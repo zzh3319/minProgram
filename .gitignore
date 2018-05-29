@@ -1,0 +1,9 @@
+/dist
+/node_modules
+.wepycache
+/*.wepycache
+.vscode/settings.json
+.src/app.wpy
+/.idea
+/package-lock.json
+.DS_Store
