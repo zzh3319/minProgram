@@ -1,0 +1,11 @@
+<view class="counter">
+    <view class="counter__number">
+        <view class="counter__modify counter__opt{{number <= min || disabled ? ' counter_disable' : ''}}" bindtap="minusHandler">
+            <wxc-icon type="minus" _pid="{{_pid}}"></wxc-icon>
+        </view>
+        <view class="counter__modify counter__text{{disabled ? ' counter_disable' : ''}}">{{number}}</view>
+        <view class="counter__modify counter__opt{{curCountValue >= cartSkusCount ||number >= max || disabled ? ' counter_disable' : '' }}" bindtap="addHandler">
+            <wxc-icon type="add" _pid="{{_pid}}"></wxc-icon>
+        </view>
+    </view>
+</view>

@@ -1,0 +1,81 @@
+<template>
+    <wxc-flex class="detail-wrap" cross="start">
+      <swiper class="swiper" indicator-dots="{{indicatorDots}}" autoplay="{{autoplay}}" indicator-active-color="{{indicatorActiveColor}}" duration="{{duration}}" circular="{{true}}">
+        <repeat for="{{pictures}}" key="index" index="index" item="item">
+          <swiper-item>
+            <image src="{{item.url}}" class="slide-image" @tap="previewImage({{item.url}})"/>
+          </swiper-item>
+        </repeat>
+      </swiper>
+      <view class="sold-out" wx:if="{{soldOut||outSale}}">
+        <image class="sold-out-img" src="https://i2.ygimg.cn/cmp/mp/ysq.png"/>
+      </view>
+    </wxc-flex>
+</template>
+<script>
+import wepy from 'wepy';
+export default class GoodsDetailSwiper extends wepy.component {
+    data = {
+        indicatorDots: true,
+        autoplay: false,
+        duration: 300,
+        remainingNum: 1 //剩余数量
+    };
+    props = {
+        pictures: {
+            type: Array,
+            default: []
+        },
+        outSale: {
+            type: Boolean,
+            default: false
+        },
+        soldOut: {
+            type: Boolean,
+            default: false
+        }
+    };
+    methods = {
+        previewImage(url) {
+            const urlList = [];
+            this.pictures.forEach(item => {
+                urlList.push(item.url);
+            });
+            const opt = {
+                current: url, // 当前显示图片的http链接
+                urls: urlList // 需要预览的图片http链接列表
+            };
+            wepy.previewImage(opt);
+        }
+    };
+    computed = {};
+}
+</script>
+<style lang="less">
+.detail-wrap {
+    display: flex;
+    width: 100%;
+    border-top: 1px solid #e3e5e9;
+    position: relative;
+    .swiper {
+        background: #fff;
+        width: 100%;
+        height: 750rpx;
+    }
+    .slide-image {
+        width: 100%;
+        height: 100%;
+    }
+    .sold-out {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+    }
+    .sold-out-img {
+        width: 100%;
+        height: 100%;
+    }
+}
+</style>

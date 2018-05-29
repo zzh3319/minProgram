@@ -1,0 +1,305 @@
+<style lang="less">
+page {
+    background-color: #fff;
+}
+.container {
+    background-color: #fff;
+    height: 100%;
+    background-size: contain;
+
+    .head {
+        width: 100%;
+        height: 370rpx;
+    }
+
+    .fixedHead {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 99;
+    }
+
+    .headTop {
+        background-color: #0e0e0e;
+        position: relative;
+        top: 0;
+        left: 0;
+
+        .brandName {
+            width: 407rpx;
+            height: 60rpx;
+            margin: 0 auto;
+            padding-top: 105rpx;
+            display: block;
+        }
+
+        .integralShow {
+            margin-top: 55rpx;
+            display: block;
+            text-align: center;
+            color: rgb(132, 132, 132);
+            font-size: 26rpx;
+            letter-spacing: 1rpx;
+
+            .integralCount {
+                font-size: 46rpx;
+                color: rgb(255, 255, 255);
+            }
+        }
+
+        .otherBrand {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            height: 50rpx;
+            line-height: 50rpx;
+            font-size: 24rpx;
+            color: #848484;
+            text-align: center;
+            background-color: #000;
+            letter-spacing: 1rpx;
+        }
+    }
+
+    .hasIntegral {
+        padding: 33rpx 60rpx 0;
+
+        &.overlength {
+            margin-top: 370rpx;
+        }
+
+        .subWrap {
+            position: relative;
+            top: 0;
+            left: 0;
+
+            .subTop {
+                height: 17rpx;
+
+                image {
+                    width: 17rpx;
+                    height: 17rpx;
+                    position: absolute;
+                    top: 0;
+                    left: -7.5rpx;
+                }
+
+                .subscore {
+                    font-size: 26rpx;
+                    color: #000;
+                    font-weight: bold;
+                    display: block;
+                    margin-left: 25rpx;
+                    position: absolute;
+                    top: -12rpx;
+                }
+
+                .subtime {
+                    position: absolute;
+                    right: 0;
+                    top: -12rpx;
+                    font-size: 24rpx;
+                    color: #000;
+                }
+            }
+
+            .subBottom {
+                border-left: 1rpx solid #000;
+                margin-bottom: 3rpx;
+                margin-top: 3rpx;
+                min-height: 140rpx;
+
+                .subdesc {
+                    font-size: 24rpx;
+                    color: #b6b5bc;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    display: -webkit-box;
+                    -webkit-box-orient: vertical;
+                    -webkit-line-clamp: 2;
+                    margin-left: 25rpx;
+                    padding-top: 10rpx;
+                }
+            }
+
+            .noborder {
+                border-left: 0;
+            }
+        }
+    }
+
+    .noIntegral {
+        image {
+            width: 279rpx;
+            height: 55rpx;
+            margin: 0 auto;
+            display: block;
+            margin-bottom: 45rpx;
+            margin-top: 200rpx;
+        }
+
+        navigator {
+            width: 260rpx;
+            height: 60rpx;
+            line-height: 60rpx;
+            background-color: #000;
+            font-size: 30rpx;
+            text-align: center;
+            margin: 0 auto;
+            border-radius: 50rpx;
+            color: #fff;
+            display: block;
+        }
+    }
+
+    // 加载更多
+    .weui-loadmore {
+        margin: 0 auto 30rpx;
+    }
+}
+</style>
+<template>
+  <view class="container">
+    <!-- 头部 -->
+    <view class="head {{cardList.memberIntegraList.length > 5 ? 'fixedHead' :''}}">
+      <view class="headTop" style="width:750rpx;height:370rpx;background-image: url('https://i2.ygimg.cn/cmp/mp/integralBg.png');background-repeat:no-repeat;background-size:contain">
+        <image src="https://i2.ygimg.cn/cmp/mp/{{brandName}}integralBrand.png" mode="aspectFit" class="brandName" />
+        <view class="integralShow">
+          <text class="integralCount">{{cardList.brandCodeAmout}}</text><text> 积分</text>
+        </view>
+        <view class="otherBrand">其它品牌积分:<text>{{cardList.otherBrandCodeAmout}}</text></view>
+      </view>
+    </view>  
+
+    <!--有列表 -->
+    <view wx:if="{{cardList.memberIntegraList.length > 0}}" class="hasIntegral {{ cardList.memberIntegraList.length > 5 ? 'overlength' : ''}}">
+      <view wx:for="{{cardList.memberIntegraList}}"  wx:key="item.id" class="subWrap">
+        <view class="subTop">
+          <image src="https://i2.ygimg.cn/cmp/mp/integralPositionIcon.png" mode="aspectFit"/>
+          <text class="subscore"><text>{{item.ioflag == '01'?'+':'-'}}</text>{{item.recordNum}}</text>
+          <text class="subtime" wx:if="{{item.recordStatus == '1'}}">将于{{item.effectTime}}生效</text>
+          <text class="subtime" wx:if="{{item.recordStatus == '2' || item.recordStatus == '3'  || item.recordStatus == '0'}}">{{item.createTime}}</text>
+          <text class="subtime" wx:if="{{item.recordStatus == '4'}}">已过期</text>
+        </view>
+        <view class="subBottom {{cardList.memberIntegraList.length-1 == index ? 'noborder' : '' }}" data-index="{{index}}" data-id="{{item.id}}">
+          <text class="subdesc">{{item.orderSource}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!--无列表 -->
+    <view class="noIntegral" wx:if="{{cardList.memberIntegraList.length == 0}}">
+      <image src="https://i2.ygimg.cn/cmp/mp/NoIntegral.png" mode="aspectFit" wx:if="cardList.brandCodeAmout == 0 && cardList.memberIntegraList.length == 0"/>
+      <navigator url="/pages/index" hover-class="navigator-hover" open-type="switchTab">
+        <text>获取积分</text>
+      </navigator>
+    </view>
+
+    <view class="weui-loadmore" wx:if="{{isHideLoadMore}}">
+      <view class="weui-loading" wx:if="{{loadtxt == '正在加载'}}"></view>
+      <view class="weui-loadmore__tips">{{loadtxt}}</view>
+    </view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+
+export default class integralDetail extends wepy.page {
+    shareType = {};
+    shareUrl = {};
+    config = {
+        onReachBottomDistance: 10
+    };
+    components = {};
+    mixins = [];
+    data = {
+        cardList: {
+            brandCodeAmout: '',
+            otherBrandCodeAmout: '',
+            memberIntegraList: [],
+            pageNo: '1',
+            totalPage: '',
+            pageSize: '10'
+        },
+        isHideLoadMore: false,
+        loadtxt: '正在加载',
+        brandName: '{$brandName}'
+    };
+    computed = {};
+    methods = {};
+    events = {};
+
+    onLoad() {
+        console.log('id', wepy.getStorageSync('openid'));
+        wepy.showLoading();
+        this.initPage();
+    }
+    //加载更多
+    methods = {
+        onReachBottom: function() {
+            let that = this;
+            console.log('加载更多');
+            that.isHideLoadMore = true;
+            console.log(that.cardList.totalPage);
+            if (that.cardList.pageNo < that.cardList.totalPage) {
+                that.cardList.pageNo++;
+                that.initPage();
+            } else {
+                that.loadtxt = '没有更多数据';
+            }
+        }
+    };
+
+    initPage() {
+        let that = this;
+        console.log(wepy.getStorageSync('openid'));
+        wepy
+            .request({
+                url:
+                    that.$parent.globalData.apiBaseUrl +
+                    '/api/v2/chessStarIntegra/queryChessStarIntegraDetail',
+                data: {
+                    // 请求数据
+                    openId: wepy.getStorageSync('openid'),
+                    unionId: '',
+                    MerchantNo: '',
+                    brandCode: '',
+                    pageNo: this.cardList.pageNo,
+                    pageSize: this.cardList.pageSize
+                    // 有积分test数据
+                    // openId:'oBPQT0ZW6KZO31rBrDnOq11nqzp4',
+                    // unionId:'oAGwtwHNKBuP4VGrWHWajCRn8pLw',
+                    // MerchantNo:'5682e8d7120c411bb38ddc252e6a74ee',
+                    // brandCode:'MA',
+                    // pageNo:this.cardList.pageNo,
+                    // pageSize:10,
+                }
+            })
+            .then(res => {
+                wepy.hideLoading();
+                if (res.data.code === 20000) {
+                    that.cardList.brandCodeAmout = res.data.data.brandCodeAmout;
+                    that.cardList.otherBrandCodeAmout =
+                        res.data.data.otherBrandCodeAmout;
+                    that.cardList.pageNo = res.data.data.pageNo;
+                    that.cardList.totalPage = res.data.data.totalPage;
+                    that.cardList.pageSize = that.cardList.pageSize;
+                    // console.log(that.cardList.memberIntegraList);
+                    that.cardList.memberIntegraList = that.cardList.memberIntegraList.concat(
+                        res.data.data.memberIntegraList
+                    );
+                    // console.log(that.cardList.memberIntegraList);
+                    that.$apply();
+                } else {
+                    wepy.showToast({
+                        title: res.data.msg || res.data.errorMsg,
+                        icon: 'none',
+                        duration: 2000
+                    });
+                }
+            });
+    }
+}
+</script>

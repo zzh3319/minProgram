@@ -1,0 +1,35 @@
+<style lang="less">
+.coupons-empty {
+    padding: 200rpx 0;
+    width: 100%;
+    justify-content: center;
+    flex-direction: column;
+    display: -webkit-flex;
+    align-items: center;
+    display: flex;
+    .empty-img {
+        width: 160rpx;
+        height: 160rpx;
+    }
+    .empty-info {
+        font-size: 26rpx;
+        color: #898989;
+    }
+}
+</style>
+
+<template>
+
+  <view class="coupons-empty">
+    <image class="empty-img" src="https://i2.ygimg.cn/cmp/mp/ept.png"></image>
+    <text class="empty-info">暂无优惠劵</text>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+export default class couponEmpty extends wepy.component {
+    data = {};
+    methods = {};
+}
+</script>

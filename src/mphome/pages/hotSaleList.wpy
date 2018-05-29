@@ -1,0 +1,97 @@
+<style lang="less">
+.weui-loadmore__tips {
+    color: #999;
+}
+</style>
+<template>
+  <repeat for="{{saleList.items}}" key="index" index="index" item="item">
+    <hotSaleItem :item="item" :index="index"></hotSaleItem>
+  </repeat>
+
+  <view class="weui-loadmore" wx:if="{{isHideLoadMore}}">
+    <view class="weui-loading" wx:if="{{loadtxt === '正在加载'}}"></view>
+    <view class="weui-loadmore__tips">{{loadtxt}}</view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+import hotSaleItem from '@/components/hotSale-item';
+
+export default class search extends wepy.page {
+    shareType = {};
+    shareUrl = {};
+    config = {
+        navigationBarTitleText: '热销榜',
+        onReachBottomDistance: 10
+    };
+    components = {
+        hotSaleItem: hotSaleItem
+    };
+    mixins = [];
+    data = {
+        saleList: {
+            items: [], //排行榜列表
+            pageNo: 1, //当前第几页
+            pageSize: 10, //每页条数
+            pageCount: '' //总页数
+        },
+
+        isHideLoadMore: false,
+        loadtxt: '正在加载'
+    };
+    computed = {};
+    methods = {};
+    events = {};
+
+    onLoad() {
+        this.initPage();
+    }
+    //加载更多
+    methods = {
+        onReachBottom: function() {
+            let that = this;
+            console.log('加载更多');
+            that.isHideLoadMore = true;
+            if (that.saleList.pageNo < that.saleList.pageCount) {
+                that.saleList.pageNo++;
+                that.initPage();
+            } else {
+                that.loadtxt = '没有更多数据';
+            }
+        }
+    };
+    initPage() {
+        let that = this;
+        wepy
+            .request({
+                url:
+                    that.$parent.globalData.apiBaseUrl +
+                    '/api/v2/sales/getSalesList',
+                method: 'GET',
+                data: {
+                    // 请求数据
+                    openId: wepy.getStorageSync('openid'),
+                    pageNo: this.saleList.pageNo,
+                    pageSize: this.saleList.pageSize
+                }
+            })
+            .then(res => {
+                wepy.hideLoading();
+                if (res.data.code === 20000) {
+                    that.saleList.items = that.saleList.items.concat(
+                        res.data.data.items
+                    );
+                    that.saleList.pageCount = res.data.data.pageCount;
+                    that.$apply();
+                } else {
+                    wepy.showToast({
+                        title: res.errorMsg || '数据错误',
+                        icon: 'none',
+                        duration: 2000
+                    });
+                }
+            });
+    }
+}
+</script>

@@ -1,0 +1,62 @@
+<template>
+  <view class="shopcart-empty">
+    <image class="empty-img" src="https://i2.ygimg.cn/cmp/mp/ept.png"/>
+    <text class="empty-info">购物车还是空的,去商城挑选任意产品吧!</text>
+      <button @tap="visitIndex" size="default"  class="visit-btn" type="primary">去逛逛</button>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+export default class Shopcart extends wepy.component {
+    shareType = {};
+    shareUrl = {};
+    config = {};
+    components = {};
+    mixins = [];
+    data = {};
+    computed = {};
+    methods = {
+        visitIndex() {
+            this.$parent.$parent.globalData.returnTopStatus = true;
+            const option = {
+                url: '/pages/index'
+            };
+            wepy.switchTab(option);
+        }
+    };
+    events = {};
+    onLoad(options) {}
+    onReady() {}
+    onShow() {}
+}
+</script>
+<style lang="less">
+.shopcart-empty {
+    padding: 200rpx 0;
+    width: 100%;
+    justify-content: center;
+    flex-direction: column;
+    display: -webkit-flex;
+    align-items: center;
+    display: flex;
+    .empty-img {
+        width: 160rpx;
+        height: 160rpx;
+    }
+    .empty-info {
+        font-size: 26rpx;
+        color: #898989;
+    }
+    .visit-btn {
+        width: 400rpx;
+        height: 80rpx;
+        background: #ff434d;
+        color: #fff;
+        font-size: 34rpx;
+        line-height: 80rpx;
+        text-align: center;
+        margin-top: 100rpx;
+    }
+}
+</style>

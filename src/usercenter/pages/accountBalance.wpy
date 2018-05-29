@@ -1,0 +1,335 @@
+<style type="less">
+.accountBalance_wrpa {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    .accountBalance {
+        width: 100%;
+        height: 235rpx;
+        background-color: #202025;
+        display: flex;
+        flex-direction: row;
+        color: white;
+        justify-content: space-around;
+        .item {
+            text-align: center;
+            .name {
+                font-size: 30rpx;
+                margin: 50rpx 0 25rpx 0;
+            }
+            .money {
+                font-size: 50rpx;
+            }
+        }
+    }
+    .money_detail {
+        width: 100%;
+        .tab_wrap {
+            width: 100%;
+            box-sizing: border-box;
+            background-color: #ffffff;
+            height: 88rpx;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            .tab {
+                width: 50%;
+                text-align: center;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                text {
+                    padding: 20rpx 0;
+                    color: #777777;
+                    font-size: 32rpx;
+                    width: 50%;
+                }
+                .tesx_active {
+                    border-bottom: 2rpx solid #717171;
+                }
+            }
+        }
+    }
+
+    .data_wrap {
+        .items_wrap {
+            width: 100%;
+            margin-top: 20rpx;
+            .items {
+                padding: 10rpx 30rpx;
+                /*padding: 100rpx 30rpx;*/
+                width: 100%;
+                overflow: hidden;
+                box-sizing: border-box;
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                background: #ffffff;
+                border-bottom: 2rpx solid #f4f4f4;
+                font-size: 28rpx;
+                .time {
+                    font-size: 25rpx;
+                }
+                .item_money {
+                    width: 25%;
+                    display: flex;
+                    justify-content: space-between;
+                }
+            }
+        }
+    }
+    .nodata_wrap {
+        width: 230rpx;
+        margin: 0 auto;
+        margin-top: 195rpx;
+        text-align: center;
+        .icon {
+            width: 174rpx;
+            height: 174rpx;
+        }
+        .text {
+            width: 100%;
+            text-align: center;
+            font-size: 25rpx;
+            color: #666;
+        }
+    }
+}
+</style>
+<template>
+<view class="accountBalance_wrpa">
+  <view class="accountBalance">
+      <view class="item">
+          <view class="name">累计提成</view>  
+          <view class="money">{{commission}}</view>
+      </view>
+
+      <view class="item">
+          <view class="name">账户余额</view>
+          <view class="money">{{balance}}</view>
+      </view>
+  </view>
+  <view class="money_detail">
+     <view class="tab_wrap">
+        <view @tap="clickIncome" class="tab"><text class="{{incomeShow?'tesx_active':''}}">收入</text></view>
+        <view @tap="clickSend" class="tab"><text class="{{incomeShow?'':'tesx_active'}}">已发放</text></view>
+     </view>
+
+      <view wx:if="{{!isEmpty}}" class="data_wrap" >    
+         <scroll-view scroll-y="true"  bindscrolltolower="reachlowerHandler" wx:if="{{incomeShow}}"  style="height:70vh"  class="items_wrap">
+            <repeat for="{{listData}}" key="index" index="index" item="item">
+               <view  @tap="incomeMoneyNavHandler({{item.id}})"  class="items income">
+                   <view class="income_item">
+                      <view>
+                          <view>已到账提成</view>
+                          <view class="time"><text>{{item.stringTransactionTime}}</text></view>
+                      </view>
+                   </view>
+                   <view class="item_money">  
+                     <text>+</text>
+                     <text>￥{{item.incomeAmount}}</text>
+                     <text>&gt;</text>
+                   </view>
+               </view>
+            </repeat>
+            <view wx:if="{{NoMoreData}}" class="weui-loadmore">没有更多数据</view>
+            <view class="weui-loadmore" wx:if="{{hasMoreData}}">
+              <view class="weui-loading"></view>
+              <view class="weui-loadmore__tips">正在加载</view>
+            </view>
+         </scroll-view>  
+    <!-- 已发送 -->
+          <scroll-view scroll-y  wx:if="{{sendShow}}" style="height:70vh"  class="items_wrap">
+            <repeat for="{{listData}}" key="index" index="index" item="item">
+               <view  @tap="expenditureNavHandler({{item.id}})" class="items send">
+                   <view class="income_item">
+                      <view>
+                          <view>已发放</view>
+                             <view class="time"><text>{{item.stringTransactionTime}}</text></view>
+                      </view>    
+                   </view>
+                   <view class="item_money">
+                     <text>-</text>  
+                     <text>￥{{-item.expendAmount}}</text>
+                     <text>&gt;</text>
+                   </view>
+               </view>
+            </repeat>
+              
+               <view wx:if="{{NoMoreData}}" class="weui-loadmore">没有更多数据</view>
+               <view class="weui-loadmore" wx:if="{{hasMoreData}}">
+                 <view class="weui-loading"></view>
+                 <view class="weui-loadmore__tips">正在加载</view>
+               </view>
+          </scroll-view>
+      </view>
+
+      <view wx:if="{{isEmpty}}" class="nodata_wrap">
+          <image class="icon" src="https://i2.ygimg.cn/cmp/mp/ept.png"></image>
+          <view class="text">暂时没有相关数据</view>
+      </view>
+  </view>
+</view>
+       
+</template>
+<script>
+import wepy from 'wepy';
+import GTools from '@/mixins/g-tools';
+export default class accountBalance extends wepy.page {
+    mixins = [GTools];
+    config = {
+        navigationBarTitleText: '账户余额',
+        onReachBottomDistance: 10
+    };
+    data = {
+        incomeShow: true,
+        sendShow: false,
+        commission: '', //累计提成
+        balance: '', //账户余额
+        listData: [], //收入和发送共同用
+        status: 1, //1 收入  2是已发送
+
+        pageNum: 1, //初始化
+        hasMoreData: false,
+        NoMoreData: false,
+        maxPageNum: 0, //临界值 已经最大了
+        totalCount: 0,
+        pageCount: 0, //总的页数
+        isEmpty: false,
+        limit: 20
+    };
+    methods = {
+        incomeMoneyNavHandler(id) {
+            wepy.navigateTo({
+                url: `/usercenter/pages/incomeMoney?incomingId=${id}`
+            });
+        },
+        expenditureNavHandler(id) {
+            wepy.navigateTo({
+                url: `/usercenter/pages/expenditure?incomingId=${id}`
+            });
+        },
+        clickIncome() {
+            let incomeState = this.incomeShow;
+            if (incomeState) {
+                return;
+            }
+            this.changeTabStateStyle();
+            this.loadIncomeOrSendData(1);
+        },
+        clickSend() {
+            let sendState = this.sendShow;
+            if (sendState) {
+                return;
+            }
+            this.changeTabStateStyle();
+            this.loadIncomeOrSendData(2);
+        },
+        reachlowerHandler(event) {
+            if (this.maxPageNum) {
+                //当maxPageNum有值的时间便不再发起请求；
+                this.NoMoreData = true; //比如只有一页  但是第一页的数量超过页面 触发了onReachBottom
+                return;
+            }
+            let pageNum = this.pageNum;
+            this.pageNum = pageNum + 1;
+            this.loadMoreData(pageNum + 1);
+            console.log(pageNum + 1);
+        }
+    };
+
+    initState() {
+        //初始化状态
+        this.listData = [];
+        this.pageNum = 1; //初始化
+            this.hasMoreData = false;
+            this.NoMoreData = false;
+            this.maxPageNum = 0; //临界值 已经最大了
+          this.totalCount = 0;
+            this.pageCount = 0; //总的页数
+            this.isEmpty = false;
+            this.$apply();
+    }
+
+    async loadMoreData(num) {
+        // let url = `${this.$parent.globalData.apiBaseUrlMock}/customerList1`;
+        let url = `${
+            this.$parent.globalData.apiBaseUrl
+        }/api/v2/finace/myIncome`;
+        let params = {
+            pageNo: num,
+            limit: this.limit,
+            status: this.status //收入
+        };
+        let response = await wepy.request({ url: url, data: params });
+        let { data, code, errorMsg } = response.data;
+        if (code !== 20000) {
+            this.customFunction.toast(errorMsg || '数据错误！');
+            return;
+        }
+        let pageCount = this.pageCount;
+        let { items } = data.list;
+        pageCount = this.pageCount;
+        this.listData = this.listData.concat(items);
+        if (pageCount === num) {
+            this.hasMoreData = false;
+            this.NoMoreData = true;
+            this.maxPageNum = num;
+        }
+        this.$apply();
+    }
+
+    changeTabStateStyle() {
+        let incomeState = this.incomeShow;
+        let sendState = this.sendShow;
+        this.incomeShow = !incomeState;
+        this.sendShow = !sendState;
+    }
+    async onLoad(options) {
+        this.loadIncomeOrSendData(this.status || 1);
+    }
+
+    async loadIncomeOrSendData(status) {
+        this.initState(); //初始化下
+        let url = `${
+            this.$parent.globalData.apiBaseUrl
+        }/api/v2/finace/myIncome`;
+        let params = {
+            pageNo: 1,
+            limit: this.limit,
+            status: status //收入
+        };
+        this.status = status;
+        let response = await this.customFunction.fetchData(url, params);
+        let { data, code, errorMsg } = response;
+        if (code !== 20000) {
+            this.customFunction.toast(errorMsg || '数据错误！');
+            return;
+        }
+
+        let { commission, balance } = data;
+        let { pageCount, items } = data.list;
+        this.commission = commission; //累计提成
+        this.balance = balance; //账号余额
+        this.pageCount = pageCount;
+        this.listData = items;
+
+        if (pageCount === 1) {
+            //第一次加载0-20  无更多数据
+            this.hasMoreData = false;
+            this.NoMoreData = false; //是否显示？
+            this.maxPageNum = 1;
+        } else if (pageCount === 0) {
+            //
+            this.isEmpty = true;
+        } else {
+            //pageCount>1  //因为数据》20
+            this.hasMoreData = true;
+            this.NoMoreData = false;
+        }
+
+        this.$apply();
+    }
+}
+</script>

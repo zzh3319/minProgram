@@ -1,0 +1,75 @@
+<style lang="less">
+.goods-info-wrap {
+    view.wrap {
+        padding-top: 18rpx;
+        margin-bottom: 18rpx;
+        display: flex;
+        image {
+            width: 120rpx;
+            height: 120rpx;
+            border: 1px solid #cfcfcf;
+        }
+        view {
+            margin-left: 18rpx;
+            color: #252525;
+            font-size: 28rpx;
+            width: 80%;
+            .goods-descript {
+                line-height: 1.5;
+                display: block;
+                margin-top: 5rpx;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                // white-space: nowrap;
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 2;
+            }
+            .goods-count {
+                color: #b8b8b8;
+                display: block;
+            }
+        }
+    }
+}
+.mtL24 {
+    margin-left: 20rpx;
+}
+</style>
+<template>
+  <view class="goods-info-wrap">
+    <view class="wrap">
+      <image class="goods-image" src="https://i2.ygimg.cn/cmp/{{item.pic_cover}}" mode="aspectFit" /> 
+      <view>
+        <text class="goods-descript">Belle/百丽2015年春季简约胎牛皮浅口女单鞋3VDG8AQ5 Belle/百丽2015年春季简约胎牛皮浅口女单鞋3VDG8AQ5<text class="mtL24">黑色</text> <text class="mtL24"> 37</text> </text>
+        <text class="goods-count">x <text>1</text></text>
+      </view>
+    </view>
+    <view class="wrap">
+      <image class="goods-image" src="https://i2.ygimg.cn/cmp/{{item.pic_cover}}" mode="widthFix" /> 
+      <view>
+        <text class="goods-descript">Belle/百丽2015年春季简约胎牛皮浅口女单鞋3VDG8AQ5 <text class="mtL24">黑色</text> <text class="mtL24"> 37</text> </text>
+        <text class="goods-count">x <text>1</text></text>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+export default class logisticGoodsInfo extends wepy.component {
+    shareType = {};
+    shareUrl = {};
+    config = {};
+    components = {};
+    mixins = [];
+    data = {};
+    computed = {};
+    methods = {};
+    events = {};
+
+    onLoad() {}
+    //加载更多
+    methods = {};
+}
+</script>

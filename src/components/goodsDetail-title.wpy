@@ -1,0 +1,161 @@
+<template>
+  <view class="title-wrap">
+    <view class="title" wx:if="{{!commodity.isPreSell}}">
+      <wxc-elip line="2" class="goods-name">{{commodity.commodityName}}</wxc-elip>
+      <wxc-flex main="between" cross="center" class="goods-info">
+        <view>
+          <wxc-price class="price" value="{{wfxPrice}}"></wxc-price>
+          <wxc-price wx:if="{{publicPrice}}" class="o-price" status="del" del-color="#666" value="{{publicPrice}}"></wxc-price>
+        </view>
+        <view class="goods-info-sales">销量:{{saleQuantity}}</view>
+        <view class="goods-coupon">{{couponFlag?"不支持优惠券":""}}</view>
+      </wxc-flex>
+    </view>
+    <!-- 预售 -->
+    <block wx:else>
+      <view class="booking">
+        <view class="booking-lt">
+          <text class="booking-h3">预售</text>
+          <view class="booking-lt-container">
+            <wxc-price class="booking-price" value="{{wfxPrice}}"></wxc-price>
+            <view class="public-price"> 市场价: ￥<text>{{publicPrice}}</text></view>
+          </view>
+        </view>
+        <view class="booking-rt">
+          <view>
+            最晚发货时间
+          </view>
+          <view>
+            {{commodity.latestDeliveryTimeStr}}
+          </view>
+        </view>
+      </view>
+      <view class="title">
+        <wxc-elip line="2" class="goods-name">{{commodity.commodityName}}</wxc-elip>
+        <wxc-flex main="between" cross="center" class="goods-info">
+          <view>
+            <view class="goods-info-sales">已预订:{{saleQuantity}}</view>
+          </view>
+          <view class="goods-coupon">{{couponFlag?"不支持优惠券":""}}</view>
+        </wxc-flex>
+      </view>
+    </block>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+export default class GoodsDetail extends wepy.component {
+    props = {
+        commodity: {
+            type: Object,
+            default: {
+                commodityName: '',
+                wfxPrice: 0,
+                saleQuantity: 0,
+                publicPrice: 0
+            }
+        }
+    };
+    computed = {
+        saleQuantity() {
+            if (!this.commodity.saleQuantity) return 0;
+            const commodity = this.commodity;
+            return commodity.saleQuantity > 10000
+                ? `${(commodity.saleQuantity / 10000).toFixed(1)}万`
+                : commodity.saleQuantity;
+        },
+        wfxPrice() {
+            if (!this.commodity.wfxPrice) return 0;
+            return this.commodity.wfxPrice.toFixed(2);
+        },
+        couponFlag() {
+            if (!this.commodity.couponFlag) return false;
+            return this.commodity.couponFlag === 2;
+        },
+        publicPrice() {
+            if (!this.commodity.publicPrice) return false;
+            return this.commodity.publicPrice.toFixed(2);
+        }
+        // isOrgPrice() {
+        //   const num = parseInt(this.orgPrice, 10);
+        //   return Boolean(num);
+        // }
+    };
+    methods = {};
+    onLoad(options) {}
+}
+</script>
+<style lang="less">
+.title-wrap {
+    background: #fff;
+    margin-bottom: 20rpx;
+    .title {
+        padding: 10rpx 30rpx;
+    }
+    .goods-name {
+        display: block;
+        font-size: 28rpx;
+        font-weight: bold;
+        padding-right: 100rpx;
+    }
+    .price {
+        display: inline-block;
+        font-size: 42rpx;
+        color: #ff434d;
+        margin-right: 10rpx;
+    }
+    .goods-info {
+        display: block;
+        margin-top: 20rpx;
+    }
+    .goods-info-sales {
+        margin-right: 30rpx;
+        font-size: 22rpx;
+        color: #848484;
+    }
+    .goods-coupon {
+        width: 160rpx;
+        display: inline-block;
+        font-size: 22rpx;
+        color: #848484;
+    }
+    .booking {
+        background: url(https://i2.ygimg.cn/cmp/mp/booking-background.png)
+            no-repeat;
+        background-size: 100% 100%;
+        width: 750rpx;
+        height: 101rpx;
+        box-sizing: border-box;
+        padding: 0 28rpx;
+        justify-content: space-between;
+        display: flex;
+        align-items: center;
+        color: #fff;
+        .booking-lt {
+            display: flex;
+            align-items: center;
+        }
+        .booking-h3 {
+            font-size: 44rpx;
+            margin-right: 10px;
+        }
+        .booking-lt-container {
+            text-align: center;
+        }
+        .booking-price {
+            font-size: 36rpx;
+        }
+        .public-price {
+            font-size: 24rpx;
+            color: #fbe4ea;
+            text-decoration: line-through;
+        }
+        .booking-rt {
+            display: flex;
+            font-size: 26rpx;
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+}
+</style>

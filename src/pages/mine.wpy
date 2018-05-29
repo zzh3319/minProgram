@@ -1,0 +1,609 @@
+<style lang="less">
+@import '../static/less/base/fn';
+page {
+    background: #f0f0f6;
+}
+.member-box {
+    width: 100%;
+    background: #f0f0f6 url(https://i2.ygimg.cn/cmp/mp/userBg.png) no-repeat top
+        center; //背景图待加  ff
+    background-size: contain;
+    min-height: 100%;
+    padding-bottom: 40rpx;
+    .member-top-block {
+        width: 100%;
+        height: 42rpx;
+        background: #000;
+    }
+    .member-infos-con {
+        margin: 0 32rpx;
+        background: #ffffff;
+        padding: 20rpx 0 30rpx 0;
+        position: relative;
+        .main {
+            width: 100%;
+            display: block;
+            .user-name {
+                height: 46rpx;
+                line-height: 46rpx;
+                display: block;
+                text-align: center;
+                font-size: 30rpx;
+            }
+        }
+        // main end
+        .member-type {
+            width: 100%;
+            text-align: center;
+            .member-type-name {
+                max-width: 500rpx;
+                height: 60rpx;
+                line-height: 60rpx;
+                padding: 0 72rpx;
+                text-align: center;
+                font-size: 30rpx;
+                color: #ffffff;
+                border-radius: 30rpx;
+                background: #000;
+                margin: 0 auto 10rpx auto;
+                display: inline-block;
+            }
+        }
+        .member-type_active {
+            .member-type {
+                width: 100%;
+                text-align: center;
+                .member-type-name {
+                    max-width: 500rpx;
+                    height: 60rpx;
+                    line-height: 60rpx;
+                    padding: 0 72rpx;
+                    text-align: center;
+                    font-size: 30rpx;
+                    color: #ffffff;
+                    border-radius: 26rpx;
+                    background: #3e3e3e;
+                    margin: 0 auto 10rpx auto;
+                    display: inline-block;
+                }
+            }
+        }
+        .member-points {
+            height: 40rpx;
+            line-height: 40rpx;
+            font-size: 30rpx;
+            color: #000;
+            margin-bottom: 14rpx;
+        }
+        .icon-s {
+            width: 60rpx;
+            height: 60rpx;
+            line-height: 60rpx;
+            position: absolute;
+            right: 40rpx;
+            top: 40rpx;
+            background: #000;
+            border-radius: 50%;
+            -webkit-border-radius: 50%;
+            -moz-border-radius: 50%;
+            text-align: center;
+            .icon-xiao {
+                font-size: 34rpx;
+                color: #ffffff;
+            }
+        }
+    }
+    .member-lists-con {
+        background-color: #f0f0f6;
+        padding-left: 32rpx;
+        padding-right: 32rpx;
+        .right-icon {
+            display: block;
+            flex: 1;
+            margin-right: 26rpx;
+            width: 40rpx;
+            height: 32rpx;
+            line-height: 32rpx;
+            text-align: right;
+        }
+        .weui-cells {
+            font-size: 26rpx;
+            margin-top: 0;
+            background-color: #f0f0f6;
+        }
+        .weui-cells_after-title {
+            margin-top: 0;
+        }
+    }
+}
+//多元素并排
+.tab-wrap {
+    display: block;
+    overflow-x: hidden;
+    //客户，待付款
+    &.customer {
+        background-color: #fff;
+        .tab-item {
+            color: #656565;
+            border-right: 0;
+            .item-icon {
+                color: #000000;
+            }
+        }
+    }
+}
+.tab-itemhalf {
+    min-width: 50%;
+    height: 40rpx;
+    line-height: 40rpx;
+    vertical-align: middle;
+    font-size: 26rpx;
+    text-align: center;
+    color: #838383;
+    border-right: 1rpx solid #d9d9e0;
+    text-align: center;
+    padding: 10rpx 0;
+    &:last-child {
+        border-right: 0;
+    }
+    .item-text {
+        display: inline-block;
+        margin-left: 10rpx;
+    }
+    .item-icon {
+        display: inline-block;
+        position: relative;
+        width: 40rpx;
+        height: 40rpx;
+        font-size: 26rpx;
+        .item-icon-c {
+            width: 26rpx;
+            height: 26rpx;
+            font-size: 26rpx;
+            display: inline-block;
+        }
+    }
+    .item-value {
+        font-size: 26rpx;
+        line-height: 40rpx;
+    }
+}
+.tab-item {
+    min-width: 25%;
+    min-height: 32rpx;
+    font-size: 22rpx;
+    text-align: center;
+    color: #000;
+    &:last-child {
+        border-right: 0;
+    }
+    .item-icon {
+        display: inline-block;
+        position: relative;
+        width: 64rpx;
+        height: 50rpx;
+        font-size: 48rpx;
+        line-height: 48rpx;
+        .badge {
+            display: inline-block;
+            position: absolute;
+            top: -10rpx;
+            right: -18rpx;
+            width: 24rpx;
+            height: 24rpx;
+            font-size: 18rpx;
+            line-height: 24rpx;
+            color: #ffffff;
+            background-color: #ff434d;
+            -webkit-border-radius: 50%;
+            -moz-border-radius: 50%;
+            border-radius: 50%;
+        }
+    }
+    .item-text {
+        display: block;
+        line-height: 46rpx;
+    }
+    .item-value {
+        display: block;
+        font-size: 32rpx;
+        margin-bottom: 6rpx;
+        line-height: 46rpx;
+    }
+}
+// tab-item end
+.avatar {
+    display: block;
+    width: 200rpx;
+    height: 200rpx;
+    padding: 10rpx;
+    background: #ffffff;
+    border: 1rpx solid #d7d7d7;
+    border-radius: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+.weui-cells {
+    font-size: 26rpx;
+    &:before,
+    &:after {
+        border: 0;
+    }
+}
+.mt10 {
+    margin-top: 10rpx;
+}
+.pt18 {
+    padding-top: 10rpx;
+}
+.pbt10 {
+    padding-bottom: 10rpx;
+}
+.mbt30 {
+    margin-bottom: 18rpx;
+}
+.iwidcenter {
+    width: 100%;
+    text-align: center;
+}
+.pt30 {
+    padding-top: 30rpx;
+}
+.border-bt {
+    border-bottom: 1rpx solid #b4b4bf;
+}
+.border-bt-e {
+    border-bottom: 1rpx solid #e5e5ec;
+}
+.border-bt-f {
+    border-bottom: 1rpx solid #b7b7c1;
+}
+.mbt46 {
+    margin-bottom: 46rpx;
+}
+.plr32 {
+    padding-left: 32rpx;
+    padding-right: 32rpx;
+}
+</style>
+<template>
+  <view class="member-box">
+    <view class="member-top-block"></view>
+    <view class="member-infos-con">
+          <view class="item main mt30">
+               <text class="user-name">{{userInfo.nickName}}</text>
+          </view>
+           <view class="item mt10 mbt30">
+             <wxc-avatar class="avatar" src="{{userInfo.avatarUrl}}"></wxc-avatar>
+          </view>
+          <!-- 若为会员则显示，若不为会员则不显示 -->
+          <navigator url="/usercenter/pages/points" hover-class="member-type_active" wx:if="{{memberFlag}}">
+            <view class="item member-type">
+                <text class="member-type-name">{{levelId}}</text>
+            </view>
+            <view class="item iwidcenter mbt46">
+                <text class="member-points">{{effectiveAmount}}</text>
+            </view>
+          </navigator>
+           <!--  导购端 start-->
+          <block  wx:if="{{isSeller === 1}}">
+            <!-- 导购端   小程序链接地址-->
+            <view class="item icon-s">
+              <navigator url="/usercenter/pages/guideQrcode?data={{qrcodeParams}}" class="iconfont icon-xiao" hover-class="none"> &#xe6b4;</navigator>
+            </view>
+            <!-- 排名+我的顾客 -->
+            <!--  导购端 -->
+            <wxc-flex class="tab-wrap member-rangking" wrap="nowrap">
+                <view class="tab-itemhalf">
+                  <view class="item-icon">
+                    <text class="item-icon-c iconfont">&#xe618;</text>
+                  </view>
+                  <text class="item-text">No.{{shopCode}}</text>
+                </view>
+                <navigator url="/usercenter/pages/customerList" class="tab-itemhalf" hover-class="none">
+                  <view class="item-icon">
+                    <text class="item-icon-c iconfont">&#xe617;</text>
+                  </view>
+                  <text class="item-text">我的顾客</text>
+                  <view class="item-icon">
+                    <text class="item-icon-c iconfont">&#xe60e;</text>
+                  </view>
+                </navigator>
+            </wxc-flex>
+            <!--  导购端 -->
+            <wxc-flex  class="tab-wrap pt30" wrap="nowrap">
+              <navigator url="/usercenter/pages/accountBalance" class="tab-item" hover-class="none">
+                <text class="item-value">{{totalMoney}}</text>
+                <text class="item-text">累计收入</text>
+              </navigator>
+              <navigator url="/usercenter/pages/orderlist" class="tab-item" hover-class="none">
+                <text class="item-value">{{curMonthOrderNum}}</text>
+                <text class="item-text">本月订单</text>
+              </navigator>
+              <navigator url="/usercenter/pages/profit" class="tab-item" hover-class="none">
+                <text class="item-value">{{curMonthProfit}}</text>
+                <text class="item-text">本月收入</text>
+              </navigator>
+              <navigator url="/usercenter/pages/recentVisitors" class="tab-item" hover-class="none">
+                <text class="item-value">{{todayVisitorCount}}</text>
+                <text class="item-text">最近访客</text>
+              </navigator>
+            </wxc-flex>
+          </block>
+           <!--  导购端 end-->
+          <!--  用户端（客户） -->
+           <block  wx:if="{{isSeller === 0}}">
+            <wxc-flex class="tab-wrap customer pt30" wrap="nowrap">
+              <navigator url="/usercenter/pages/buyerOrderList?key=1" class="tab-item" hover-class="none">
+              <!-- 全部0，待付款1，待发货2，待收货3，交易成功4 -->
+                <view class="item-icon iconfont">&#xe60c;<text class="badge" wx:if="{{userOrder.wait_pay}}">{{userOrder.wait_pay}}</text></view>
+                <text class="item-text">待付款</text>
+              </navigator>
+              <navigator url="/usercenter/pages/buyerOrderList?key=2" class="tab-item" hover-class="none">
+                <view class="item-icon iconfont">&#xe60f;<text class="badge"  wx:if="{{userOrder.wait_deliver}}">{{userOrder.wait_deliver}}</text></view>
+                <text class="item-text">待发货</text>
+              </navigator>
+              <navigator url="/usercenter/pages/buyerOrderList?key=3" class="tab-item" hover-class="none">
+                <view class="item-icon iconfont">&#xe610;<text class="badge" wx:if="{{userOrder.wait_receive}}">{{userOrder.wait_receive}}</text></view>
+                <text class="item-text">待收货</text>
+              </navigator>
+              <navigator url="/usercenter/pages/myrefunds" class="tab-item" hover-class="none">
+                <view class="item-icon iconfont">&#xe611;<text class="badge" wx:if="{{userOrder.wait_refund}}">{{userOrder.wait_refund}}</text></view>
+                <text class="item-text">退款/售后</text>
+              </navigator>
+            </wxc-flex>
+          </block>
+    </view>
+      <!-- 用户信息，白色模块 end -->
+    <!-- 导购端-->
+    <block  wx:if="{{isSeller === 1}}">
+      <view class="member-lists-con pt18 pbt10" >
+          <view class="weui-cells weui-cells_after-title">
+            <navigator  url="/usercenter/pages/buyerOrderList" class="weui-cell weui-cell_access" hover-class="weui-cell_active">
+              <view class="weui-cell__hd"><text class="right-icon iconfont" >&#xe612;</text></view>
+              <view class="weui-cell__bd">我购买的订单</view>
+              <view class="weui-cell__ft weui-cell__ft_in-access"></view>
+            </navigator>
+          </view>
+          <view class="weui-cells weui-cells_after-title">
+          <navigator url="/usercenter/pages/myrefunds" class="weui-cell weui-cell_access" hover-class="weui-cell_active">
+            <view class="weui-cell__hd"><text class="right-icon iconfont" >&#xe611;</text></view>
+            <view class="weui-cell__bd">我申请的售后</view>
+            <view class="weui-cell__ft weui-cell__ft_in-access"></view>
+          </navigator>
+          </view>
+          <view class="weui-cells weui-cells_after-title border-bt">
+          <navigator url="/usercenter/pages/myCoupon" class="weui-cell weui-cell_access" hover-class="weui-cell_active">
+            <view class="weui-cell__hd"><text class="right-icon iconfont" >&#xe614;</text></view>
+            <view class="weui-cell__bd">我的优惠券</view>
+            <view class="weui-cell__ft weui-cell__ft_in-access"></view>
+          </navigator>
+          </view>
+          <view class="weui-cells weui-cells_after-title">
+          <navigator url="/usercenter/pages/addressList" class="weui-cell weui-cell_access" hover-class="weui-cell_active">
+            <view class="weui-cell__hd"><text class="right-icon iconfont" >&#xe615;</text></view>
+            <view class="weui-cell__bd">收货地址管理</view>
+            <view class="weui-cell__ft weui-cell__ft_in-access"></view>
+          </navigator> 
+          </view>
+          <view class="weui-cells weui-cells_after-title border-bt">
+          <navigator url="/usercenter/pages/afterInstructions" class="weui-cell weui-cell_access" hover-class="weui-cell_active">
+            <view class="weui-cell__hd"><text class="right-icon iconfont" >&#xe616;</text></view>
+            <view class="weui-cell__bd">售后条款</view>
+            <view class="weui-cell__ft weui-cell__ft_in-access"></view>
+          </navigator>
+          </view>
+      </view>
+    </block>
+    <!-- 用户端（客户）-->
+      <block  wx:if="{{isSeller === 0}}">
+          <view class="member-lists-con curstomer pt18 pbt10">
+            <view class="weui-cells weui-cells_after-title border-bt-e">
+              <navigator  url="/usercenter/pages/buyerOrderList" class="weui-cell weui-cell_access" hover-class="weui-cell_active">
+                <view class="weui-cell__hd"><text class="right-icon iconfont" >&#xe612;</text></view>
+                <view class="weui-cell__bd">我的订单</view>
+                <view class="weui-cell__ft weui-cell__ft_in-access"></view>
+              </navigator>
+            </view>
+            <view class="weui-cells weui-cells_after-title border-bt-e">
+            <navigator url="/usercenter/pages/myCoupon" class="weui-cell weui-cell_access" hover-class="weui-cell_active">
+              <view class="weui-cell__hd"><text class="right-icon iconfont" >&#xe614;</text></view>
+              <view class="weui-cell__bd">我的优惠券</view>
+              <view class="weui-cell__ft weui-cell__ft_in-access"></view>
+            </navigator>
+            </view>
+            <view class="weui-cells weui-cells_after-title border-bt-e">
+            <navigator url="/usercenter/pages/addressList" class="weui-cell weui-cell_access" hover-class="weui-cell_active">
+              <view class="weui-cell__hd"><text class="right-icon iconfont" >&#xe615;</text></view>
+              <view class="weui-cell__bd">收货地址管理</view>
+              <view class="weui-cell__ft weui-cell__ft_in-access"></view>
+            </navigator> 
+            </view>
+            <view class="weui-cells weui-cells_after-title border-bt-f">
+            <navigator url="/usercenter/pages/afterInstructions" class="weui-cell weui-cell_access" hover-class="weui-cell_active">
+              <view class="weui-cell__hd"><text class="right-icon iconfont" >&#xe616;</text></view>
+              <view class="weui-cell__bd">售后条款</view>
+              <view class="weui-cell__ft weui-cell__ft_in-access"></view>
+            </navigator>
+            </view>
+        </view>
+    </block>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+export default class mine extends wepy.page {
+    config = {
+        navigationBarTitleText: '个人中心',
+        navigationBarBackgroundColor: '{$mineNavigationBarBackgroundColor}',
+        navigationBarTextStyle: '{$mineNavigationBarTextStyle}',
+        backgroundColor: '#F0F0F6',
+        usingComponents: {
+            'wxc-flex': './../../packages/@minui/wxc-flex/dist/index',
+            'wxc-avatar': './../../packages/@minui/wxc-avatar/dist/index'
+        }
+    };
+    components = {};
+    data = {
+        loadingIsShow: false,
+        baseUrl: '',
+        shopCode: '',
+        shortUserName: '',
+        curMonthProfit: 0,
+        totalMoney: 0,
+        curMonthOrderNum: 0,
+        todayVisitorCount: 0,
+        qrcodeParams: '',
+        userInfo: {
+            avatarUrl: 'https://i2.ygimg.cn/cmp/mp/default-p.jpg',
+            nickName: '加载中...'
+        },
+        userOrder: {
+            wait_pay: 0,
+            wait_deliver: 0,
+            wait_receive: 0,
+            wait_refund: 0
+        },
+        isSeller: 0,
+        isShow: true,
+        memberFlag: false, //是否是会员
+        effectiveAmount: '--', //有效积分
+        levelId: '--', //会员等级
+        waitPay: encodeURIComponent(
+            '/order/myorder.sc?status=WAIT_PAY&tabType=1'
+        ),
+        waitDeliver: encodeURIComponent(
+            '/order/myorder.sc?status=WAIT_DELIVER&tabType=2'
+        ),
+        waitReceive: encodeURIComponent(
+            '/order/myorder.sc?mergeSearchFlag=1&tabType=3'
+        ),
+        myIncome: encodeURIComponent('/finance/myIncome.sc?transactionFlag=1'),
+        ufansOrderList: encodeURIComponent('/ufans/order/list.sc?level=1'),
+        couponsList: encodeURIComponent(
+            '/usercenter/coupon-list.sc?page=1&limit=20'
+        )
+    };
+    computed = {
+        nickNameClass() {
+            return this.isSeller ? '' : 'mt45';
+        }
+    };
+    methods = {};
+    events = {};
+    initUserInfo() {
+        //初始化会员信息。积分除外
+        wepy
+            .request({
+                url: `${
+                    this.$parent.globalData.apiBaseUrl
+                }/api/v2/userCenter/index`,
+                data: {
+                    openId: wepy.getStorageSync('openid')
+                }
+            })
+            .then(data => {
+                let shop = data.data.shop;
+                let userOrder = data.data.user_order;
+                let userAccount = data.data.user_account;
+                this.shortUserName = userAccount.short_user_name;
+                this.isSeller = data.data.is_seller === 1 ? 0 : 1;
+                let params = {
+                    imgUrl: data.data.qr_code_img,
+                    sharePage: this.baseUrl
+                };
+                params = JSON.stringify(params);
+                this.qrcodeParams = params;
+                this.totalMoney = data.data.str_total_money;
+                this.curMonthProfit = data.data.str_cur_month_profit;
+                if (userOrder) {
+                    this.userOrder = userOrder;
+                    this.$apply();
+                }
+                if (shop) {
+                    this.shopCode = shop.shop_code;
+                    this.curMonthOrderNum = shop.cur_month_order_num;
+                    this.todayVisitorCount = shop.today_visitor_count;
+                }
+                wepy.hideLoading();
+                this.$apply();
+            });
+    }
+    initUserInfoPoints() {
+        //获取棋星会员信息。
+        var params = {
+            openId: wepy.getStorageSync('openid'),
+            unionId: wepy.getStorageSync('unionid')
+            //测试数据
+            // openId: 'oBPQT0ZW6KZO31rBrDnOq11nqzp4',
+            // unionId:'oAGwtwHNKBuP4VGrWHWajCRn8pLw',
+            // brandCode: 'MA'
+        };
+        wepy
+            .request({
+                url: `${
+                    this.$parent.globalData.apiBaseUrl
+                }/api/v2/chessStarIntegra/getChessStarMemberInfo`, //请求链接-获取棋星会员信息
+                data: params
+            })
+            .then(res => {
+                let response = res.data;
+                if (response.code === 20000) {
+                    //请求成功
+                    //有效积分 即将过期积分 未生效积分 会员等级
+                    if (
+                        response.data === undefined ||
+                        response.data === '' ||
+                        response.data === null
+                    ) {
+                        //无数据返回状态
+                        //若无数据
+                        wepy.showToast({
+                            title: '网络错误',
+                            duration: 4000
+                        });
+                        wepy.hideLoading();
+                    } else {
+                        const {
+                            type,
+                            effectiveAmount,
+                            levelId
+                        } = response.data;
+                        if (type) {
+                            //若为true,则为会员
+                            this.effectiveAmount = effectiveAmount;
+                            this.levelId = levelId;
+                            this.memberFlag = type;
+                        } else {
+                            this.memberFlag = type;
+                        }
+                        this.$apply();
+                        wepy.hideLoading();
+                    }
+                } else {
+                    //若请求失败，则显示信息
+                    wepy.showToast({
+                        title: response.errorMsg + ' ',
+                        duration: 4000
+                    });
+                    wepy.hideLoading();
+                }
+                //结构赋值
+            });
+    }
+    onLoad() {
+        wepy.showLoading();
+        this.baseUrl = this.$parent.globalData.h5BaseUrl;
+        this.$parent.getUserInfo(userInfo => {
+            this.userInfo = userInfo;
+            this.$apply();
+        });
+        this.initUserInfo(); //初始化会员信息。积分除外
+    }
+    onShow() {
+        this.initUserInfoPoints(); //初始化会员积分信息
+        this.initUserInfo();
+    }
+}
+</script>

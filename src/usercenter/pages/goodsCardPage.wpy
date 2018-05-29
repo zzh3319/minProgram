@@ -1,0 +1,45 @@
+
+<style>
+
+</style>
+<template>
+    <scroll-view scroll-y="{{true}}">
+        <ShareCard/>
+    </scroll-view>
+</template>
+<script>
+
+import wepy from 'wepy';
+import ShareCard from '@/components/shareCard';
+export default class empty extends wepy.page {
+    config = {
+        navigationBarTitleText: '领取红包'
+    };
+    components = {
+        ShareCard
+    };
+    data = {
+        orderNo: ''
+    };
+    methods = {};
+    onShareAppMessage(option){//在shareCard.wpy中有发红包的button
+        if (option.from === 'button') {
+            // 来自页面内转发按钮
+            console.log(option.target)
+        }
+        return {
+            title: '送您一个拼手气红包',
+            path: '/mphome/pages/getCouponResult?redPacketSendId='+this.orderNo+'',
+            imageUrl: 'https://i2.ygimg.cn/cmp/mp/red-envelope.png'
+        }
+    };
+    onLoad(options) {
+        let dataObj;
+        if (options.data) {
+            dataObj = JSON.parse(options.data) || {};
+            this.orderNo = dataObj.orderNo;
+            this.$broadcast('shareCard:show', dataObj, 'white_bg');
+        }
+    }
+}
+</script>

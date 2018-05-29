@@ -1,0 +1,415 @@
+<style lang="less">
+page {
+    background: #f4f4f4;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.container {
+    display: flex;
+    padding: 86rpx 28rpx 28rpx;
+    width: 100%;
+    height: 100vh;
+    flex-direction: column;
+    justify-content: flex-start;
+    box-sizing: border-box;
+}
+
+.build-img {
+    width: 695px;
+    height: 720px;
+}
+
+.show-img {
+    width: 100%;
+    border-radius: 18rpx;
+    box-shadow: 0.5rpx 4rpx 1rpx #d5d5d5;
+}
+
+.goods_bg {
+    width: 100%;
+    height: 850rpx;
+}
+
+.goods_pic {
+    width: 100%;
+    height: 824rpx;
+    border: 2rpx solid #919191;
+}
+
+.goods_footer {
+    width: 100%;
+    height: 90rpx;
+    line-height: 90rpx;
+    background: #000;
+    opacity: 0.6;
+    margin-top: -102rpx;
+    margin-left: 1rpx;
+}
+
+.left {
+    color: #fff;
+    font-size: 38rpx;
+    z-index: 100;
+    margin-left: 20rpx;
+}
+
+.right {
+    color: #fff;
+    font-size: 52rpx;
+    margin-left: 85rpx;
+}
+
+.center_pic {
+    width: 200rpx;
+    height: 200rpx;
+    margin-top: 28rpx;
+    position: relative;
+    left: 80rpx;
+}
+
+.center_text {
+    font-size: 34rpx;
+    color: #898989;
+    position: relative;
+    left: 310rpx;
+    top: -126rpx;
+}
+
+.show_price {
+    margin: 0 10rpx 30rpx;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    width: 222rpx;
+    .hasPrice {
+        // color: red;
+    }
+
+    .noPrice {
+        // margin-left: 20rpx;
+        // color: green;
+    }
+    .iconfont {
+        margin-left: 10rpx;
+    }
+    .unactiveColor {
+        color: #404040;
+    }
+
+    .activeColor {
+        color: #DB1700;
+    }
+}
+
+.goods_btn {
+    width: 100%;
+    height: 85rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fe4c55;
+    color: #fff;
+    font-size: 28rpx;
+    margin-top: 30rpx;
+}
+</style>
+<template>
+    <view class='container'>
+        <view class="show_price">
+            <view @tap="hasPriceHandler" class="{{active?'hasPrice activeColor':'hasPrice unactiveColor'}}">
+                <text>价格</text>
+                <text class="iconfont">&#xe621;</text>
+            </view>
+            <view>|</view>
+            <view @tap="noPriceHandler" class="{{active?'noPrice unactiveColor':'noPrice  activeColor'}}">
+                <text>价格</text>
+                <text class="iconfont">&#xe61d;</text>
+            </view>
+        </view>
+        <image class='show-img' mode='widthFix' src='{{showImgUrl}}' />
+        <button class='goods_btn' bindtap='saveImg'>保存</button>
+    </view>
+    <canvas class='build-img' canvas-id='buildImg_hasMoney' hidden='{{MoneyPicHide}}' />
+    <canvas class='build-img' canvas-id='buildImg_Nomoney' hidden='{{noMoneyPicHide}}' />
+</template>
+<script>
+import wepy from 'wepy'
+export default class goodsShare extends wepy.page {
+    config = {
+    }
+    data = {
+        goodsPicMsg: null, //只做了图片下载的优化
+        qrcodePicMsg: null, //二维码优化有问题没做
+        active: true,
+        urlMsg: {},
+        showImgUrl: '{$defaultImg}',
+        MoneyImgPath: '{$defaultImg}',
+        noMoneyImgPath: '{$defaultImg}',
+        noMoneyPicHide: false,
+        MoneyPicHide: false,
+        drawData: {}
+    }
+    saveImg(e) {
+        wepy.saveImageToPhotosAlbum({
+            filePath: this.showImgUrl
+        })
+            .then(result => {
+                wepy.showToast({
+                    title: '保存成功',
+                    icon: 'success',
+                    duration: 4000
+                });
+                setTimeout(function() {
+                    wepy.navigateBack()
+                }, 2000)
+            })
+            .catch(e => {
+                wepy.showModal({
+                    content: '保存失败'
+                })
+            })
+    }
+    drawCanvasDetail(ret, ctx, _data, canvasId, that) {
+        let width = 695;
+        let height = 720;
+
+        ctx.setFillStyle('white')
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(ret.path, 107.5, 0, 480, 480);
+        console.log(ret.path)
+        var goodName = _data.goodName
+        var length = goodName.length;
+        function setGoodsTxt(goodName, y) {
+            ctx.setFontSize(30);
+            ctx.setFillStyle('#3a3a3a');
+            ctx.fillText(goodName, 15, y);
+        }
+        if (length < 16) {
+            setGoodsTxt(goodName, 560);
+        } else if (length >= 16 && length <= 27) {
+            let fitstLineTxt = goodName.substring(0, 16)
+            let secondLineTxt = goodName.substring(16)
+            setGoodsTxt(fitstLineTxt, 5600);
+            setGoodsTxt(secondLineTxt, 610);
+        } else { //>27
+            let fitstLineTxt = goodName.substring(0, 16);
+            let secondLineTxt = goodName.substring(16, 25) + '....'
+            setGoodsTxt(fitstLineTxt, 560);
+            setGoodsTxt(secondLineTxt, 610);
+        }
+        if (canvasId === 'buildImg_hasMoney') {
+            ctx.setFontSize(25);
+            ctx.setFillStyle('#ff414b');
+            ctx.fillText('￥', 20, 670);
+            ctx.setFontSize(32);
+            ctx.setFillStyle('#ff414b');
+            ctx.fillText(_data.price, 49, 670);
+        }
+        that.drawCode(ctx, _data.qrCodePath, width, height, canvasId);
+    }
+    downloadFileAndDraw(_data, ctx, that, canvasId) {
+        if (that.goodsPicMsg) {
+            let ret = that.goodsPicMsg;
+            that.drawCanvasDetail(ret, ctx, _data, canvasId, that);
+            return false;
+        }
+        wepy.downloadFile({
+            url: _data.img
+        })
+            .then(ret => {
+                if (ret.errMsg === 'downloadFile:ok') {
+                    wepy.getImageInfo({
+                        src: ret.tempFilePath
+                    })
+                        .then(ret => {
+                            that.goodsPicMsg = ret;
+                            that.drawCanvasDetail(ret, ctx, _data, canvasId, that)
+                        })
+                        .catch(e => {
+                            wepy.showModal({
+                                content: e.errMsg
+                            })
+                        })
+                }
+            })
+            .catch(e => {
+                wepy.showModal({
+                    content: '主图出错：' + _data.img + e.errMsg
+                })
+            })
+    }
+    //把canvas 导出生成图片
+    setToImgForHasMoney(width, height, canvasId) {
+        var that = this;
+        wepy.canvasToTempFilePath({
+            x: 0,
+            y: 0,
+            width: width,
+            height: height,
+            destWidth: width,
+            destHeight: height,
+            canvasId: canvasId
+        })
+            .then(res => {
+                if (canvasId === 'buildImg_hasMoney') {
+                    that.MoneyPicHide = true;
+                    that.MoneyImgPath = res.tempFilePath;
+                    that.showImgUrl = res.tempFilePath;
+                    let ctxNomoney = wepy.createCanvasContext('buildImg_Nomoney');
+                    let _data = that.drawData;
+                    that.downloadFileAndDraw(_data, ctxNomoney, that, 'buildImg_Nomoney');
+                };
+            })
+            .catch(e => {
+                wepy.showModal({
+                    content: '图片生成失败！\r\n图片生成过程中请勿操作'
+                })
+            })
+    }
+    setToImgForNoMoney(width, height, canvasId) {
+        var that = this;
+        wepy.canvasToTempFilePath({
+            x: 0,
+            y: 0,
+            width: width,
+            height: height,
+            destWidth: width,
+            destHeight: height,
+            canvasId: canvasId
+        })
+            .then(res => {
+                if (canvasId === 'buildImg_Nomoney') {
+                    that.noMoneyPicHide = true;
+                    that.noMoneyImgPath = res.tempFilePath;
+                    that.$apply();
+                };
+                wepy.hideLoading();
+            })
+            .catch(e => {
+                wepy.showModal({
+                    content: '图片生成失败！\r\n图片生成过程中请勿操作'
+                })
+            })
+    }
+    //画二维码
+
+    drawCode(ctx, url, width, height, canvasId) {
+        let that = this;
+        wepy.downloadFile({
+            url: url
+        })
+            .then(ret2 => {
+                if (ret2.errMsg === 'downloadFile:ok') {
+                    wepy.getImageInfo({
+                        src: ret2.tempFilePath
+                    })
+                        .then(qret => {
+                            try {
+                                console.log(qret)
+                                ctx.drawImage(qret.path, 455, 480, 210, 210);
+                            } catch (e) {
+                                wepy.showModal({
+                                    content: '图片生成出错'
+                                })
+                            }
+                            ctx.draw();
+                            wepy.getSetting({})
+                                .then(res => {
+                                    if (canvasId === 'buildImg_hasMoney') {
+                                        that.setToImgForHasMoney(width, height, canvasId);
+                                    } else {
+                                        that.setToImgForNoMoney(width, height, canvasId);
+                                    }
+                                })
+                                .catch(e => {
+                                    wepy.openSetting({})
+                                        .then(res => {
+                                            if (res.authSetting['scope.writePhotosAlbum']) {
+                                                if (canvasId === 'buildImg_hasMoney') {
+                                                    that.setToImgForHasMoney(width, height, canvasId);
+                                                } else {
+                                                    that.setToImgForNoMoney(width, height, canvasId);
+                                                }
+                                                return;
+                                            }
+                                            console.log('openSetting: success');
+                                            wepy.navigateBack()
+                                        })
+                                        .catch(data => {
+                                            console.log('openSetting: fail');
+                                            wepy.navigateBack()
+                                        })
+                                })
+                        }).catch(e => {
+                            wepy.showModal({
+                                content: '图片下载失败！'
+                            })
+                        })
+                } else {
+                    wepy.showModal({
+                        content: '28' + ret2.errMsg
+                    })
+                }
+            })
+            .catch(e => {
+                console.log('5')
+                console.log(e)
+                wepy.showModal({
+                    content: 'code下载失败' + e.errMsg
+                })
+            })
+    }
+    methods = {
+        hasPriceHandler() {
+            let MoneyImgPath = this.MoneyImgPath;
+            this.showImgUrl = MoneyImgPath;
+            this.active = true;
+            this.$apply();
+            console.log('hasPriceHandler')
+        },
+        noPriceHandler() {
+            let noMoneyImgPath = this.noMoneyImgPath;
+            this.showImgUrl = noMoneyImgPath;
+            this.active = false;
+            this.$apply();
+            console.log('noPriceHandler')
+        }
+    }
+    onLoad(options) {
+        if (!wx.saveImageToPhotosAlbum) {
+            wepy.showModal({
+                title: '提示',
+                content: '当前微信版本过低，无法使用该功能，请升级到最新微信版本后重试。'
+            })
+            return;
+        }
+        let data = JSON.parse(decodeURIComponent(options.data));
+        //  let data = JSON.parse(`{"commodityName":"STACCATO/思加图春季黑色胎牛漆皮/兰色胎牛漆皮女皮鞋9LC19AQ4","wfxPrice":"0.01","imgUrl":"https://i1.ygimg.cn/pics/staccato/2014/99944177/99944177_01_m.jpg","sharePage":"https://devcmp.belle.net.cn/mpshop/item/99944177.sc","qrCodePath":"https://testcmp.belle.net.cn/pics/wfx/STACCATO/WX_ACODE/DE0BA17F5F0442D9B9B8A488A35EE8F9.png"}`)
+        let that = this;
+        wepy.showLoading({
+            title: '图片生成中'
+        });
+        that.urlMsg = data;
+        if (!data.qrCodePath) {
+            wepy.hideLoading();
+            wepy.showToast({
+                title: '二维码生成失败',
+                duration: 4000
+            })
+            return;
+        }
+        let drawData = {
+            img: data.imgUrl,
+            goodName: data.commodityName,
+            price: data.wfxPrice,
+            qrCodePath: data.qrCodePath
+        };
+        that.drawData = drawData;
+        let ctxHasmoney = wepy.createCanvasContext('buildImg_hasMoney');
+        that.downloadFileAndDraw(drawData, ctxHasmoney, that, 'buildImg_hasMoney');//先执行hasMoney的画图 然后在回调执行that.downloadFileAndDraw(_data, ctxNomoney, that, 'buildImg_Nomoney');
+    }
+}
+</script>

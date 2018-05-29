@@ -1,0 +1,53 @@
+<template>
+  <view class="decorate-item-title">
+    <wxc-flex  main="between" cross="center">
+      <view wx:if="{{item.widgetsContent.textLayout==1}}"></view>
+      <view wx:if="{{item.widgetsContent.textLayout==2}}"></view>
+      <view class='decorate-weight'>{{item.widgetsContent.title}}</view>
+      <view wx:if="{{item.widgetsContent.textLayout==1&&!(item.type=='goods1'||item.type=='goods2'||item.type=='goods3'||item.type=='goods4')}}"></view>
+      <!-- 列表长度大于最大显示数的时候需要显示更多 -->
+      <view  @tap.stop="linkMore" class="more" 
+        wx:if="{{item.widgetsContent.list.length>=item.widgetsContent.maxCount&&(item.type=='goods1'||item.type=='goods2'||item.type=='goods3'||item.type=='goods4')}}"
+      >
+        更多
+      </view>
+    </wxc-flex>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+
+export default class decorateColGoodsTitle extends wepy.component {
+    props = {
+        item: {
+            type: Object,
+            default: {}
+        }
+    };
+    methods = {
+        linkMore() {
+            let commodityNoes = [];
+            this.item.widgetsContent.list.map(item => {
+                commodityNoes.push(item.no);
+            });
+            let _commodityNoes = commodityNoes.join('|');
+            const url = `/mphome/pages/goodsList?commodity_no=${_commodityNoes}`;
+            wepy.navigateTo({
+                url
+            });
+        }
+    };
+}
+</script>
+<style lang="less">
+.decorate-item-title {
+    background: #fff;
+    font-size: 26rpx;
+    height: 50rpx;
+    padding: 16rpx;
+    border-bottom: 1px solid #d9d9dc;
+    .decorate-weight {
+        font-weight: 700;
+    }
+}
+</style>

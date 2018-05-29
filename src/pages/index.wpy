@@ -1,0 +1,225 @@
+<template>
+    <view class="index-container">
+        <repeat for="{{render}}" key="kindex" index="index" item="item">
+            <!-- decorateGoodsTitle因repeat的子组件中传值错误,放在此处,升级后修改 -->
+            <decorateGoodsListTitle :item.sync="item" wx:if="{{item.widgetsContent.titleFlag==1}}" />
+            <!-- 基础组件,需要整个items -->
+            <decorateGeneral :item.sync="item" wx:if="{{item.type=='general'}}" />
+            <decorateGoodsListSwiper :item.sync="item" wx:if="{{item.type=='goods4'}}" />
+            <decorateListArticleTab :item.sync="item" wx:if="{{item.type=='acticleChannle'}}" :itemIndex.sync="index" />
+            <decorateBlank :item.sync="item" wx:if="{{item.type=='space'}}" />
+            <decorateSearch :item.sync="item" wx:if="{{item.type=='search'}}" />
+            <decorateSwiper :item.sync="item" wx:if="{{item.type=='scroll' && index < 5}}" />
+            <decorateS2 :item.sync="item" wx:if="{{item.type=='scroll' && index > 4}}" />
+            <decorateCoupons :item.sync="item" wx:elif="{{item.type=='coupon'}}" />
+            <decorateTcNine :item.sync="item" wx:elif="{{item.type=='tc9'}}" />
+            <!-- 只需要循环widgetsContent内数组的组件 -->
+            <decorateList :item.sync="item" wx:else/>
+            <view wx:if="{{item.widgetsContent.marginBottom==1}}" class='margin-b'></view>
+        </repeat>
+        <decorateGoods1 wx:if="{{lastModuleDataObj}}" :hasMoreData.sync="hasMoreData"  :lastModuleDataObj.sync="lastModuleDataObj"  :lastModuleDataList.sync="lastModuleDataList"/>
+        <returnTop :showReturnBotton.sync="showReturnBotton" />
+    </view>  
+</template>
+<script>
+import wepy from 'wepy';
+import decorateGoods1 from '@/components/decorate-goods1';
+import decorateList from '@/components/decorate-list';
+import decorateSwiper from '@/components/decorate-swiper';
+import decorateSearch from '@/components/decorate-search';
+import decorateCoupons from '@/components/decorate-coupons';
+import decorateBlank from '@/components/decorate-blank';
+import decorateTcNine from '@/components/decorate-tc-nine';
+import decorateGoodsListSwiper from '@/components/decorate-list-goods-swiper';
+import decorateGoodsListTitle from '@/components/decorate-list-goods-title';
+import decorateListArticleTab from '@/components/decorate-list-article-tab';
+import returnTop from '@/components/return-top';
+import GTools from '@/mixins/g-tools';
+import linkHandle from '@/mixins/link-map';
+import decorateGeneral from '@/components/decorate-general';
+export default class index extends wepy.page {
+    mixins = [GTools];
+    config = {
+        usingComponents: {
+            'wxc-flex': '../../../packages/@minui/wxc-flex/dist/index',
+            'wxc-elip': '../../../packages/@minui/wxc-elip/dist/index',
+            'wxc-tab': '../../../packages/@minui/wxc-tab/dist/index',
+            'wxc-tab-panel': '../../../packages/@minui/wxc-tab/dist/panel',
+            'wxc-price': '../../../packages/@minui/wxc-price/dist/index'
+        },
+        enablePullDownRefresh: true,
+        backgroundTextStyle: 'dark',
+        onReachBottomDistance: 0
+    };
+    components = {
+        decorateList,
+        decorateSwiper,
+        decorateS2: decorateSwiper,
+        decorateSearch,
+        decorateBlank,
+        decorateCoupons,
+        decorateGoodsListSwiper,
+        decorateTcNine,
+        decorateGoodsListTitle,
+        returnTop,
+        decorateListArticleTab,
+        decorateGeneral,
+        decorateGoods1
+    };
+    data = {
+        shareType: null,
+        render: [],
+        showReturnBotton: false,
+        shopId: '',
+        loading: false,
+        height: 0,
+        loadNum: 5,
+        //zzh
+        lastModuleDataList: null,
+        lastModuleDataObj: null,
+        pageNum: 1,
+        moduleContentContorlNum: 20, //模块内容list数量控制
+        onePageContentNum: 10, //分页一次加载个数
+        allPageContentNum: 0, //总页数
+        hasMoreData: true
+    };
+    events = linkHandle;
+    onLoad(options) {
+        this.shareType = options.type;
+        this.shopId = options.shopId;
+        //初始化默认门店信息
+        this.$parent.initVirtualShop();
+        this.init();
+        // const url = `${
+        //   this.$parent.globalData.apiBaseUrlMock
+        // }/api/v2/component/pagehome`;
+        if (options.type || options.scene) {
+            this.shareType = null;
+            if (options.scene) {
+                let ops = options.scene.split('-');
+                this.shopId = ops[0];
+            }
+            // 锁粉
+            this.$parent.lockFans(this.shopId, 1); //1 店铺访问
+        }
+    }
+    onShow() {
+        this.$parent.getCartNum();
+        // 从购物车逛一逛返回首页回到顶部
+        if (this.$parent.globalData.returnTopStatus) {
+            this.backTop();
+            this.$parent.globalData.returnTopStatus = false;
+        }
+    }
+
+    async init({ loadingStatus = true } = {}) {
+        const url = `${
+            this.$parent.globalData.apiBaseUrl
+        }/api/v2/component/pagehome`;
+        const params = {
+            type: 'MALL',
+            templateId: ''
+        };
+        const { data, code } = await this.customFunction.fetchData(
+            url,
+            params,
+            {},
+            {
+                isShowLoad: loadingStatus
+            }
+        );
+        if (code !== 20000) {
+            this.customFunction.showModal();
+            console.error('获取数据错误:code', code);
+            console.error('获取数据错误:data', data);
+            return;
+        }
+        data.forEach(item => {
+            item.widgetsContent = JSON.parse(item.widgetsContent);
+        });
+        // zzh
+        this.customFunction.pagingHandler(data, this);
+        // zzh
+        this.render = data;
+        this.$apply();
+    }
+    onPageScroll({ scrollTop }) {
+        if (scrollTop > 400 && !this.showReturnBotton) {
+            this.showReturnBotton = true;
+            this.$apply();
+        }
+        if (scrollTop < 400 && this.showReturnBotton) {
+            this.showReturnBotton = false;
+            this.$apply();
+        }
+    }
+    onShareAppMessage(options) {
+        // URL 增加 shopId
+        let shopId = wepy.getStorageSync('shopId');
+        let path = `/pages/index?type=share&shopId=${shopId}`;
+        return {
+            title: '{$shareTitle}',
+            path: path,
+            // imageUrl: "{$shareImg}",
+            success: function(res) {
+                // 转发成功
+                wepy.showToast({
+                    title: '转发成功',
+                    icon: 'success',
+                    duration: 2000
+                });
+            },
+            fail: function(res) {
+                wepy.showToast({
+                    icon: 'none',
+                    title: '转发失败',
+                    duration: 2000
+                });
+            }
+        };
+    }
+    onPullDownRefresh(e) {
+        this.init({
+            loadingStatus: false
+        });
+        wepy.stopPullDownRefresh();
+    }
+    showLoad() {
+        this.loading = true;
+        this.$apply();
+    }
+    backTop() {
+        wepy.pageScrollTo({
+            scrollTop: 0,
+            duration: 0
+        });
+    }
+    onReachBottom() {
+        //容错处理
+        if (
+            this.lastModuleDataObj === null ||
+            this.lastModuleDataObj === undefined ||
+            this.lastModuleDataObj === ''
+        ) {
+            console.log('this 为空');
+        } else {
+            this.customFunction.onReachBottomHandler(this);
+        }
+    }
+}
+</script>
+<style lang="less">
+page {
+    background: white;
+}
+.index-container {
+    .margin-b {
+        margin-bottom: 20rpx;
+    }
+}
+.loading {
+    height: 150rpx;
+    text-align: center;
+    color: #ccc;
+}
+</style>

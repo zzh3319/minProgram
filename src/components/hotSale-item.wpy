@@ -1,0 +1,151 @@
+<template>
+    <navigator class="item-wrap" url="/pages/goodsDetail?commodityNo={{item.commodityNo}}" hover-class="none">
+        <view class="margin-bottom-border">
+            <view class="goodsImage">
+                <image src="{{item.img}}" mode="scaleToFill" class="goodsImg"></image> 
+                <view class="rank-wrap">
+                    <!-- top-three热销前三的大小样式 top-first，top-second， top-third热销前背景三样式不同，top-other 热销前三以外的其他商品背景样式 -->
+                    <view class="top-rank {{index === 0 ? 'top-first' : ''}} {{index === 1 ? 'top-second' : ''}} {{index === 2 ? 'top-third' : ''}}  {{ index >= 3 ? 'top-other' : '' }}">
+                        <!-- <text wx:if="{{index < 3}}">TOP </text><text>{{index+1}}</text> {{index+1}}   wx:if="{{index > 3}}"-->
+                        <text class="array-num" wx:if="{{index >= 3}}">{{index+1}}</text>
+                    </view>
+                </view>
+            </view>
+        
+            <view class="goods-detailinfo">
+                <text class="goods-name">{{item.commodityName}}</text>
+                <view class="goods-saleinfo">
+                    <view class="flex1">
+                        <text class="final-price"><text class="coin-icon">￥</text>{{item.salePrice}}</text>
+                        <text class="del-price">￥ {{item.publicPrice}}</text>
+                    </view>
+                    <view class="flex1 sale-num">
+                        <text>销量：{{item.saleQuantity}}</text>
+                    </view>
+                </view>
+            </view>
+        </view>
+    </navigator>
+</template>
+<script>
+import wepy from 'wepy';
+export default class hotSaleItem extends wepy.component {
+    components = {};
+    props = {
+        item: {
+            type: Object,
+            default: {}
+        }
+    };
+    data = {};
+    events = {};
+    watch = {};
+    onLoad(option) {}
+    methods = {};
+}
+</script>
+<style lang="less">
+.item-wrap {
+    background-color: #fff;
+    padding: 40rpx 28rpx 0;
+    .margin-bottom-border {
+        display: flex;
+        padding-bottom: 40rpx;
+        border-bottom: 1rpx solid #eee;
+    }
+    .goodsImage {
+        width: 200rpx;
+        height: 200rpx;
+        margin-right: 10rpx;
+        position: relative;
+        text-align: center;
+        .goodsImg {
+            width: 200rpx;
+            height: 200rpx;
+        }
+        .rank-wrap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+        }
+        .top-rank {
+            color: #fff;
+            // margin:0 auto;
+        }
+        // .top-three{
+
+        // }
+        .top-first {
+            width: 50rpx;
+            height: 55rpx;
+            background: url(https://i2.ygimg.cn/cmp/mp/top1.png?v=1.0) no-repeat;
+            background-size: 100%;
+        }
+        .top-second {
+            width: 55rpx;
+            height: 55rpx;
+            background: url(https://i2.ygimg.cn/cmp/mp/top2.png?v=1.0) no-repeat;
+            background-size: 100%;
+        }
+        .top-third {
+            width: 55rpx;
+            height: 55rpx;
+            background: url(https://i2.ygimg.cn/cmp/mp/top3.png?v=1.0) no-repeat;
+            background-size: 100%;
+        }
+        .top-other {
+            width: 55rpx;
+            height: 55rpx;
+            background: url(https://i2.ygimg.cn/cmp/mp/commonTop.png?v=1.0)
+                no-repeat;
+            background-size: 100%;
+        }
+    }
+    .goods-detailinfo {
+        flex: 1;
+        .goods-name {
+            color: #231815;
+            font-size: 28rpx;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+        }
+        .goods-saleinfo {
+            margin-top: 46rpx;
+            display: flex;
+            .flex1 {
+                flex: 1;
+                line-height: 40rpx;
+            }
+            .final-price {
+                color: #ee0000;
+                font-size: 32rpx;
+                font-weight: bold;
+                .coin-icon {
+                    font-size: 24rpx;
+                }
+            }
+            .del-price {
+                font-size: 20rpx;
+                color: #b0b0b0;
+                text-decoration: line-through;
+                margin-left: 13rpx;
+            }
+            .sale-num {
+                font-size: 24rpx;
+                color: #b0b0b0;
+                text-align: right;
+            }
+        }
+    }
+    .array-num {
+        line-height: 55rpx;
+        font-size: 20rpx;
+        color: #696969;
+        font-weight: bold;
+    }
+}
+</style>

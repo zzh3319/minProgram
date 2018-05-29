@@ -1,0 +1,338 @@
+<style lang="less">
+@import '../../static/less/base/fn';
+.member-box {
+    width: 100%;
+    background: #f0f0f6 url(https://i2.ygimg.cn/cmp/mp/userBg.png) no-repeat top
+        center; //背景图待加  ff
+    background-size: contain;
+    .member-infos-con {
+        margin: 0 32rpx;
+        background: #ffffff;
+        padding: 20rpx 0 30rpx 0;
+        position: relative;
+        .main {
+            width: 100%;
+            display: block;
+            .icon-crown {
+                width: 64rpx;
+                margin: 70rpx auto 0 auto;
+                display: block;
+                color: #000;
+                font-size: 54rpx;
+            }
+        }
+        // main end
+        .member-points {
+            height: 96rpx;
+            line-height: 96rpx;
+            font-size: 86rpx;
+            color: #000;
+        }
+        .member-type-name {
+            height: 52rpx;
+            line-height: 52rpx;
+            font-size: 30rpx;
+            color: #000;
+        }
+        .member-detail-btn {
+            max-width: 500rpx;
+            height: 60rpx;
+            line-height: 60rpx;
+            padding: 0 72rpx;
+            text-align: center;
+            font-size: 30rpx;
+            color: #ffffff;
+            border-radius: 26rpx;
+            background: #000;
+            margin: 0 auto;
+            display: inline-block;
+        }
+        .icon-s {
+            width: 60rpx;
+            height: 60rpx;
+            background: #000;
+            border-radius: 30rpx;
+            position: absolute;
+            right: 40rpx;
+            top: 40rpx;
+        }
+    }
+}
+//多元素并排
+.tab-wrap {
+    display: block;
+    overflow-x: hidden;
+    border-top: 1rpx solid #dedee3;
+    margin: 0 30rpx;
+}
+.tab-item {
+    min-width: 50%;
+    min-height: 32rpx;
+    font-size: 24rpx;
+    text-align: center;
+    color: #000;
+    &:last-child {
+        border-right: 0;
+    }
+    .item-icon {
+        display: inline-block;
+        position: relative;
+        width: 48rpx;
+        height: 48rpx;
+        font-size: 48rpx;
+        line-height: 48rpx;
+        .badge {
+            display: inline-block;
+            position: absolute;
+            top: -10rpx;
+            right: -18rpx;
+            width: 24rpx;
+            height: 24rpx;
+            font-size: 18rpx;
+            line-height: 24rpx;
+            color: #ffffff;
+            background-color: #ff434d;
+            -webkit-border-radius: 50%;
+            -moz-border-radius: 50%;
+            border-radius: 50%;
+        }
+    }
+    .item-text {
+        display: block;
+        color: #858585;
+    }
+    .item-value {
+        display: block;
+        font-size: 54rpx;
+        margin-bottom: 10rpx;
+    }
+}
+.split-line-box {
+    flex-grow: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.split-line {
+    width: 1px;
+    height: 50rpx;
+    border-left: 1rpx solid #dedee3;
+}
+// tab-item end
+.imember-rule-title {
+    font-size: 26rpx;
+    color: #000;
+}
+.imember-rule-box {
+    padding: 20rpx 148rpx;
+}
+.imember-rule-p {
+    font-size: 22rpx;
+    color: #92939a;
+    text-align: justify;
+}
+.imember-rule-line {
+    max-width: 349rpx;
+    height: 2px;
+    line-height: 2rpx;
+    overflow: hidden;
+    white-space: nowrap;
+    display: block;
+    margin: 0 auto;
+    color: #c8c8d1;
+    font-size: 16rpx;
+}
+.mt10 {
+    margin-top: 10rpx;
+}
+.mbt10 {
+    margin-bottom: 10rpx;
+}
+.pt18 {
+    padding-top: 10rpx;
+}
+.mbt30 {
+    margin-bottom: 18rpx;
+}
+.iwidcenter {
+    width: 100%;
+    text-align: center;
+}
+.iblock {
+    width: 100%;
+    display: block;
+}
+.pt30 {
+    padding-top: 30rpx;
+}
+.pt50 {
+    padding-top: 50rpx;
+}
+.mbt60 {
+    margin-bottom: 60rpx;
+}
+.mbt160 {
+    margin-bottom: 160rpx;
+}
+</style>
+<template>
+  <view class="member-box">
+    <view class="member-infos-con">
+      <block wx:if="{{hasFlag}}">
+         <view class="item main">
+            <text class="iconfont icon-crown">&#xe61a;</text>
+         </view>
+          <view class="item iwidcenter">
+               <text class="member-points">{{effectiveAmount}}</text>
+          </view>
+          <view class="item iwidcenter mbt10">
+               <text class="member-type-name">{{levelId}}</text>
+          </view>
+          <view class="item iwidcenter mbt60" >
+           <navigator  url="/usercenter/pages/integralDetail"  hover-class="none">
+               <text class="member-detail-btn">查看明细</text>
+          </navigator>
+          </view>
+           <wxc-flex  class="tab-wrap pt30" wrap="nowrap">
+            <navigator  class="tab-item"  hover-class="none">
+              <text class="item-value">{{expiredAmount}}</text>
+              <text class="item-text">将过期积分</text>
+            </navigator>
+            <navigator class="split-line-box">
+              <text class="split-line"></text>
+            </navigator>
+            <navigator  class="tab-item"  hover-class="none">
+              <text class="item-value">{{freezeAmount}}</text>
+              <text class="item-text">未生效积分</text>
+            </navigator>
+          </wxc-flex>
+      </block>
+      <view class="noinfo-box tcenter mt100 mbt160"  wx:if="{{!hasFlag}}">
+        <image src="https://st-dev.belle.net.cn/static/images/shopping_no.png" class="yg-empty-icon"></image>
+        <text class="Gray">暂没有相关数据</text>
+      </view>
+    </view>
+      <!-- 用户信息，白色模块 end -->
+    <view class="member-lists-con pt50">
+         <view class="item iblock">
+           <image src="https://i2.ygimg.cn/cmp/mp/points.png" style="width: 318rpx;height: 54rpx;display:block;margin:0 auto;" />
+         </view>
+        <view class="page__bd">
+        <view class="weui-article imember-rule-box">
+            <view class="weui-article__h1 iwidcenter imember-rule-title">积分期限</view>
+            <view class="weui-article__section">
+                <view class="weui-article__section">
+                    <view class="weui-article__p imember-rule-p">获取积分7日后开始生效，每笔积分生效后一年自动过期。
+                    </view>
+                     <view class="weui-article__p imember-rule-p">有效积分会员可使用有效积分在品牌活动时兑换礼品或优惠券。
+                    </view>
+                </view>
+            </view>
+        </view>
+        <view class="item iblock">
+           <text class="imember-rule-line">--------------------------------------------------------------------------</text>
+         </view>
+         <view class="weui-article imember-rule-box">
+            <view class="weui-article__h1 iwidcenter imember-rule-title">累计积分</view>
+            <view class="weui-article__section">
+                <view class="weui-article__section">
+                    <view class="weui-article__p  imember-rule-p">累计积分达到棋星联盟各合作品牌制定的联盟会员优惠积分额度时，即可在该品牌购物享受联盟会员统一折扣。
+                    </view>
+                </view>
+            </view>
+        </view>
+    </view>
+    </view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+export default class points extends wepy.page {
+    config = {
+        navigationBarTitleText: '积分详情',
+        backgroundColor: '#F0F0F6',
+        usingComponents: {
+            'wxc-flex': '../../../packages/@minui/wxc-flex/dist/index'
+        }
+    };
+    components = {};
+    data = {
+        loadingIsShow: false,
+        baseUrl: '',
+        isShow: true,
+        hasFlag: 1, //若为0，则无积分，为1，则有积分
+        effectiveAmount: '---', //总积分-有效积分
+        freezeAmount: '---', //未生效积分
+        expiredAmount: '---', //可用积分-即将过期积分
+        levelId: '---' //会员等级
+    };
+    computed = {};
+    methods = {};
+    events = {};
+    initPoints() {
+        var params = {
+            openId: wepy.getStorageSync('"openid"'),
+            unionId: wepy.getStorageSync('"unionid"')
+        };
+        wepy
+            .request({
+                url: `${
+                    this.$parent.globalData.apiBaseUrl
+                }/api/v2/chessStarIntegra/queryChessStarIntegra`, //请求链接-查询棋星会员积分
+                data: params
+            })
+            .then(res => {
+                let response = res.data;
+                if (response.code === 20000) {
+                    //请求成功
+                    //有效积分 即将过期积分 未生效积分 会员等级
+                    if (
+                        response.data === undefined ||
+                        response.data === '' ||
+                        response.data === null
+                    ) {
+                        this.hasFlag = 0;
+                        this.$apply();
+                        wepy.hideLoading();
+                    } else {
+                        const {
+                            effectiveAmount,
+                            expiredAmount,
+                            freezeAmount,
+                            levelId
+                        } = response.data;
+                        this.effectiveAmount = effectiveAmount;
+                        this.expiredAmount = expiredAmount;
+                        this.freezeAmount = freezeAmount;
+                        this.levelId = levelId;
+                        this.hasFlag = 1;
+                        this.$apply();
+                        wepy.hideLoading();
+                    }
+                } else {
+                    //若请求失败，则显示信息
+                    wepy.hideLoading(); //接口容错处理 --两个分支接口返回返回数据不一样，报错，影响查看页面。
+                    if (
+                        response.errorMsg === undefined ||
+                        response.errorMsg === '' ||
+                        response.errorMsg === null
+                    ) {
+                        return false;
+                    } else {
+                        wepy.showToast({
+                            title: response.errorMsg,
+                            duration: 4000
+                        });
+                    }
+                }
+                //结构赋值
+            });
+    }
+    onLoad() {
+        wepy.showLoading();
+        this.baseUrl = this.$parent.globalData.h5BaseUrl; //获得h5的站点链接
+        this.initPoints(); //初始，查询棋星会员积分
+    }
+}
+</script>

@@ -1,0 +1,40 @@
+<template>
+  <web-view src='{{webViewUrl}}'></web-view>
+</template>
+
+<script>
+import wepy from 'wepy';
+export default class contact extends wepy.page {
+    shareType = {};
+    shareUrl = {};
+    config = {};
+    components = {};
+    mixins = [];
+    data = {
+        webViewUrl: '',
+        merchantNo: '{$merchantNo}'
+    };
+    computed = {};
+    methods = {};
+    events = {};
+    onLoad(options) {
+        if (!wepy.canIUse('web-view')) {
+            this.$parent.webviewNoCanUsewx();
+            return false;
+        }
+        let openId = wepy.getStorageSync('openid');
+
+        const { prodName, payment, orderId, imageUrl, orderNo } = options;
+        const paramVal = `prodName=${encodeURIComponent(
+            prodName
+        )}&payment=${payment}&orderId=${orderId}&imageUrl=${imageUrl}&orderNo=${orderNo}&openId=${openId}&merchantNo=${this.merchantNo}`;
+        this.webViewUrl = `${
+            this.$parent.globalData.apiBaseUrl
+        }/api/v2/easemob/orders?${paramVal}`;
+        console.log('imageUrl', imageUrl);
+        this.$apply();
+    }
+    onReady() {}
+    onShow() {}
+}
+</script>

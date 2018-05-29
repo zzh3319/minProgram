@@ -1,0 +1,676 @@
+<style lang="less">
+page {
+    background: #f4f4f4;
+}
+.red {
+    color: #ff414b;
+    font-size: 45rpx;
+}
+.wechat_icon {
+    color: #41b035;
+    font-size: 50rpx;
+}
+.active {
+    -webkit-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+    webkit-transform: rotate(90deg);
+    transform: rotate(90deg);
+}
+.unactive {
+    -webkit-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+    webkit-transform: rotate(-90deg);
+    transform: rotate(-90deg);
+}
+#confirmPay {
+    padding-bottom: 100rpx;
+    color: #333333;
+    .address_wrap {
+        min-height: 140rpx;
+        width: 100%; // height: 118rpx;
+        background: #ffffff url('https://i2.ygimg.cn/cmp/mp/address.png') -4rpx 0;
+        background-size: contain;
+        background-repeat: repeat-x;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        .goto_address {
+            margin-right: 30rpx;
+        }
+        .noAddress-content {
+            font-size: 23rpx;
+            width: 655rpx;
+            text-align: center;
+        }
+        .address-content-wrap {
+            width: 655rpx;
+            margin: 10rpx 0rpx 10rpx 30rpx;
+            box-sizing: border-box;
+            outline: none;
+            display: flex;
+            flex-direction: column; // height: 110rpx;
+            // border: 1rpx solid red;
+            font-size: 22rpx;
+            .ddress-title {
+                width: 100%;
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+            }
+            .address-info-content {
+                margin-left: 43rpx;
+                margin-top: 18rpx;
+                margin-bottom: 15rpx;
+                .address_detail {
+                    font-size: 20rpx;
+                    width: 570rpx;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    text {
+                        margin: 0 4rpx;
+                    }
+                    .default_addrss {
+                        background: #ff414b;
+                        color: white;
+                        font-size: 19rpx;
+                        padding: 2rpx 10rpx;
+                        border-radius: 5rpx;
+                        text-align: center;
+                        display: inline-block;
+                    }
+                }
+            }
+        }
+    } // .order_list_wrap {
+    // }
+    .select_wechat {
+        font-size: 26rpx;
+        height: 90rpx;
+        margin-top: 16rpx;
+        background: #ffffff;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding-left: 30rpx;
+        padding-right: 30rpx;
+        justify-content: space-between;
+        .wechat_default_txt {
+            .wechat_txt {
+                margin-left: 24rpx;
+            }
+        }
+    }
+    .select_list {
+        /*   border-bottom: 1rpx solid #999;
+                                                    border-top: 1rpx solid #999; */
+        font-size: 26rpx;
+        background: #ffffff;
+        padding-left: 30rpx;
+        padding-right: 30rpx;
+        height: 85rpx;
+        margin-top: 16rpx;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        .list_btn {
+            color: #b8b8b8;
+            font-size: 22rpx;
+            width: 113rpx;
+            display: flex;
+            align-items: center;
+            flex-direction: row;
+            justify-content: space-between;
+        }
+    }
+}
+#bottom_pay {
+    z-index: 10000;
+    font-size: 28rpx;
+    position: fixed;
+    bottom: 0;
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    height: 100rpx;
+    background: #313131;
+    .confirm_money {
+        padding-left: 25rpx;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        width: e('calc(100% - 230rpx)');
+        color: #ffffff;
+        .money {
+            margin: 0 25rpx;
+        }
+    }
+    .confirm_btn {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #ffffff;
+        width: 230rpx;
+        background: #ff414b;
+    }
+}
+#popup {
+    .popup__content {
+        width: 100%;
+        height: 260rpx;
+        line-height: 500rpx;
+        background: #ffffff;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 100rpx;
+        .popup_list {
+            font-size: 22.03rpx;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding-left: 25rpx;
+            padding-right: 25rpx;
+            justify-content: space-between;
+            .list_money {
+                color: #ff414b;
+                .money_icon {
+                    margin: 0 10rpx;
+                }
+            }
+        }
+    }
+}
+</style>
+<template>
+  <view>
+    <view id="confirmPay">
+      <!--       <navigator open-type="navigate" url="{{hasAddressMsg?'':''}}"> -->
+      <view @tap="gotoAddress" class="address_wrap">
+        <view style="display:{{hasAddressMsg?'block':'none'}}" class="address-content-wrap">
+          <view class="ddress-title">
+            <view class="Name">
+              <text class="iconfont red">&#xe604;</text>
+              <text>{{addressDetail.name}}</text>
+            </view>
+            <view class="Tel">
+              <text class="iconfont red">&#xe649;</text>
+              <text class="phone">{{addressDetail.phone}}</text>
+            </view>
+          </view>
+          <view class="address-info-content">
+            <view class="address_detail">
+              <text class="province">{{addressDetail.province}}</text>
+              <text class="city">{{addressDetail.city}}</text>
+              <text class="district">{{addressDetail.district}}</text>
+              <text class="address">{{addressDetail.address}}</text>
+              <text wx:if="{{addressDetail.defaultAddress}}" class="default_addrss">默认</text>
+            </view>
+          </view>
+        </view>
+        <veiw style="display:{{hasAddressMsg?'none':'block'}}" class="noAddress-content">
+          请填写收货人信息
+        </veiw>
+        <view class="goto_address">
+          <text class="iconfont">&#xe60e;</text>
+        </view>
+      </view>
+      <view class="order_list_wrap">
+        <repeat for="{{commoditys}}" key='idx' index="idx" item="item">
+          <orderList :goodsMsg='item' />
+        </repeat>
+      </view>
+      <view class="select_wechat">
+        <view class="wechat_default_txt">
+          <text class="iconfont wechat_icon">&#xe655;</text>
+          <text class="wechat_txt">微信支付</text>
+        </view>
+        <icon type="success" size="20" color="#000" />
+      </view>
+      <view @tap="toCouponPage" class="select_list">
+        <view>
+          优惠券
+        </view>
+        <view class="list_btn">
+          <block wx:if="{{hasCoupon}}">
+            <text>{{couponMoney}}元</text>
+          </block>
+          <block wx:else>
+            <text>未使用</text>
+          </block>
+          <text class="iconfont">&#xe60e;</text>
+        </view>
+      </view>
+      <view @tap="toWordPage" class="select_list">
+        <view>
+          优惠口令
+        </view>
+        <view class="list_btn">
+          <block wx:if="{{hasWord}}">
+            <text>{{wordMoney}}元</text>
+          </block>
+          <block wx:else>
+            <text>未使用</text>
+          </block>
+          <text class="iconfont">&#xe60e;</text>
+        </view>
+      </view>
+    </view>
+    <view id="bottom_pay">
+      <view class="confirm_money" @tap="showPopup">
+        <view>应付金额:</view>
+        <view class="money">
+          <text>￥</text>
+          <text>{{payment}}</text>
+        </view>
+        <view class="{{ifShowPopup?'iconfont active':'iconfont unactive'}}">&#xe60e;</view>
+      </view>
+      <view @tap="goPay" class="confirm_btn">提交订单</view>
+    </view>
+    <!-- <button bindtap="showPopup">居下，有动画</button> -->
+    <view @tap="hidePopup" id="popup">
+      <wxc-popup class="J_Popup" animation-mode="bottom" align="bottom" locked="true">
+        <view class="popup__content">
+          <view class="popup_list">
+            <veiw>商品总金额</veiw>
+            <view class="list_money">
+              <text class="money_icon">￥</text>
+              <text>{{commodityAmount}}</text>
+            </view>
+          </view>
+          <view class="popup_list">
+            <veiw>活动优惠</veiw>
+            <block wx:if="{{discountFee}}">
+              <view class="list_money">
+                <text>-</text>
+                <text class="money_icon">￥</text>
+                <text>{{discountFee}}</text>
+              </view>
+            </block>
+            <block wx:else>
+              <view class="list_money">
+                <text class="money_icon">￥</text>
+                <text>0.00</text>
+              </view>
+            </block>
+          </view>
+          <view class="popup_list">
+            <veiw>券/口令优惠</veiw>
+            <block wx:if="{{canUseAmount}}">
+              <view class="list_money">
+                <text>-</text>
+                <text class="money_icon">￥</text>
+                <text>{{canUseAmount}}</text>
+              </view>
+            </block>
+            <block wx:else>
+              <view class="list_money">
+                <text class="money_icon">￥</text>
+                <text>0.00</text>
+              </view>
+            </block>
+          </view>
+          <view class="popup_list">
+            <block wx:if="{{freight}}">
+              <veiw>运费(满99元免运费哦)</veiw>
+              <view class="list_money">
+                <text>+</text>
+                <text class="money_icon">￥</text>
+                <text>{{freight}}</text>
+              </view>
+            </block>
+            <block wx:else>
+              <veiw>运费</veiw>
+              <view class="list_money">
+                <text class="money_icon">￥</text>
+                <text>0.00</text>
+              </view>
+            </block>
+          </view>
+        </view>
+      </wxc-popup>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+import OrderList from '@/components/orderList';
+export default class forword extends wepy.page {
+    config = {
+        navigationBarTitleText: '确认订单',
+        usingComponents: {
+            'wxc-popup': '../../../packages/@minui/wxc-popup/dist/index'
+        }
+    };
+    components = {
+        orderList: OrderList
+    };
+    data = {
+        commoditys: [], //商品信息
+        hasAddressMsg: false, //是否有地址
+        addressDetail: {
+            //地址信息
+            // address:'',
+            // cardNo:null,
+            // city:'',
+            // defaultAddress:false,
+            // district:"",
+            // id:"",
+            // name:"",
+            // phone:"",
+            // phoneEncode:"",
+            // province:""
+        },
+        payment: '', //底部应付金额
+        commodityAmount: '', //商品总金额
+        discountFee: '', //活动优惠
+        canUseAmount: '', //减免的钱
+        couponMoney: '', //优惠卷
+        wordMoney: '', //优惠口令
+        freight: '', //运费
+        hasCoupon: false, //已有优惠券(默认有优惠卷)
+        hasWord: false, //已有口令
+        type: 'coupon', //默认没有优惠卷
+        ifShowPopup: false,
+        buttonClicked: false,
+        couponId: null, //优惠价id
+        addressId: '',
+        couponUseAmount: '',
+        orderEnv: '', //默认空
+        orderType: '1',
+        payType: 'wechatpay',
+        getOrderId: '',
+        orderId: '', //订单id
+        orderNo: '' //订单编号
+    };
+    methods = {
+        gotoAddress() {
+            if (!this.buttonClicked) {
+                this.buttonClickedDelayed(this);
+                let hasAddressMsg = this.hasAddressMsg;
+                if (hasAddressMsg) {
+                    //有地址
+                    wepy.navigateTo({
+                        url: '/usercenter/pages/addressList?type=confirmPay'
+                    });
+                } else {
+                    wepy.navigateTo({
+                        url: '/usercenter/pages/addressNew?type=confirmPay'
+                    });
+                }
+            }
+        },
+        showPopup() {
+            let status = this.ifShowPopup;
+            this.ifShowPopup = !status;
+            if (this.ifShowPopup) {
+                this.showPopupStyle();
+            } else {
+                this.hidePopupStyle();
+            }
+        },
+        hidePopup() {
+            this.ifShowPopup = false;
+            this.hidePopupStyle();
+        },
+        goPay() {
+            if (!this.buttonClicked) {
+                this.buttonClickedDelayed(this);
+                let hasAddressMsg = this.hasAddressMsg;
+                let that = this;
+                if (!hasAddressMsg) {
+                    //如果没有地址
+                    wepy.showToast({
+                        title: '请填写收货人信息！',
+                        icon: 'none',
+                        mask: true,
+                        duration: 3000
+                    });
+                    return;
+                }
+                let openId = this.openId || '';
+                let toPayUrl =
+                    this.$parent.globalData.apiBaseUrl +
+                    '/api/v2/confirm_order?openId=' +
+                    openId;
+                let dataObj = {
+                    addressId: this.addressId || '',
+                    couponId: this.couponId || '',
+                    couponUseAmount: this.canUseAmount || '',
+                    orderEnv: this.orderEnv || '',
+                    orderType: this.orderType || '1',
+                    payType: this.payType || 'wechatpay'
+                };
+                wepy
+                    .request({
+                        url: toPayUrl,
+                        method: 'POST',
+                        data: dataObj
+                    })
+                    .then(res => {
+                        let response = res.data;
+                        if (response.code === 20000) {
+                            that.orderId = response.data.orderId;
+                            that.orderNo = response.data.orderNo;
+                            that.$apply();
+                            wepy.redirectTo({
+                                url:
+                                    '/usercenter/pages/gopay?orderNo=' +
+                                    that.orderNo +
+                                    '&payment=' +
+                                    +that.payment +
+                                    '&openId=' +
+                                    that.openId +
+                                    '&orderId=' +
+                                    that.orderId
+                            });
+                        } else {
+                            //库存不足
+                            let errorMsg = res.data.errorMsg;
+                            wepy.navigateTo({
+                                url:
+                                    '/usercenter/pages/payfail?errorMsg=' +
+                                    errorMsg
+                            });
+                        }
+                    });
+            }
+        },
+        toCouponPage() {
+            //去优惠卷页面
+            // console.log(this.buttonClicked)
+            if (!this.buttonClicked) {
+                this.buttonClickedDelayed(this);
+                let hasWord = this.hasWord;
+                let couponId = this.couponId;
+                if (hasWord) {
+                    let content = '若选择使用优惠券,将无法使用优惠口令';
+                    let handlerFn = function() {
+                        wepy.navigateTo({
+                            url:
+                                '/usercenter/pages/coupons?couponId=' +
+                                couponId +
+                                '&type=confirmPay'
+                        });
+                    };
+                    this.showModalHandler(content, handlerFn);
+                } else {
+                    wepy.navigateTo({
+                        url:
+                            '/usercenter/pages/coupons?couponId=' +
+                            couponId +
+                            '&type=confirmPay'
+                    });
+                }
+            }
+        },
+        toWordPage() {
+            if (!this.buttonClicked) {
+                this.buttonClickedDelayed(this);
+                let hasCoupon = this.hasCoupon;
+                if (hasCoupon) {
+                    //当有优惠券时     优惠券和优惠口令只能二选一
+                    let content = '若选择使用优惠口令,将无法使用优惠券';
+                    let handlerFn = function() {
+                        wepy.navigateTo({
+                            url: '/usercenter/pages/preferential'
+                        });
+                    };
+                    this.showModalHandler(content, handlerFn);
+                } else {
+                    //当无优惠券或者有优惠口令时
+                    wepy.navigateTo({
+                        url: '/usercenter/pages/preferential'
+                    });
+                }
+            }
+        }
+    };
+    buttonClickedDelayed(self) {
+        self.buttonClicked = true;
+        self.$apply();
+        setTimeout(function() {
+            self.buttonClicked = false;
+            self.$apply();
+        }, 800);
+    }
+    showModalHandler(content, handlerFn) {
+        wepy.showModal({
+            title: '提示',
+            content: content,
+            confirmText: '继续使用',
+            cancelText: '取消',
+            cancelColor: '#007AFF',
+            confirmColor: '#007AFF'
+        })
+        .then(res => {
+          if (res.confirm) {
+                    handlerFn();
+                } else if (res.cancel) {
+                    console.log('用户点击取消');
+                }
+        });
+    }
+    showPopupStyle() {
+        let popupComponent = this.$wxpage.selectComponent('.J_Popup');
+        popupComponent && popupComponent.show();
+    }
+    hidePopupStyle() {
+        let popupComponent = this.$wxpage.selectComponent('.J_Popup');
+        popupComponent && popupComponent.hide();
+    }
+    initPageHandler() {
+        let that = this;
+        //let toBuyUrl = `http://172.17.222.105:8055/hasAddress.json`;
+        let toBuyUrl =
+            this.$parent.globalData.apiBaseUrl + '/api/v2/order/confirm_order';
+        //let toBuyUrl = 'https://172.17.222.70'+`/api/v2/order/confirm_order`;
+        //let toBuyUrl = `http://10.0.30.65:8295/confirm_order`;
+        let openId = wepy.getStorageSync('openid') || '';
+        let addressId = this.addressId || '';
+        let couponId = this.couponId || '';
+        this.openId = openId;
+        wepy
+            .request({
+                url: toBuyUrl,
+                method: 'GET',
+                data: {
+                    addressId: addressId,
+                    openId: openId,
+                    couponId: couponId
+                }
+            })
+            .then(res => {
+                // console.log(res)
+                if (res.data.code !== 20000) {
+                    wepy.showModal({
+                        content: res.data.msg,
+                        showCancel: false
+                    });
+                    return;
+                }
+                wepy.showLoading({
+                    title: '加载中'
+                });
+                let response = res.data.data;
+                if (response.address) {
+                    //有地址
+                    that.hasAddressMsg = true; //是否有地址
+                    that.addressDetail = response.address; //地址信息
+                    that.addressId = response.address.id;
+                } else {
+                    that.hasAddressMsg = false;
+                }
+                let commoditys = response.commoditys; //商品
+                for (
+                    let i = 0, commoditysData, length = commoditys.length;
+                    i < length;
+                    i++
+                ) {
+                    commoditysData = commoditys[i];
+                    if (commoditysData.isPromotion) {
+                        //是促销价格
+                        commoditysData.actualPrice =
+                            commoditysData.promotionPrice;
+                    } else {
+                        commoditysData.actualPrice = commoditysData.wfxPrice;
+                    }
+                }
+                that.commoditys = commoditys; //商品信息
+                that.payment = response.payment.toFixed(2); //底部应付金额
+                that.commodityAmount = response.commodityAmount; //商品总金额
+                that.discountFee =
+                    response.singleDiscountFee + response.groupDiscountFee; //活动优惠
+                if (response.coupon) {
+                    //优惠有值
+                    that.canUseAmount = response.coupon.canUseAmount; //减免的钱
+                    that.couponId = response.coupon.couponId; //优惠价id
+                    if (that.type === 'coupon') {
+                        //这个优惠是优惠卷
+                        that.couponMoney = response.coupon.amount; //优惠卷
+                        that.hasCoupon = true;
+                        that.hasWord = false;
+                    } else {
+                        //这个优惠是优惠口令
+                        that.wordMoney = response.coupon.amount; //优惠卷
+                        that.hasCoupon = false;
+                        that.hasWord = true;
+                    }
+                } else {
+                    //没有优惠卷
+                    that.hasCoupon = false;
+                    that.hasWord = false;
+                    that.canUseAmount = 0.0;
+                    that.couponMoney = 0.0;
+                    that.wordMoney = 0.0;
+                }
+                if (response.freight > 0) {
+                    that.freight = response.freight;
+                } else {
+                    that.freight = 0.0;
+                }
+                that.$apply();
+                wepy.hideLoading();
+            })
+            .catch(err => {
+                  console.log('查询失败', err);
+              });
+    }
+    onShow(options) {
+        let type = this.$wxpage.data.type;
+        let couponId = this.$wxpage.data.couponId;
+        let addressId = this.$wxpage.data.addressId;
+        addressId && (this.addressId = addressId);
+        type && (this.type = type);
+        couponId && (this.couponId = couponId);
+        this.initPageHandler();
+        this.$apply();
+    }
+    onLoad(options) {}
+}
+</script>

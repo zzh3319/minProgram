@@ -1,0 +1,93 @@
+<style lang="less">
+page {
+    height: 100%;
+    background: #f4f4f4;
+}
+.preferential-info {
+    padding: 19rpx;
+    font-size: 22rpx;
+    view {
+        margin-top: 5rpx;
+    }
+}
+</style>
+
+<template>
+  <view class='container'>
+    <Couponshead btnText="使用" placeholder="请输入优惠口令" type="preferential" />
+    <view class="preferential-info">
+      <view>
+        使用规则
+      </view>
+      <view>
+        1.通过站内外的运营活动中可获得优惠口令
+      </view>
+      <view>
+        2.优惠口令先到先得,若超出使用次数将立即失效
+      </view>
+      <view>
+        3.优惠口令不可与优惠券同时使用
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+import md5 from 'md5';
+import Couponshead from '@/components/coupons-head';
+import GTools from '@/mixins/g-tools';
+
+export default class preferential extends wepy.page {
+    mixins = [GTools];
+    config = {
+        navigationBarTitleText: '优惠口令'
+    };
+    components = {
+        Couponshead
+    };
+    data = {
+        couponSign: '',
+        url: 'http://10.0.30.65:8295'
+    };
+    methods = {};
+    events = {
+        'preferential:clickhandle': async $event => {
+            const url = `${
+                this.$parent.globalData.apiBaseUrl
+            }/api/v2/order/couponSign`;
+            //获取sign并加密传输
+            let couponSign = this.couponSign.trim();
+            if (couponSign === '') return;
+            couponSign = md5(couponSign);
+            const param = { couponSign };
+
+            const res = await this.customFunction.fetchData(url, param);
+            this.success(res);
+        },
+        'preferential:inputchange'(value) {
+            this.couponSign = value;
+        }
+    };
+    success(res) {
+        const { data, code } = res;
+        if (code !== 20000 || !data) {
+            this.customFunction.toast('使用口令失败');
+            return;
+        }
+        const { resultCode, resultMsg, result } = data;
+        if (resultCode !== 1) {
+            this.customFunction.toast(resultMsg);
+        } else {
+            const { couponId } = result;
+            this.customFunction.toast('口令使用成功');
+            setTimeout(() => {
+                this.customFunction.setPrevPage({
+                    type: 'word',
+                    couponId
+                });
+            }, 300);
+        }
+    }
+}
+</script>

@@ -1,0 +1,88 @@
+<template>
+    <view class="discount-choose" @tap="openDiscount">
+        <view main="between" cross="center" class="discount-choose-flex">
+            <view  class="choose-info">
+                <label class="choose-label">促销</label>
+                <view wx:if="{{commodity.activityType}}" class="discount-tag">{{activityType[commodity.activityType]}}</view>
+                <view class="choose-item">
+                    <wxc-elip line="1">
+                        {{allDiscountInfo}}
+                    </wxc-elip>
+                </view>
+            </view>
+            <view>
+                <wxc-icon size="30" type="arrow-right" color="#848484"></wxc-icon>
+            </view>
+        </view>
+    </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+import activityType from '@/mixins/activityType.js';
+export default class GoodsDetailDiscount extends wepy.component {
+    props = {
+        commodity: {
+            type: Object,
+            default: {}
+        },
+        allDiscountInfo: {
+            type: String,
+            default: ''
+        }
+    };
+    data = {
+        activityType: {}
+    };
+    onLoad(){
+        this.activityType = activityType;
+    };
+    methods = {
+        openDiscount(){
+            this.$emit('GoodsDetailDiscount:show');
+        }
+    }
+}
+</script>
+<style lang="less">
+    .discount-choose{
+        margin-top:-20rpx;
+        display: block;
+        height: 90rpx;
+        background: #fff;
+        padding: 0 20rpx;
+        margin-bottom:20rpx;
+        border-top:1px solid #e5e5e5;
+        .discount-choose-flex {
+            display: flex;
+            height: 100%;
+            align-items: center;
+            justify-content: space-between;
+            box-sizing: border-box;
+        }
+        .choose-label {
+            font-size: 22rpx;
+            color: #b8b8b8;
+            margin-right: 20rpx;
+        }
+        .choose-info {
+            font-size: 22rpx;
+            align-items: center;
+            display: flex;
+            .choose-item {
+                width: 500rpx;
+                display: inline-block;
+                margin: 0 10rpx;
+            }
+            .discount-tag{
+                color: #ff4343;
+                border:1px solid #ff4343;
+                border-radius:20rpx;
+                font-weight:200;
+                padding:6rpx 10rpx;
+                line-height:20rpx;
+                margin-right:15rpx;
+            }
+        }
+    }
+</style>

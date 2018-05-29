@@ -1,0 +1,283 @@
+<style lang="less">
+page {
+    background-color: #f7f7f7;
+}
+.scroll-header {
+    width: 100%;
+    border-top: 1px solid #cfcfcf;
+    border-bottom: 1px solid #cfcfcf;
+    .scroll-tab {
+        width: 100%;
+        height: 105rpx;
+        line-height: 105rpx;
+        background-color: #f7f7f7;
+        font-size: 28rpx;
+        display: flex;
+        white-space: nowrap;
+        border-top: 1px solid #cfcfcf;
+        border-bottom: 1px solid #cfcfcf;
+        margin: 20rpx 0;
+        .active-tab {
+            background-color: #fff;
+            color: #e60012;
+        }
+        view {
+            display: inline-block; //这个也很重要
+            text-align: center;
+        }
+    }
+}
+.logistic-info {
+    background-color: #fff;
+    border-bottom: 1px solid #cfcfcf;
+    margin-bottom: 20rpx;
+    padding: 24rpx 36rpx;
+    font-size: 32rpx;
+    view {
+        padding: 22rpx 0;
+        color: #bdbdbd;
+        text {
+            color: #252525;
+        }
+    }
+}
+.logList {
+    margin-top: 20rpx;
+    padding: 50rpx 38rpx;
+    border-top: 1px solid #cfcfcf;
+    border-bottom: 1px solid #cfcfcf;
+    background: #fff;
+    .logList-wrap {
+        border-left: 2px solid #cfcfcf;
+        .item {
+            position: relative;
+            top: 0;
+            left: 0;
+            font-size: 28rpx;
+            padding-top: 52rpx;
+            padding-left: 55rpx;
+            .circle {
+                position: absolute;
+                top: 70rpx;
+                left: -13rpx;
+                width: 25rpx;
+                height: 25rpx;
+                background-color: #cfcfcf;
+                border-radius: 25rpx;
+                &.active {
+                    background-color: #e60012;
+                }
+            }
+            .log-wrap {
+                border-bottom: 1px dashed #ededed;
+                margin-bottom: 32rpx;
+                text {
+                    display: block;
+                }
+                .log-statu {
+                    color: #252525;
+                    margin-bottom: 30rpx;
+                }
+                .log-times {
+                    color: #bdbdbd;
+                    margin-bottom: 36rpx;
+                }
+            }
+        }
+    }
+}
+.logistic-goods {
+    border-top: 1px solid #cfcfcf;
+    border-bottom: 1px solid #cfcfcf;
+    background-color: #fff;
+    padding: 6rpx 50rpx 18rpx 32rpx;
+}
+.goods-info-wrap {
+    view.wrap {
+        padding-top: 18rpx;
+        margin-bottom: 18rpx;
+        display: flex;
+        image {
+            width: 120rpx;
+            height: 120rpx;
+            border: 1px solid #cfcfcf;
+        }
+        view {
+            margin-left: 18rpx;
+            color: #252525;
+            font-size: 28rpx;
+            width: 80%;
+            .goods-descript {
+                line-height: 1.5;
+                display: block;
+                margin-top: 5rpx;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                // white-space: nowrap;
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 2;
+            }
+            .goods-count {
+                color: #b8b8b8;
+                display: block;
+            }
+        }
+    }
+}
+.mtL24 {
+    margin-left: 20rpx;
+}
+.coupons-empty {
+    padding: 50rpx 0;
+    width: 100%;
+    justify-content: center;
+    flex-direction: column;
+    display: -webkit-flex;
+    align-items: center;
+    display: flex;
+    .empty-img {
+        width: 160rpx;
+        height: 160rpx;
+    }
+    .empty-info {
+        font-size: 26rpx;
+        color: #898989;
+    }
+}
+</style>
+
+<template>
+  <view class="scroll-header" wx:if="{{logisticTrackInfo.logisticses.length > 1}}">
+    <scroll-view scroll-x="true" class="scroll-tab " style="width:100%" scroll-with-animation>
+      <view wx:for="{{ logisticTrackInfo.logisticses}}" class="{{index == curTabIndex?'active-tab':''}}" wx:key="{{index}}" id="{{index}}" @tap="tabClick" style="width:{{tabW}}px">
+        <text>{{item.logisticPageIndex}}</text>
+      </view>
+    </scroll-view>
+  </view>
+
+  <view class="logistic-info">
+    <view>发货时间：<text>{{logisticTrackInfo.logisticses[curTabIndex].stringShipTime}}</text></view>
+    <view>配送公司：<text>{{logisticTrackInfo.logisticses[curTabIndex].logisticsName}} ({{logisticTrackInfo.logisticses[curTabIndex].logisticsOrderNo}})</text></view>        
+  </view>
+  <view class="logistic-goods">
+    <view class="goods-info-wrap">
+      <view class="wrap" wx:for="{{logisticTrackInfo.logisticses[curTabIndex].styles}}" wx:key="{{index}}">
+        <image class="goods-image" src="{{item.picUrl}}" mode="aspectFit" /> 
+        <view>
+          <text class="goods-descript">{{item.prodName}}<text class="mtL24">{{item.prodSpec}}</text></text>
+          <text class="goods-count">x <text>{{item.num}}</text></text>
+        </view>
+      </view>
+    </view>
+  </view>
+  <view class="logList">
+    <view class="logList-wrap" wx:if="{{logisticTrackInfo.logisticses[curTabIndex].logs.length > 0}}">
+      <view class="item" wx:for="{{logisticTrackInfo.logisticses[curTabIndex].logs}}" wx:key="{{index}}">
+        <view class="circle {{index == 0?'active':''}}"></view>
+        <view class="log-wrap">
+          <text class="log-statu">{{item.context}}</text>
+          <text class="log-times">{{item.time}}</text>
+        </view>
+      </view>
+    </view>
+    
+    <view class="coupons-empty" wx:if="{{logisticTrackInfo.logisticses[curTabIndex].logs.length == 0}}">
+        <image class="empty-img" src="https://i2.ygimg.cn/cmp/mp/ept.png"></image>
+        <text class="empty-info">暂无物流信息</text>
+    </view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+export default class logisticTrack extends wepy.page {
+    shareType = {};
+    shareUrl = {};
+    config = {
+        navigationBarTitleText: '物流跟踪',
+        usingComponents: {}
+    };
+    components = {};
+    mixins = [];
+    data = {
+        logisticTrackInfo: {
+            commodityNos: {},
+            logistics: {},
+            logisticses: [],
+            order: {},
+            page: 1
+        },
+        curTabIndex: 0,
+        tabW: 200
+        // mtabW:200,
+    };
+
+    computed = {};
+    events = {};
+
+    onLoad(opt) {
+        var that = this;
+        wepy.showLoading();
+        wepy
+            .request({
+                url:
+                    that.$parent.globalData.apiBaseUrl +
+                    '/api/v2/order/getLogisticsByOrderId',
+                method: 'GET',
+                data: {
+                    // 请求数据
+                    orderNo: opt.orderNo,
+                    openId: wepy.getStorageSync('openid'),
+                    page: that.logisticTrackInfo.page //第几个包裹
+                }
+            })
+            .then(res => {
+                wepy.hideLoading();
+                if (res.data.code === 20000) {
+                    that.logisticTrackInfo = res.data.data;
+                    for (
+                        var i = 1;
+                        i < that.logisticTrackInfo.logisticses.length + 1;
+                        i++
+                    ) {
+                        that.logisticTrackInfo.logisticses[i - 1].logisticPageIndex =
+                            '包裹' + i;
+                    }
+                    console.log(that.logisticTrackInfo.logisticses);
+                    if (that.logisticTrackInfo.logisticses.length < 5) {
+                        wepy.getSystemInfo().then(res=>{
+                            that.tabW =
+                                    res.windowWidth /
+                                    that.logisticTrackInfo.logisticses.length;
+                        })
+                        // wepy.getSystemInfo({
+                        //     success: function(res) {
+                        //         that.tabW =
+                        //             res.windowWidth /
+                        //             that.logisticTrackInfo.logisticses.length;
+                        //     }
+                        // });
+                    } else {
+                        that.tabW = 200;
+                    }
+                    that.$apply();
+                } else {
+                    wepy.showToast({
+                        title: res.data.msg || res.data.errorMsg,
+                        icon: 'none',
+                        duration: 2000
+                    });
+                }
+            });
+    }
+
+    methods = {
+        tabClick: function(e) {
+            var that = this;
+            console.log(e);
+            that.curTabIndex = e.currentTarget.id;
+        }
+    };
+}
+</script>

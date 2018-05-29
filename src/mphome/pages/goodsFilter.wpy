@@ -1,0 +1,296 @@
+<style lang="less">
+page {
+    background-color: #fff;
+}
+.filter-wrap {
+    padding: 0 12rpx;
+    padding-bottom: 120rpx;
+    .sub-wrap {
+        border-bottom: 1rpx solid #f6f6f6;
+        .sub-title {
+            font-size: 28rpx;
+            color: #3a3a3a;
+            display: flex;
+            margin-left: 8rpx;
+            height: 88rpx;
+            line-height: 88rpx;
+            position: relative;
+            // 未展开状态
+            &.close {
+                margin-bottom: 36rpx;
+            }
+            text {
+                &.iconfont {
+                    position: absolute;
+                    right: 8rpx;
+                    top: 40rpx;
+                    border: 2px solid #cdcdcd;
+                    border-width: 2px 0 0 2px;
+                    display: inline-block;
+                    height: 8px;
+                    transform: rotate(-135deg);
+                    transition: all 0.2s ease-in;
+                    width: 8px;
+                    &.arrow {
+                        -moz-transform: rotate(165deg);
+                        -moz-transition: all 0.2s ease-in;
+                        -webkit-transform: rotate(45deg);
+                        -webkit-transition: all 0.2s ease-in;
+                        -o-transform: rotate(45deg);
+                        -o-transition: all 0.2s ease-in;
+                        -ms-transform: rotate(45deg);
+                        -ms-transition: all 0.2s ease-in;
+                        transform: rotate(45deg);
+                        transition: all 0.2s ease-in;
+                    }
+                }
+            }
+        }
+        .unshow {
+            margin-bottom: 0;
+            padding-top: 12rpx;
+        }
+        .sub-list {
+            padding-bottom: 20rpx;
+            text {
+                width: 226rpx;
+                height: 68rpx;
+                line-height: 68rpx;
+                display: inline-block;
+                margin: 0 8rpx 16rpx;
+                font-size: 26rpx;
+                text-align: center;
+                border: 1px solid #f3f3f3;
+                background-color: #f3f3f3;
+                color: #7a7a7a;
+                border-radius: 4rpx;
+		        box-sizing: border-box;
+                -moz-box-sizing: border-box; /* Firefox */
+                -webkit-box-sizing: border-box;
+                white-space:nowrap;
+                text-overflow:ellipsis;
+                overflow:hidden;
+                &.active {
+                    border: 1rpx solid #fea1a5;
+                    box-sizing: border-box;
+                    -moz-box-sizing: border-box;
+                    -webkit-box-sizing: border-box;
+                    background-color: #fff2f3;
+                    color: #fe434c;
+                    position: relative;
+                    top: 0;
+                    left: 0;
+                }
+                &.active::before {
+                    display: inline-block;
+                    width: 34rpx;
+                    height: 24rpx;
+                    overflow: hidden;
+                    content: '';
+                    position: absolute;
+                    bottom: -1rpx;
+                    right: -1rpx;
+                    background: url(https://i2.ygimg.cn/cmp/mp//btn-selected-right.png)
+                        0 0 no-repeat;
+                    background-size: 100%;
+                }
+            }
+        }
+    }
+    .price-wrap {
+        view.price-list {
+            display: flex;
+            margin-left: 8rpx;
+            margin-bottom: 36rpx;
+            input {
+                width: 320rpx;
+                height: 68rpx;
+                line-height: 68rpx;
+                background-color: #f3f3f3;
+                border-radius: 4rpx;
+                text-align: center;
+                color: #7a7a7a;
+            }
+            text {
+                margin: 33rpx 18rpx;
+                width: 34rpx;
+                font-size: 0;
+                border-bottom: 2px solid #9d9d9d;
+            }
+        }
+    }
+}
+
+.bth-wrap {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100rpx;
+    background-color: #ffffff;
+    border-top: 1px solid #fe434c;
+    display: flex;
+    button {
+        display: inline-block;
+
+        height: 100rpx;
+        line-height: 100rpx;
+        text-align: center;
+        font-size: 34rpx;
+        flex: 1;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box; /* Firefox */
+        -webkit-box-sizing: border-box;
+        background: none;
+        border: none;
+        border-radius: 0;
+        &:after {
+            border: none;
+        }
+        &.reset {
+            color: #fe434c;
+        }
+        &.sure {
+            background-color: #fe434c;
+            color: #fff;
+        }
+    }
+}
+</style>
+<template>
+  <view>
+    <view class="filter-wrap">
+      <!-- 价格区间 -->
+      <view class="sub-wrap price-wrap">
+        <text class="sub-title">价格区间</text>
+        <view class="price-list">
+          <input type="number" placeholder="最低价" placeholder-style="color:#BDBDBD" bindblur="bindLowerPrice"  maxlength="5" value="{{filterList[0].dataList[0].name}}" />
+          <text></text>
+          <input type="number" placeholder="最高价" placeholder-style="color:#BDBDBD" bindblur="bindHighPrice" maxlength="5" value="{{filterList[0].dataList[1].name}}" />
+        </view>
+      </view>
+      <view class="sub-wrap" wx:for="{{filterList}}" wx:key="{{code}}" wx:for-index="index" wx:for-item="item" wx:if="{{index > 0}}">
+        <view class="sub-title" @tap="bindSubIcon({{index}})">
+          <text>{{item.name}}</text>
+          <text class="iconfont {{item.subMenu ? 'arrow' :''}}"></text>
+        </view>
+        <view class="{{item.subMenu || item.name == '品牌'? 'sub-list' : ''}}" wx:if="{{!item.subMenu}}">
+          <view>
+            <text wx:for="{{item.dataList}}" wx:for-index="subIndex" wx:for-item="subItem" wx:key="{{subItem.id}}" wx:if="{{item.name == '品牌' && subIndex < 6}}" class="{{subItem.checked ? 'active':''}}" @tap="bindSubList({{index}},{{subIndex}},{{item.id}})">{{subItem.name}}</text>
+          </view>
+        </view>
+       <view  class="{{item.subMenu ? 'sub-list' : ''}}" wx:if="{{item.subMenu}}">
+          <view>
+            <text wx:for="{{item.dataList}}" wx:for-index="subIndex" wx:for-item="subItem" wx:key="{{subItem.id}}"  class="{{subItem.checked ? 'active':''}}" @tap="bindSubList({{index}},{{subIndex}},{{item.id}})">{{subItem.name}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+    <view class="bth-wrap">
+      <button class="reset" @tap="bindReset({{index}})">重置</button>
+      <button class="sure" @tap="bindSure({{index}})">确定</button>
+    </view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+import GTools from '@/mixins/g-tools';
+
+// 商品列表
+export default class goodList extends wepy.page {
+    mixins = [GTools];
+    config = {
+        navigationBarTitleText: '筛选',
+        backgroundColor: '#f4f4f4',
+        usingComponents: {
+            'wxc-flex': '../../../packages/@minui/wxc-flex/dist/index'
+        }
+    };
+    components = {};
+    data = {
+        lowerPrice: '',
+        highPrice: '',
+        filterList: [],
+        catListFlag: false
+    };
+    methods = {
+        bindLowerPrice(e) {
+            this.filterList[0].dataList[0].checked = true;
+            if (e.detail.value) {
+                this.filterList[0].dataList[0].name = parseInt(e.detail.value);
+                if (
+                    parseInt(this.filterList[0].dataList[0].name) >
+                        parseInt(this.filterList[0].dataList[1].name) &&
+                    this.filterList[0].dataList[1].name
+                ) {
+                    this.filterList[0].dataList[0].name = parseInt(
+                        this.filterList[0].dataList[1].name
+                    );
+                    this.filterList[0].dataList[1].name = parseInt(
+                        e.detail.value
+                    );
+                }
+            } else {
+                this.filterList[0].dataList[0].name = '';
+            }
+            console.log(this.filterList[0].dataList);
+        },
+        bindHighPrice(e) {
+            this.filterList[0].dataList[1].checked = true;
+            if (e.detail.value) {
+                this.filterList[0].dataList[1].name = parseInt(e.detail.value);
+                if (
+                    parseInt(this.filterList[0].dataList[0].name) >
+                    parseInt(this.filterList[0].dataList[1].name)
+                ) {
+                    this.filterList[0].dataList[1].name = parseInt(
+                        this.filterList[0].dataList[0].name
+                    );
+                    this.filterList[0].dataList[0].name = parseInt(
+                        e.detail.value
+                    );
+                }
+            } else {
+                console.log('h' + '----' + e.detail.value);
+                this.filterList[0].dataList[1].name = '';
+            }
+            console.log(this.filterList[0].dataList);
+        },
+        //菜单栏展示
+        bindSubIcon(index) {
+            // console.log(index);
+            this.filterList[index].subMenu = !this.filterList[index].subMenu;
+        },
+        //选择子标签
+        bindSubList(index, subIndex, id) {
+            this.filterList[index].dataList[subIndex].checked = !this
+                .filterList[index].dataList[subIndex].checked;
+        },
+        //重置
+        bindReset() {
+            // console.log(this.filterList);
+            let filterList = wepy.getStorageSync('filterList');
+            for (let i = 0; i < filterList.length; i++) {
+                for (let j = 0; j < filterList[i].dataList.length; j++) {
+                    filterList[i].dataList[j].checked = false;
+                }
+            }
+            filterList[0].dataList[0].name = '';
+            filterList[0].dataList[1].name = '';
+            this.filterList = filterList;
+            wepy.setStorageSync('filterList', filterList);
+        },
+        bindSure() {
+            wepy.setStorageSync('flag', true); //flag代表点击筛选，是否有更改数据
+            wepy.setStorageSync('reFilterFlag', true); //列表页重新筛选按钮显示隐藏，非筛选入口进入列表页不显示重新筛选按钮
+            wepy.setStorageSync('filterList', this.filterList);
+            wepy.navigateBack({ delta: 1 });
+        }
+    };
+    onLoad() {
+        this.filterList = wepy.getStorageSync('filterList');
+        console.log(this.filterList);
+    }
+}
+</script>

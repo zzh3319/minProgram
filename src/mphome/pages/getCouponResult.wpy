@@ -1,0 +1,241 @@
+<style lang="less">
+.font (@color;@fontSize;@lineHeight){
+            font-family: PingFangSC-Medium;
+            font-size: @fontSize;
+            color: @color;
+            letter-spacing: 0;
+            line-height: @lineHeight;
+}
+.box {
+    width: 100%;
+    height: 100%;
+    min-height: 100vh;
+    background-color: #fff;
+    .l-top {
+        width: 100%;
+        height: 776rpx;
+        background: #f1f3ff url('https://i2.ygimg.cn/cmp/mp/getCoupon-bg.png')
+            no-repeat;
+        background-size: 100% 100%;
+        position: relative;
+        text-align: center;
+        overflow: hidden;
+        .t-h1 {
+          .font(#ff346a;108rpx;100rpx);
+            margin-top: 92rpx;
+            margin-bottom: 33rpx;
+        }
+        .t-h1.active {
+            color: #bfb2d8;
+        }
+        .t-user {
+          .font(#7b505b;26rpx;20rpx);
+        }
+        .t-explain {
+            width: 500rpx;
+            height: 450rpx;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background: url('https://i2.ygimg.cn/cmp/mp/getCoupon-envelope.png')
+                no-repeat;
+            background-size: 100% 100%;
+            text-align: center;
+            .m-number {
+                font-family: Roboto-Medium;
+                font-size: 88rpx;
+                color: #ff346a;
+                letter-spacing: 0;
+                line-height: 88rpx;
+                margin: 60rpx 0 20rpx 0;
+            }
+            .m-txt {
+              .font(#7b505b;40rpx;40rpx);
+              margin-top: 101rpx;
+            }
+            .m-time {
+              .font(#7b505b;24rpx;24rpx);
+            }
+            .but {
+                width: 280rpx;
+                height: 78rpx;
+                border: 2rpx solid #ca2850;
+                border-radius: 100rpx;
+                background: -webkit-linear-gradient(#fff, #ffe2e2);
+                position: absolute;
+                bottom: 51rpx;
+                left: 50%;
+                transform: translateX(-50%);
+                .font(#ff346a;34rpx;78rpx);
+            }
+        }
+    }
+    .l-bottom {
+        width: 100%;
+        height: 100%;
+        padding: 128rpx 20rpx 0;
+        position: relative;
+        box-sizing: border-box;
+        .b-header {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-content: center;
+            width: 390rpx;
+            height: 30rpx;
+            .font(#333333;30rpx;30rpx);
+            position: absolute;
+            top: 65rpx;
+            left: 50%;
+            transform: translateX(-50%);
+            image {
+                margin: 8rpx 0;
+                width: 13rpx;
+                height: 14rpx;
+            }
+        }
+        .user-list {
+            width: 100%;
+            height: 110rpx;
+            border-bottom: 1px solid #eee;
+            image {
+                width: 66rpx;
+                height: 66rpx;
+                border-radius: 50%;
+                margin-right: 18rpx;
+                margin-top: 22rpx;
+                float: left;
+            }
+            .user-text {
+                height: 110rpx;
+                float: left;
+                .user-info {
+                  .font(#333333;28rpx;28rpx);
+                    margin: 24rpx 0 10rpx;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap; 
+                    width: 344rpx;                  
+                }
+                .user-txt {
+                  .font(#aaaaaa;24rpx;24rpx);
+                }
+            }
+            .money-time {
+                float: right;
+                text-align: right;
+                .user-money {
+                    padding: 20rpx 0 10rpx;
+                    .font(#ff4677;32rpx;32rpx);
+                }
+                .user-time {
+                  .font(#999999;20rpx;20rpx);
+                }
+            }
+        }
+    }
+}
+</style>
+<template>
+  <view class="box">
+    <view class="l-top">
+      <view class="{{isshow?'t-h1':'t-h1 active'}}">{{info.title}}</view>
+      <view class="t-user" wx:if="{{isshow}}">红包已存入微信号：{{info.wxName}}</view>
+      <view class="t-explain">
+          <view class="{{isshow?'m-number':'m-txt'}}">{{info.money}}</view>
+          <view class="m-time" wx:if="{{isshow}}">有效期至：{{info.validTime}}</view>
+          <navigator open-type="switchTab" url="/pages/index" class="but">{{info.buttonText}}</navigator>
+      </view>
+    </view>
+    <view class="l-bottom">
+      <view class="b-header">
+        <image class="img-left" src="https://i2.ygimg.cn/cmp/mp/getCoupon-left.png" />
+        <view class="b-text">看看小伙伴都领到了多少</view>
+        <image class="img-left" src="https://i2.ygimg.cn/cmp/mp/getCoupon-right.png" />        
+      </view>
+      <view class="user-list" wx:for="{{info.receiveList}}" wx:key="index">
+        <image src="{{item.imgUrl}}"/>
+        <view class="user-text">
+          <view class="user-info">{{item.wxName}}</view>
+          <view class="user-txt">{{item.remark}}</view>          
+        </view>
+        <view class="money-time">
+          <view class="user-money">{{item.money}}</view>
+          <view class="user-time">{{item.receiveTime}}</view>          
+        </view>        
+      </view>
+    </view>    
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+import GTools from '@/mixins/g-tools';
+export default class getCouponResult extends wepy.page {
+    mixins = [GTools];
+    config = {
+        navigationBarTitleText: '领取红包'
+    };
+    data = {
+        redPacketSendId: '',
+        isshow: true,
+        info: {}
+    };
+    components = {};
+    methods = {};
+    events = {};
+   async onLoad(options) {
+        this.redPacketSendId = options.redPacketSendId || '';
+        const openId2 = await this.customFunction.getOpenId();
+        console.log('-----获取openid-------')
+        console.log(openId2)
+        if (options.scene){
+            var scene = decodeURIComponent(options.scene);
+            console.log(scene);
+            let ops = options.scene.split('-');
+            this.redPacketSendId = ops[1];
+        }
+        //给app.wpy的globalData传值，用于授权成功回到当前页面
+        this.$parent.globalData.fromUrl.url = 'mphome/pages/getCouponResult?redPacketSendId=' + this.redPacketSendId;
+        if (openId2){
+            wepy.showLoading({
+                title: '正在加载中'
+            });
+            wepy
+                .request({
+                    url:
+                        this.$parent.globalData.apiBaseUrl +
+                        '/api/v2/redPacket/orderSuccessReceiveRedPacket',
+                    data: {
+                        redPacketSendId: this.redPacketSendId
+                    }
+                })
+                .then(data => {
+                    wepy.hideLoading();
+                    if (data.data.code === 20000) {
+                        this.info = data.data.data;
+                        if (
+                            data.data.data.redPackageStatus === 1 ||
+                            data.data.data.redPackageStatus === 2
+                        ) {
+                            this.isshow = true;
+                        } else {
+                            this.isshow = false;
+                        }
+                        this.$apply();
+                    } else {
+                        wepy.showToast({
+                            title: data.data.errorMsg || '数据错误',
+                            icon: 'none',
+                            duration: 2000
+                        });
+                    }
+                    this.$apply();
+                })
+                .catch(err => {
+                    console.log(err);
+                });
+        } else {}
+    }
+}
+</script>

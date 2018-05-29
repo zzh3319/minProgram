@@ -1,0 +1,71 @@
+<template lang="wxml">
+  <block wx:if="{{ctype === 'forword'}}">
+    <button class="btn-fixed" type="default" open-type="share"><i class="iconfont Gray">&#xe6ac;</i></button>
+  </block>
+  <block wx:if="{{ctype === 'share'}}">
+    <view class="btn-fixed blue" @tap="goodsShare"><i class="iconfont Blue">&#xe6ad;</i></view>
+  </block>
+</template>
+<script>
+import wepy from 'wepy';
+export default class fixedButton extends wepy.component {
+    props = {
+        ctype: {
+            type: String,
+            default: ''
+        },
+        shareData: {
+            type: Object,
+            default: {}
+        }
+    };
+    data = {};
+    methods = {
+        goodsShare(e) {
+            let _shareData = encodeURIComponent(
+                JSON.stringify(this.shareData.share)
+            );
+            wepy.navigateTo({
+                url: `/mphome/pages/goodsShare?data=${_shareData}`
+            });
+        },
+        articleShare() {}
+    };
+
+    onLoad() {
+        console.log(this.cdata);
+    }
+}
+</script>
+<style lang="less">
+.btn-fixed {
+    display: block;
+    margin-bottom: 20rpx;
+    padding: 0;
+    width: 88rpx;
+    height: 88rpx;
+    line-height: 88rpx;
+    text-align: center;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    border-radius: 50%;
+    -webkit-box-shadow: 1rpx 1rpx 10rpx rgba(130, 130, 130, 0.5);
+    -moz-box-shadow: 1rpx 1rpx 10rpx rgba(130, 130, 130, 0.5);
+    box-shadow: 1rpx 1rpx 10rpx rgba(130, 130, 130, 0.5);
+    background-color: #fff;
+    &:last-child {
+        margin-bottom: 0;
+    }
+    &:before,
+    &:after {
+        display: none;
+    }
+    &.blue {
+        color: #4da0d9;
+    }
+    > .iconfont {
+        font-size: 44rpx;
+        line-height: 88rpx;
+    }
+}
+</style>

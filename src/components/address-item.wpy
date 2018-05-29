@@ -1,0 +1,119 @@
+<style lang="less">
+@import '../static/less/base/fn';
+.address-list {
+    .address-item {
+        margin-bottom: 15rpx;
+        background-color: #fff;
+        .hd {
+            padding: 40rpx 20rpx;
+            font-size: 24rpx;
+            border-bottom: 1px solid @c-gray-1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            .text-phone {
+                margin-left: 64rpx;
+            }
+            .address-name {
+                width: 150rpx;
+                display: inline-block;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                float: left;
+            }
+        }
+        .bd {
+            display: block;
+            padding: 28rpx 20rpx;
+            font-size: 22rpx;
+        }
+        .side {
+            width: 200rpx;
+            flex-grow: 0;
+        }
+        .main {
+            flex-grow: 1;
+            text-align: right;
+            .btn-link {
+                display: inline-block;
+                margin-left: 40rpx;
+                .iconfont {
+                    color: @c-gray-2;
+                    vertical-align: middle;
+                }
+                text {
+                    vertical-align: middle;
+                }
+            }
+        }
+    }
+}
+</style>
+
+<template>
+     <view class="address-item">
+        <view class="hd" @tap="addressHandle({{item.id}})">
+          <view class="adress-info">
+            <text class="address-name">{{item.name}}</text><text class="text-p hone">{{item.phone}}</text>
+          </view>
+          <view class="adress-info">{{item.province}}
+            {{item.city}}
+            {{item.district}}
+            {{item.address}}
+          </view>
+        </view>
+        <wxc-flex class="bd">
+          <view class="item side"> 
+            <label class="radio" @tap="radiohandle({{item.id}},{{item.defaultAddress}})">
+              <radio value="{{item.id}}" checked="{{item.defaultAddress}}" /> 默认地址
+            </label>
+          </view>
+          <view class="item main">
+            <navigator  class="btn-link" url="/usercenter/pages/addressNew?addressId={{item.id}}" open-type="navigateTo">
+              <i class="iconfont">&#xe609;</i><text> 编辑</text>
+            </navigator>
+            <view class="btn-link" @tap="deleteAddress({{item.id}})">
+              <i class="iconfont">&#xe60d;</i><text> 删除</text>
+            </view> 
+          </view>
+        </wxc-flex>
+      </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+export default class AddressItem extends wepy.component {
+    data = {};
+    props = {
+        item: {
+            type: Object,
+            default: {
+                defaultAddress: true,
+                name: '钟振华',
+                phone: '15846948452',
+                phoneEncode: '158****8452',
+                address: '您明后你弄弄',
+                city: '北京市',
+                id: 'cfe8384ba7b14a4084cb70a3b402da87',
+                province: '北京',
+                district: '东城区',
+                cardNo: null
+            }
+        }
+    };
+    computed = {};
+    methods = {
+        deleteAddress(addressId) {
+            this.$emit('address:delete', addressId);
+        },
+        addressHandle(addressId) {
+            console.log('additem', this.item);
+            this.$emit('address:click', addressId);
+        },
+        radiohandle(addressID, defaultAddress, $event) {
+            this.$emit('address:defaultChange', defaultAddress, addressID);
+        }
+    };
+}
+</script>

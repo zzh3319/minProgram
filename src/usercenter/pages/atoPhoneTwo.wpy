@@ -1,0 +1,248 @@
+<style lang="less">
+.panel {
+    background: 'red';
+}
+.phone {
+    width: 90%;
+    margin: 0 auto;
+    background-color: #ffffff;
+    margin-top: -15%;
+}
+.phone_next {
+    float: left;
+}
+.phone_left {
+    width: 12%;
+    margin-top: -22px;
+    font-size: 16px;
+}
+.phone_right {
+    position: relative;
+    width: 87%;
+    border: 1px solid #dddddd;
+    height: 40px;
+    margin-top: -30px;
+}
+.phone_next_left {
+    margin-left: 2%;
+    margin-top: 10px;
+    font-size: 14px;
+    width: 54%;
+}
+.phone_next_right {
+    margin-top: 0px;
+    float: right;
+    width: 40%;
+}
+.determine {
+    position: absolute;
+    right: 20rpx;
+    top: 0px;
+    color: #1aac19;
+    height: 40px;
+    opacity: 1;
+}
+.determine::after {
+    content: '';
+}
+.phoneAdd {
+    height: 38px;
+    border-right: 1px solid #eeeeee;
+    float: right;
+    margin-top: -30px;
+    margin-right: 45%;
+}
+.c-btn {
+    color: green;
+}
+.c-btn::after {
+    display: none;
+}
+button {
+    padding-left: 0px;
+    padding-right: 0px;
+    font-size: 16px;
+    background-color: #ffffff;
+    height: 35px;
+}
+.goTo {
+    width: 90%;
+    margin: 0 auto;
+    margin-top: 20%;
+    height: 40px;
+    line-height: 40px;
+    color: #fff;
+}
+.goJump {
+    width: 100%;
+    background-color: #c9c9c9;
+    height: 40px;
+    line-height: 40px;
+    font-size: 16px;
+    color: #fff;
+    text-align: center;
+    border-radius: 3px;
+}
+.phone_hide {
+    color: #dddddd;
+}
+.phoneHide {
+    display: none;
+}
+</style>
+<template>
+  <view class="container">
+    <!--<wxc-loading  wx:if="{{isShow}}" class="wxc-loading0" type="mall"/>-->
+    <view class="phone">
+      <view class="phone_next phone_left">
+        <text bindtap="tapMe">手机</text>
+      </view>
+      <view class="phone_next phone_right">
+        <button class='c-btn determine' open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber">使用微信手机号</button>
+        <view class="phone_next_left">
+          <text>{{getPhone}}</text>
+          <view class="phone_next_right">
+          </view>
+          <text class="phone_hide" hidden="{{phoneHide}}">请点击使用微信手机号</text>
+        </view>
+        <view class="phoneAdd" style="margin-top:{{marginTop}}"></view>
+      </view>
+    </view>
+    <view class="goTo">
+      <view class='goJump' @tap='onJump' disabled="{{ban}}" style="background-color:{{backgroundColor}}">提交</view>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+var phoneNumberAll = '';
+export default class atoPhoneTwo extends wepy.page {
+    config = {
+        navigationBarTitleText: '绑定手机号'
+    };
+    data = {
+        ban: true,
+        backgroundColor: '#c9c9c9'
+    };
+    methods = {
+        onJump() {
+            console.log(phoneNumberAll);
+            console.log(wepy.getStorageSync('openid'));
+            console.log(wepy.getStorageSync('gender'));
+            //wepy.getStorageSync('avatarUrl')
+            //wepy.getStorageSync('nickName')
+            //wepy.getStorageSync(' unionid')
+            wepy
+                .request({
+                    method: 'post',
+                    url:
+                        this.$parent.globalData.apiBaseUrl +
+                        '/api/v2/user/becomeSeller',
+                    data: {
+                        openid: wepy.getStorageSync('openid'),
+                        phone: phoneNumberAll,
+                        nickname: wepy.getStorageSync('nickName'),
+                        headimgurl: wepy.getStorageSync('avatarUrl'),
+                        sex: wepy.getStorageSync('gender'),
+                        unionId: wepy.getStorageSync(' unionid')
+                    }
+                })
+                .then(data => {
+                    console.log(data);
+                    var resultCode = data.data.resultCode;
+                    if (resultCode === 200) {
+                        //成功升级
+                        wepy.navigateTo({
+                            url: './atoSuccess'
+                        });
+                    } else if (resultCode === 300) {
+                        wepy.showModal({
+                            showCancel: false,
+                            title: '绑定失败',
+                            content: '您已经是导购了'
+                        }).then(res=>{
+                          wepy.navigateTo({
+                                    url: './atoSuccess'
+                                });
+                        });
+                    } else if (resultCode === 400) {
+                        //顾客身份进来的
+                        wepy.navigateTo({
+                            url: './atofail'
+                        });
+                    } else if (resultCode === 500) {
+                        //系统异常
+                        wepy.showModal({
+                            showCancel: false,
+                            title: '绑定失败',
+                            content: '服务器出现异常，请稍后再试!'
+                        }).then(res=>{
+                          /*wepy.navigateTo({
+                      url: '../atofail/atofail'
+                  })*/
+                        });
+                    }
+                });
+        }
+    };
+    getPhoneNumber(e) {
+        var that = this;
+        wepy.login({
+
+        }).then(res=>{
+                if (res.code) {
+                    //发起网络请求
+                    var code = res.code;
+                } else {
+                    console.log('获取用户登录态失败！' + res.errMsg);
+                }
+                var errMsg = e.detail.errMsg;
+                /*console.log(e.detail.iv)
+           console.log(e.detail.encryptedData)*/
+                var encryptData = e.detail.encryptedData;
+                var iv = e.detail.iv;
+                var getPhoneNumber = 'getPhoneNumber:ok';
+                if (errMsg === getPhoneNumber) {
+                    //解密
+                    wepy
+                        .request({
+                            url:
+                                that.$parent.globalData.apiBaseUrl +
+                                '/api/v2/user/encryptData',
+                            data: {
+                                encryptData: encryptData,
+                                iv: iv,
+                                code: code
+                            }
+                        })
+                        .then(result => {
+                            //4.解密成功后 获取自己服务器返回的结果
+                            //console.log(result);
+                            //console.log(result.data.data.phoneNumber);
+                            var phoneNumber = result.data.data.phoneNumber;
+                            var phoneNumberTwo = result.data.data.phoneNumber.replace(
+                                /^(\d{4})\d{4}(\d+)/,
+                                '$1****$2'
+                            );
+                            phoneNumberAll = phoneNumber;
+                            that.backgroundColor = '#ff434d';
+                            that.marginTop = '-31px';
+                            that.getPhone = phoneNumberTwo;
+                            that.ban = false;
+                            that.phoneHide = true;
+                            that.$apply();
+                        });
+                } else {
+                    wepy.showModal({
+                        showCancel: false,
+                        title: '授权失败',
+                        content: '请先授权才能继续哦'
+                    }).then(res=>{
+                      if (res.confirm) {
+                            }
+                    });
+                    }
+        });
+        }
+}
+</script>

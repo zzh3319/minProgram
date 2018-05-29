@@ -1,0 +1,137 @@
+<style lang="less">
+@import '../../static/less/base/fn';
+.add-btn-box {
+    padding: 50rpx;
+}
+</style>
+<template>
+  <view class="bl-container">
+    <radio-group class="address-list" wx:if="{{isShow}}">
+      <repeat for="{{addressList}}" key="index" index="index" item="item">
+        <addressItem :item="item" />
+      </repeat>
+    </radio-group>
+    <view class="add-btn-box">
+      <button @tap="addAddress" size="default" type="primary" form-type="submit" hover-class="button-hover">新增</button>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+import addressItem from '@/components/address-item';
+import GTools from '@/mixins/g-tools';
+export default class addressList extends wepy.page {
+    mixins = [GTools];
+    config = {
+        navigationBarTitleText: '收货地址管理',
+        backgroundColor: '#f4f4f4',
+        usingComponents: {
+            'wxc-flex': '../../packages/@minui/wxc-flex/dist/index'
+        }
+    };
+    components = {
+        addressItem
+    };
+    data = {
+        addressList: [],
+        url: 'http://10.0.30.65:8295',
+        type: null
+    };
+    computed = {
+        isShow() {
+            const isShow = this.addressList.length > 0;
+            return isShow;
+        }
+    };
+    methods = {
+        addAddress() {
+            const option = {
+                url: '/usercenter/pages/addressNew?type=addAddress'
+            };
+            wepy.navigateTo(option);
+        }
+    };
+    events = {
+        async 'address:delete'(addressId, $event) {
+            if (addressId) {
+                const modal = await this.customFunction.showModal(
+                    '确定要删除吗?'
+                );
+                if (modal.confirm) {
+                    this.deleteAddress(addressId);
+                }
+            } else {
+                this.customFunction.toast('获取地址id失败,请稍后重试');
+            }
+        },
+        async 'address:click'(addressId, $event) {
+            if (this.type === 'confirmPay') {
+                this.customFunction.setPrevPage({
+                    type: 'addressList',
+                    addressId
+                });
+            }
+        },
+        async 'address:defaultChange'(isDefault, addressId) {
+            const openId = await this.customFunction.getOpenId();
+            let postUrl = 'defaultAddress';
+            if (isDefault) {
+                postUrl = 'cancelDefaultAddress';
+            }
+            const url = `${
+                this.$parent.globalData.apiBaseUrl
+            }/api/v2/address/${postUrl}?addressId=${addressId}&openId=${openId}`;
+            const params = {
+                addressId
+            };
+            const res = await this.customFunction.fetchData(url, params, {
+                method: 'POST'
+            });
+            if (res.code !== 20000) {
+                this.customFunction.showModal('选择地址失败');
+                return;
+            }
+            this.getAddressList();
+        }
+    };
+    async getAddressList() {
+        const url = `${
+            this.$parent.globalData.apiBaseUrl
+        }/api/v2/address/getAddressList`;
+        const res = await this.customFunction.fetchData(url);
+        const { data, code } = res;
+        if (code !== 20000 || !data) return;
+        this.addressList = data;
+
+        this.$apply();
+    }
+    async deleteAddress(addressId) {
+        const url = `${
+            this.$parent.globalData.apiBaseUrl
+        }/api/v2/address/deleletAddress`;
+        const param = {
+            addressId
+        };
+        const res = await this.customFunction.fetchData(url, param);
+        const { code, errorMsg } = res;
+        if (code === 20000) {
+            this.customFunction.toast('修改成功', {
+                icon: 'success',
+                mask: true
+            });
+            setTimeout(() => {
+                this.getAddressList();
+            }, 300);
+        } else {
+            this.customFunction.toast('删除错误:' + errorMsg);
+        }
+    }
+    onShow(option) {
+        this.getAddressList();
+    }
+    async onLoad(options) {
+        const { type } = options;
+        this.type = type || null;
+    }
+}
+</script>

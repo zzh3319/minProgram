@@ -1,0 +1,74 @@
+<style lang="less">
+.coupon-header {
+    padding: 19rpx;
+    background: #fff;
+    font-size: 26rpx;
+    position: relative;
+    .coupon-input-box {
+        width: 100%;
+        height: 80rpx;
+        -webkit-appearance: none;
+        padding: 15rpx 5rpx 15rpx 20rpx;
+        border: 1px solid rgba(0, 0, 0, 0.2);
+        border-radius: 3rpx;
+        outline: none;
+        box-sizing: border-box;
+    }
+    .coupon-input {
+        width: 82%;
+    }
+    .btn-coupon-bind {
+        width: 107rpx;
+        position: absolute;
+        top: 50%;
+        right: 28rpx;
+        -webkit-transform: translateY(-50%);
+        transform: translateY(-50%);
+        color: #fff;
+        background-color: #ff434d;
+        border: 1rpx solid #ff434d;
+        border-radius: 8rpx;
+        font-size: 24rpx;
+        font-weight: 400;
+        text-align: center;
+        white-space: nowrap;
+        -webkit-transition: all;
+        transition: all;
+        z-index: 100;
+    }
+}
+</style>
+
+<template>
+  <view class="coupon-header">
+    <view  class="coupon-input-box">
+      <input bindinput="changeCoupon" class="coupon-input" placeholder="{{placeholder}}" />
+      <button class="btn-coupon-bind" @tap="bindCoupon">{{btnText}}</button>
+      <view></view>
+    </view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+export default class couponshead extends wepy.component {
+    props = {
+        placeholder: String,
+        btnText: {
+            type: String,
+            default: '提交'
+        },
+        type: String
+    };
+    data = {};
+    methods = {
+        bindCoupon() {
+            this.$emit(`${this.type}:clickhandle`);
+        },
+        changeCoupon(e) {
+            const value = e.detail.value;
+            this.$emit(`${this.type}:inputchange`, value);
+        }
+    };
+}
+</script>

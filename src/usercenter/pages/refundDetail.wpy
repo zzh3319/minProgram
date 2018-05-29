@@ -1,0 +1,291 @@
+<style lang="less">
+.container {
+    height: 100%;
+    background-color: #f4f4f4;
+    font-size: 30rpx;
+    color: #333;
+    .header {
+        padding: 36rpx 24rpx;
+        background-color: #fff;
+        view {
+            padding-top: 30rpx;
+        }
+        .ptop0 {
+            padding-top: 0;
+        }
+        .refund-btn {
+            display: flex;
+            // margin-bottom: 0;
+            button {
+                flex: 1;
+                color: #666;
+                font-size: 30rpx;
+                background-color: #fff;
+                overflow: visible;
+            }
+        }
+    }
+    .refund-label {
+        color: #666;
+    }
+    .refund-detail {
+        margin-top: 18rpx;
+        background-color: #fff;
+        padding: 0 24rpx;
+        view {
+            height: 90rpx;
+            line-height: 90rpx;
+            border-bottom: 1px solid #e3e3e3;
+            text {
+                margin-right: 30rpx;
+            }
+        }
+        .image-wrap {
+            height: auto;
+            line-height: auto;
+            overflow: visible;
+            .refund-label {
+                margin-right: 55rpx;
+            }
+            text {
+                float: left;
+            }
+            image {
+                width: 140rpx;
+                height: 140rpx;
+                display: inline-block;
+                margin: 20rpx 24rpx 0;
+                border: 1px solid #000;
+            }
+        }
+        .refund-explain-wrap {
+            min-height: 90rpx;
+            height: auto;
+            overflow: hidden;
+            text {
+                display: block;
+                float: left;
+            }
+
+            .refund-explain {
+                width: 74%;
+                line-height: 1.6;
+                margin: 20rpx 0;
+            }
+        }
+    }
+}
+.font-red {
+    color: #e60012;
+}
+.mtR5 {
+    margin-right: 8rpx;
+}
+.font-green {
+    color: #9ae22b;
+}
+</style>
+<template>
+  <view class="container">
+    <view class="header">
+      <view class="ptop0"><text class="refund-label">退款状态：</text><text class="font-red {{refundDetailInfo.statusDesc == '退款成功'?'font-green':''}}">{{refundDetailInfo.statusDesc}}</text></view>
+      <view><text class="refund-label">金额退回到：</text><text>原路返回</text></view>
+      <block>
+        <view wx:if="{{refundDetailInfo.status == 'SUCCESS_REFUND'}}"><text class="refund-label">退款时间：</text><text>{{refundDetailInfo.payTime}}</text></view>   
+        <view wx:if="{{refundDetailInfo.denyReason != null}}"><text class="refund-label">拒绝原因：</text><text>{{refundDetailInfo.denyReason}}</text></view>
+        <view wx:if="{{refundDetailInfo.refundType =='ONLY_REFUND' && refundDetailInfo.status == 'APPLYING'}}"><text class="refund-label">若商家发货：</text><text>申请将关闭，关闭后您可以再次申请退款。</text></view>
+        <view class="refund-btn" wx:if="{{refundDetailInfo.canEdit || refundDetailInfo.canCancel}}">
+            <button class="mtR5" @tap="bindCancelApplication" wx:if="{{refundDetailInfo.canCancel}}">取消退款申请</button>
+            <button @tap="fixApplication" wx:if="{{refundDetailInfo.canEdit}}">修改退款申请</button>
+        </view>
+      </block>
+    </view>
+    <view class="refund-detail">
+      <view><text class="refund-label">退款类型</text><text>{{refundDetailInfo.refundTypeDesc == null ? '' : refundDetailInfo.refundTypeDesc}}</text></view>
+      <view><text class="refund-label">退款金额</text><text>{{refundDetailInfo.refundFee == null ? '' : refundDetailInfo.refundFee}}</text></view>
+      <view><text class="refund-label">退款原因</text><text>{{refundDetailInfo.reason == null ? '' : refundDetailInfo.reason}}</text></view>
+      <view class="refund-explain-wrap"><text class="refund-label">退款说明</text><text class="refund-explain">{{refundDetailInfo.description == null ? '' : refundDetailInfo.description}}</text></view>
+      <view><text class="refund-label">退款编号</text><text>{{refundDetailInfo.refundNo == null ? '' : refundDetailInfo.refundNo}}</text></view>
+      <view><text class="refund-label">申请时间</text><text>{{refundDetailInfo.createTime == null ? '' : refundDetailInfo.createTime}}</text></view>
+     
+      <view wx:if="{{picList.length != 0}}" class="image-wrap">
+        <text class="refund-label">图片</text>
+        <image class="goods-image" src="{{basePath + item.picPath}}" mode="aspectFit" @tap="previewImage({{index}})" wx:for="{{picList}}" wx:key="{{index}}"/>
+      </view>
+
+    </view>
+  </view>
+  
+</template>
+
+<script>
+import wepy from 'wepy';
+export default class refundDetail extends wepy.page {
+    shareType = {};
+    shareUrl = {};
+    config = {
+        navigationBarTitleText: '退款详情'
+    };
+    components = {};
+    mixins = [];
+    data = {
+        refundNo: '',
+        refundDetailInfo: {}, //退款详情信息
+        picList: [], //图片列表
+        basePath: '',
+        orderstatus: '', //退款申请类型
+        refundStatustxt: '',
+        typeItem: '',
+        refuseReasonTxt: '', //拒绝退款原因
+        previewImages: []
+    };
+    computed = {};
+    methods = {};
+    events = {};
+
+    onLoad(opt) {
+        if (opt.refundNo) {
+            this.refundNo = opt.refundNo;
+            this.initPageRefundNo(opt.refundNo);
+        } else {
+            this.initPageRefundSub(opt);
+        }
+    }
+    methods = {
+        changeTab: function(i) {
+            let iNum = Number(i)
+            this.curIndex = iNum;
+        },
+        fixApplication: function() {
+            wepy.navigateTo({
+                url:
+                    '/usercenter/pages/editRefundApplicationForm?refundNo=' +
+                    this.refundNo +
+                    '&refundType=' +
+                    this.refundDetailInfo.refundType +
+                    '&orderStatus=' +
+                    this.refundDetailInfo.orderStatus
+            }).then(()=>console.log('请求成功'))
+            .catch(()=>console.log('请求失败'))
+            // wepy.navigateTo({
+            //     url:
+            //         '/usercenter/pages/editRefundApplicationForm?refundNo=' +
+            //         this.refundNo +
+            //         '&refundType=' +
+            //         this.refundDetailInfo.refundType +
+            //         '&orderStatus=' +
+            //         this.refundDetailInfo.orderStatus,
+            //     success: function() {
+            //         console.log('请求成功');
+            //     },
+            //     fail: function() {
+            //         console.log('请求失败');
+            //     }
+            // });
+        },
+        bindCancelApplication: function() {
+            let that = this;
+            wepy
+                .request({
+                    url:
+                        that.$parent.globalData.apiBaseUrl +
+                        '/api/v2/order/cancelRefund',
+                    method: 'POST',
+                    data: {
+                        // 请求数据
+                        openId: wepy.getStorageSync('openid'),
+                        refundNo: this.refundNo
+                    }
+                })
+                .then(res => {
+                    wepy.hideLoading();
+                    if (res.data.code === 20000 && res.data.data === true) {
+                        that.initPageRefundNo(that.refundNo);
+                        that.$apply();
+                    } else {
+                        wepy.showToast({
+                            title: res.data.msg || res.data.errorMsg,
+                            icon: 'none',
+                            duration: 2000
+                        });
+                    }
+                });
+        },
+        previewImage: function(i) {
+            let that = this;
+            for (let i = 0; i < that.picList.length; i++) {
+                that.previewImages[i] = that.basePath + that.picList[i].picPath;
+            }
+            wepy.previewImage({
+                current: that.previewImages[i], //当前显示图片的http链接
+                urls: that.previewImages // 需要预览的图片http链接列表
+            });
+        }
+    };
+    initPageRefundNo(opt) {
+        let that = this;
+        wepy.showLoading();
+        wepy
+            .request({
+                url:
+                    that.$parent.globalData.apiBaseUrl +
+                    '/api/v2/order/refundDetails',
+                method: 'GET',
+                data: {
+                    // 请求数据
+                    openId: wepy.getStorageSync('openid'),
+                    refundNo: opt
+                }
+            })
+            .then(res => {
+                wepy.hideLoading();
+                if (res.data.code === 20000) {
+                    this.basePath = res.data.data.basePath;
+                    this.refundDetailInfo = res.data.data.orderRefund;
+                    this.picList = res.data.data.picList;
+                    that.$apply();
+                } else {
+                    wepy.showToast({
+                        title: res.data.msg || res.data.errorMsg,
+                        icon: 'none',
+                        duration: 2000
+                    });
+                }
+            });
+    }
+
+    initPageRefundSub(opt) {
+        let that = this;
+        wepy.showLoading();
+        wepy
+            .request({
+                url:
+                    that.$parent.globalData.apiBaseUrl +
+                    '/api/v2/order/subordersDetail',
+                method: 'GET',
+                data: {
+                    // 请求数据
+                    openId: wepy.getStorageSync('openid'),
+                    orderId: opt.orderId,
+                    orderDetailId: opt.orderDetailId
+                }
+            })
+            .then(res => {
+                wepy.hideLoading();
+                if (res.data.code === 20000) {
+                    this.basePath = res.data.data.basePath;
+                    this.refundDetailInfo = res.data.data.orderRefund;
+                    this.refundNo = this.refundDetailInfo.refundNo;
+                    this.picList = res.data.data.picList;
+                    that.$apply();
+                } else {
+                    wepy.showToast({
+                        title: res.data.msg || res.data.errorMsg,
+                        icon: 'none',
+                        duration: 2000
+                    });
+                }
+            });
+    }
+}
+</script>

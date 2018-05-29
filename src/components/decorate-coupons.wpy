@@ -1,0 +1,70 @@
+<template>
+  <view class="coupons-container">
+    <wxc-flex main="between}}">
+      <!-- 数据结构问题,使用循环不便 -->
+        <view style="width: {{item.widgetsContent.col_1}}%" wx:if="{{item.widgetsContent.col_1}}" @tap="link({{item.widgetsContent.list[0].linkValue}})">
+            <image src="{{item.widgetsContent.list[0].imgUrl}}"   lazy-load='{{true}}' data-index="{{ index }}"   mode="widthFix" class="swiper-image"/>
+        </view>
+        <view style="width: {{item.widgetsContent.col_2}}%" wx:if="{{item.widgetsContent.col_2}}"  @tap="link({{item.widgetsContent.list[1].linkValue}})">
+             <image src="{{item.widgetsContent.list[1].imgUrl}}"   lazy-load='{{true}}' data-index="{{ index }}"   mode="widthFix" class="swiper-image"/>
+        </view>
+        <view style="width: {{item.widgetsContent.col_3}}%" wx:if="{{item.widgetsContent.col_3}}"  @tap="link({{item.widgetsContent.list[2].linkValue}})">
+             <image src="{{item.widgetsContent.list[2].imgUrl}}"   lazy-load='{{true}}' data-index="{{ index }}"   mode="widthFix" class="swiper-image"/>
+        </view>
+    </wxc-flex>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+import GTools from '@/mixins/g-tools';
+export default class decorateCoupons extends wepy.component {
+    mixins = [GTools];
+    props = {
+        item: {
+            type: Object,
+            default: {}
+        }
+    };
+    methods = {
+        async link(couponsId) {
+            const url = `${
+                this.$parent.$parent.globalData.apiBaseUrl
+            }/api/v2/coupon/getCoupon`;
+            const param = await {
+                couponSchemaId: couponsId
+            };
+            let { data: { code } } = await this.customFunction.fetchData(
+                url,
+                param
+            );
+            const msg = linkTypeMap[code] || '系统发生异常';
+            this.customFunction.toast(msg);
+        }
+    };
+}
+//code 0:领取成功
+//1：方案id为空；2：用户未登录；3：活动未开始；4：活动已结束；5：已经领完啦，下次早点来！
+//6：已达领取上限；7：已经领啦，用完再领哦；8：其它条件不满足；9：系统发生异常
+var linkTypeMap = [
+    '领取成功',
+    '方案id为空',
+    '用户未登录',
+    '活动未开始',
+    '活动已结束',
+    '已经领完啦,下次早点来!',
+    '已达领取上限',
+    '已经领啦,用完再领哦',
+    '其它条件不满足',
+    '系统发生异常'
+];
+</script>
+
+<style lang="less">
+.coupons-container {
+    background: #fff;
+    .swiper-image {
+        font-size: 0;
+        margin: 0;
+    }
+}
+</style>

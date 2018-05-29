@@ -1,0 +1,100 @@
+<style lang="less">
+page {
+    height: 100%;
+    background: #f4f4f4;
+}
+.coupon-list {
+    padding: 19rpx;
+    box-sizing: border-box;
+    height: 100%;
+}
+.coupon-Effctive-btn {
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 19rpx;
+    font-size: 24rpx;
+    color: #b1b1b1;
+    .effText {
+        letter-spacing: 2rpx;
+        text-decoration: underline;
+    }
+}
+</style>
+
+<template>
+  <view class="coupon-container">
+    <CouponsEmpty wx:if="{{isEmpty}}" />
+    <scroll-view class="coupon-list" wx:else>
+        <repeat for="{{list}}" key="index" index="index" item="item">
+          <CouponsList :item="item" type="coupon" :from='from'/>
+        </repeat>
+    </scroll-view>
+  </view>
+</template>
+ 
+<script>
+import wepy from 'wepy';
+import CouponsList from '@/components/coupons-list';
+import CouponsEmpty from '@/components/coupons-empty';
+import GTools from '@/mixins/g-tools';
+export default class Coupon extends wepy.page {
+    mixins = [GTools];
+    config = {
+        navigationBarTitleText: '优惠券'
+    };
+    components = {
+        CouponsList,
+        CouponsEmpty
+    };
+    data = {
+        list: [],
+        isEmpty: false,
+        from: '',
+        url: 'http://10.0.30.65:8295'
+    };
+    init(res, chooseCouponId) {
+        const { data } = res;
+        const list = data || [];
+        if (list.length > 0) {
+            this.isEmpty = false;
+            list.forEach(element => {
+                if (element.couponId === chooseCouponId) {
+                    element.checked = true;
+                    return false;
+                }
+            });
+            this.list = list;
+        } else {
+            this.isEmpty = true;
+        }
+        this.$apply();
+    }
+    async onLoad(option) {
+        const { couponId, type } = option;
+        // 设置从哪个页面过来的
+        this.from = type;
+        const openId = this.customFunction.getOpenId();
+        if (openId) {
+            const url = `${
+                this.$parent.globalData.apiBaseUrl
+            }/api/v2/order/coupon`;
+
+            const param = {};
+            if (couponId) {
+                param.couponId = couponId;
+            }
+
+            const data = await this.customFunction.fetchData(url, param);
+            this.init(data, couponId);
+        }
+    }
+    events = {
+        'coupon:choose'(couponId, $event) {
+            this.customFunction.setPrevPage({
+                type: 'coupon',
+                couponId
+            });
+        }
+    };
+}
+</script>

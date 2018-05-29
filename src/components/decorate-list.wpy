@@ -1,0 +1,55 @@
+<template>
+  <view class="cms-column-{{item.type}}-floor">
+    <wxc-flex wrap="wrap">
+      <repeat for="{{item.widgetsContent.list}}" key="index" index="index" item="subItem">
+        <decorateListRow :subItem.sync="subItem" wx:if="{{item.type=='tc1'||item.type=='tc2'||item.type=='tc3'||item.type=='tc4'}}" />
+        <decorateListGoodsRow :subItem.sync="subItem"  wx:elif="{{item.type=='goods3'&& index < item.widgetsContent.maxCount}}" />
+        <decorateListGoodsBlock :subItem.sync="subItem" wx:elif="{{(item.type=='goods1'&& index < item.widgetsContent.maxCount)||(item.type=='goods2'&& index < item.widgetsContent.maxCount)}}" class="{{item.type=='goods1'?'goods-col2':''}} {{item.type=='goods2'?'goods-col3':''}} "/>
+        <decorateListArticleCol :subItem.sync="subItem"  wx:elif="{{item.type === 'list'}}"/>
+        <decorateListArticleBlock :subItem.sync="subItem"   wx:elif="{{item.type === 'blocklist'}}" />
+      </repeat>
+    </wxc-flex>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+import decorateListGoodsRow from '@/components/decorate-list-goods-row';
+import decorateListGoodsBlock from '@/components/decorate-list-goods-block';
+import decorateListArticleBlock from '@/components/decorate-list-article-block';
+import decorateListArticleCol from '@/components/decorate-list-article-col';
+import decorateListRow from '@/components/decorate-list-row';
+export default class decorateList extends wepy.component {
+    components = {
+        decorateListRow,
+        decorateListGoodsRow,
+        decorateListArticleBlock,
+        decorateListArticleCol,
+        decorateListGoodsBlock
+    };
+    props = {
+        item: {
+            type: Object,
+            default: {}
+        }
+    };
+}
+</script>
+
+<style lang="less">
+.decorate-item {
+    box-sizing: border-box;
+    font-size: 0;
+    .decorate-item-image {
+        width: 100%;
+    }
+    &.goods-col3 {
+        width: 33.33%;
+    }
+    &.goods-col2 {
+        width: 50%;
+        image {
+            height: 176px;
+        }
+    }
+}
+</style>

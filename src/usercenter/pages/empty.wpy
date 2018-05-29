@@ -1,0 +1,56 @@
+
+<style>
+.empty {
+    width: 80%;
+    margin: 0 auto;
+    margin-top: 5%;
+    font-size: 18px;
+}
+</style>
+<template>
+  <view class="container">
+    <view bindtap="toast" class="empty">
+      <p>您好</p>
+      <p>此页面仅限于内部人员使用。</p>
+      <p>请您依次允许授权获取信息及手机号码,</p>
+      <p>确认导购身份,谢谢</p>
+    </view>
+  </view>
+</template>
+<script>
+/*
+ * 暂时不用,使用associate.wepy
+ */
+import wepy from 'wepy';
+export default class empty extends wepy.page {
+    config = {
+        navigationBarTitleText: '导购升级'
+    };
+    data = {};
+    methods = {};
+    onLoad(options) {
+        wepy.login().then(res => {
+            wepy
+                .getUserInfo()
+                .then(getuser => {
+                    wepy.setStorageSync('UserName', getuser.userInfo.nickName);
+                    wepy.hideToast();
+                    /*console.log(getuser);
+              console.log(res);*/
+                    if (res.code) {
+                        wepy.navigateTo({
+                            url: 'atoPhone'
+                        });
+                    } else {
+                        console.log('获取用户登录态失败！' + res.errMsg);
+                    }
+                })
+                .catch(err => {
+                    wepy.navigateTo({
+                        url: '../aztAgain'
+                    });
+                })
+        })
+    }
+}
+</script>

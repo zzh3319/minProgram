@@ -1,0 +1,272 @@
+<style lang="less">
+.coupon-header .coupon-input-box {
+    border: 1px solid #cccccc;
+    border-radius: 10rpx;
+}
+scroll-view {
+    width: auto;
+    padding: 20rpx 20rpx 0 20rpx;
+}
+.font-s {
+    font-size: 18rpx;
+}
+.yg-coupon .coupon-hd,
+.coupon-bd {
+    border-top: 1px solid #e9e9e9;
+    border-bottom: 1px solid #e9e9e9;
+}
+.yg-coupon .coupon-hd {
+    height: 182rpx;
+}
+.invalid {
+    color: #666666;
+    float: right;
+    margin-right: 20rpx;
+    height: 50rpx;
+    text-decoration: underline;
+}
+.loadMore {
+    height: 38rpx;
+    text-align: center;
+    line-height: 38rpx;
+}
+</style>
+<template>
+  <view >
+    <CouponsHead :btnText="BtnText"  :placeholder="Placeholder" type="coupon" />
+    <CouponsEmpty wx:if="{{isEmpty}}" />
+    <scroll-view class="coupon-list" bindscrolltolower="lower" style="height:100%" wx:else>
+        <repeat for="{{list}}" key="index" index="index" item="item">
+          <CouponsList :item="item" type="coupon" :from='from' :Effective="Effective"/>         
+        </repeat>
+        <view class="weui-loadmore" wx:if="{{isHideLoadMore}}">
+          <view class="weui-loading" wx:if="{{loadtxt == '正在加载'}}"></view>
+          <view class="weui-loadmore__tips">{{loadtxt}}</view>
+        </view>
+    </scroll-view>
+
+    <view class="loadMore" wx:if="{{hasMore}}">
+        <navigator url="/usercenter/pages/invalidCoupon" class="invalid" >查看失效优惠劵></navigator>
+    </view>
+    
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+import CouponsEmpty from '@/components/coupons-empty';
+import CouponsHead from '@/components/myCoupon-head';
+import CouponsList from '@/components/myCoupon-list';
+import GTools from '@/mixins/g-tools';
+export default class MyCoupon extends wepy.page {
+    mixins = [GTools];
+    config = {
+        navigationBarTitleText: '优惠券',
+        usingComponents: {
+            'wxc-flex': '../../../packages/@minui/wxc-flex/dist/index'
+        }
+    };
+    data = {
+        BtnText: '绑定',
+        Placeholder: '请输入未绑定优惠券',
+        isEmpty: false,
+        from: '',
+        url: 'http://10.0.30.65:8295',
+        list: [],
+        couponCode: '',
+        hasMore: false,
+        Effective: true,
+        pageNum: 1, //请求数据的页数
+        openId: '',
+        isHideLoadMore: false,
+        loadtxt: '正在加载',
+        switch: false //控制加载最后一页的开关
+    };
+    components = {
+        CouponsHead,
+        CouponsEmpty,
+        CouponsList
+    };
+    methods = {
+        linKTOEffective() {
+            wepy.navigateTO({
+                url: 'cuponsEffective'
+            });
+        },
+        //上拉触底的回掉函数
+        onReachBottom: function() {
+            if (!this.switch) {
+                this.isHideLoadMore = true;
+                console.log('上拉加载');
+                console.log(this.pageNum);
+                this.loadMore();
+            }
+        }
+    };
+    loadMore() {
+        wepy
+            .request({
+                url:
+                    this.$parent.globalData.apiBaseUrl +
+                    '/api/v2/coupon/couponList',
+                data: {
+                    openId: wepy.getStorageSync('openid'),
+                    pageNo: this.pageNum,
+                    limit: 20,
+                    state: 1
+                }
+            })
+            .then(data => {
+                if (data.data.code === 20000) {
+                    let store = data.data;
+                    this.pageNum += 1;
+                    this.init(store);
+                    this.$apply();
+                } else {
+                    wepy.showToast({
+                        title: data.data.errorMsg || '数据错误',
+                        icon: 'none',
+                        duration: 2000
+                    });
+                }
+                this.$apply();
+            });
+    }
+
+    //绑定优惠卷的处理函数
+    actions() {
+        if (this.couponCode === '') {
+            wepy.showToast({
+                title: '请输入优惠券编码',
+                icon: 'none',
+                duration: 2000
+            });
+        } else {
+            wepy
+                .request({
+                    url:
+                        this.$parent.globalData.apiBaseUrl +
+                        '/api/v2/coupon/bindCoupon',
+                    data: {
+                        openId: wepy.getStorageSync('openid'),
+                        couponNumber: this.couponCode
+                    }
+                })
+                .then(data => {
+                    console.log(data);
+                    let result = data.data.data.result;
+                    let resultMsg = data.data.data.resultMsg;
+                    if (result) {
+                        console.log('-----绑定成功打印状态----');
+                        console.log(resultMsg);
+                        wepy.showToast({
+                            title: resultMsg,
+                            icon: 'none',
+                            duration: 1000
+                        });
+                        setTimeout(() => {
+                            this.firstLoading('1');
+                            this.$apply();
+                        }, 1000);
+                    } else {
+                        wepy.showToast({
+                            title: resultMsg,
+                            icon: 'none',
+                            duration: 2000
+                        });
+                    }
+                    this.$apply();
+                });
+        }
+    }
+    //进行数据判断，没有数据加载默认页，有数据加载列表
+    init(res) {
+        const { data } = res;
+        console.log(data);
+        console.log(res);
+        const list1 = data || [];
+        if (this.list.length > 0) {
+            console.log('第一个if' + this.list.length);
+            if (list1.length > 0) {
+                this.isEmpty = false;
+                this.list = this.list.concat(list1);
+                this.$apply();
+            } else {
+                this.isHideLoadMore = false;
+                this.hasMore = true;
+                this.switch = true;
+                this.pageNum = 1;
+            }
+        } else {
+            console.log('进来了');
+            this.isEmpty = true;
+            this.hasMore = true;
+        }
+    }
+    firstLoading(res) {
+        console.log('从新加载中');
+        if (!res) {
+            wepy.showLoading({
+                title: '正在加载中'
+            });
+        }
+        wepy
+            .request({
+                url:
+                    this.$parent.globalData.apiBaseUrl +
+                    '/api/v2/coupon/couponList',
+                data: {
+                    // openId:wepy.getStorageSync('openid'),
+                    pageNo: 1,
+                    limit: 20,
+                    state: 1
+                }
+            })
+            .then(data => {
+                wepy.hideLoading();
+                this.list = [];
+                if (data.data.code === 20000) {
+                    let store = data.data;
+
+                    let dataArr = store.data || [];
+                    console.log('---获取----');
+                    console.log(dataArr);
+                    this.list = dataArr;
+                    console.log(this.list);
+                    if (this.list.length > 0) {
+                        this.isEmpty = false;
+                        if (this.list.length < 20) {
+                            this.hasMore = true;
+                        }
+                    } else {
+                        console.log('data出来了2');
+                        this.isEmpty = true;
+                        this.hasMore = true;
+                    }
+                    this.pageNum += 1;
+                    console.log(this.list);
+                    this.$apply();
+                    wepy.hideLoading();
+                } else {
+                    wepy.showToast({
+                        title: data.data.errorMsg || '数据错误',
+                        icon: 'none',
+                        duration: 2000
+                    });
+                }
+                this.$apply();
+            });
+    }
+    onLoad() {
+        this.firstLoading();
+        console.log('数组长度' + this.list.length);
+    }
+    events = {
+        'coupon:inputchange'(data, $event) {
+            this.couponCode = data;
+        },
+        'coupon:clickhandle'($event) {
+            this.actions();
+        }
+    };
+}
+</script>

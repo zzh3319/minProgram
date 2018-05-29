@@ -1,0 +1,127 @@
+<template>
+  <GoodsDetailPopup class="coupons" animationMode="bottom" align="bottom" :status.sync="choosing" locked="true">
+    <view class="popup__content">
+      <view class="popup__main">
+        <view class="pop-title">
+        促销
+        <view class="iconfont close-icon" @tap="closeChoose">&#xe602;</view>
+      </view>
+      <!-- <repeat for="{{coupons.items}}" key="index" index="index" item="Item"> -->
+        <view class="discount-item">
+            <view class="discount-type">{{activityType[commodity['activityType']]}}</view>
+            <view class="discount-content">
+                <repeat for="{{commodity.ruleDesc}}" key="index" index="index" item="item">
+                    {{item}}{{index==commodity.ruleDesc.length-1?'':';'}}
+                </repeat>
+            </view>
+            
+            
+        </view>
+      <!-- </repeat> -->
+      </view>
+    </view>
+    <view class="popup_bg" @tap="closeChoose" catchtouchmove="preventD"></view>
+  </GoodsDetailPopup>
+</template>
+<script>
+import wepy from 'wepy';
+import GoodsDetailPopup from '@/components/goodsDetail-popup';
+import activityType from '@/mixins/activityType.js';
+export default class goodsDetailCouponsChoose extends wepy.component {
+    components = {
+        GoodsDetailPopup
+    };
+    props = {
+        choosing: {
+            type: String,
+            default: 'hide'
+        },
+        coupons: {
+            type: Object,
+            default: {}
+        },
+        commodity: {
+            type: Object,
+            default: {}
+        }
+    };
+    onLoad(){
+        this.activityType = activityType;
+    };
+    data = {
+        activityType: {},
+        ruleList: ''
+    };
+    methods = {
+        preventD() {},
+        closeChoose() {
+            this.$emit('GoodsDetailDiscount:hide');
+        }
+    };
+}
+</script>
+<style lang="less">
+@height: 810rpx;
+.coupons {
+    .popup__content {
+        width: 100%;
+        padding: 10rpx 10rpx 70rpx 10rpx;
+        background: #eeeeee;
+        z-index: 1005;
+        position: relative;
+        height: @height;
+        overflow-y: hidden;
+        .close-icon {
+            padding: 10rpx 20rpx;
+        }
+        .discount-item{
+            box-sizing:border-box;
+            padding:20rpx 10rpx;
+            display:flex;
+            align-items:flex-start;
+            justify-content:flex-start;
+            flex-wrap:nowrap;
+            position:relative;
+            width:100%;
+            border-bottom:1px solid #e5e5e5;
+            .discount-type{
+                color: #ff4343;
+                border:1px solid #ff4343;
+                border-radius:20rpx;
+                font-weight:200;
+                padding:6rpx 10rpx;
+                line-height:20rpx;
+                margin-right:25rpx;
+                font-size:22rpx;
+            }
+            .discount-content{
+                width:e('calc(100% - 100rpx)');
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
+        .discount-item:last-child{
+            border-bottom:none;
+        }
+    }
+    .pop-title {
+        text-align: center;
+        height: 56rpx;
+        line-height: 56rpx;
+        font-size: 30rpx;
+        margin-bottom:20rpx;
+    }
+    .popup_bg {
+        height: 100%;
+        width: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1004;
+    }
+    .popup__main {
+        height: @height - 50rpx;
+        overflow-y: scroll;
+    }
+}
+</style>

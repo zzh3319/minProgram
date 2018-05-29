@@ -1,0 +1,776 @@
+<style lang="less">
+.container {
+    height: 100%;
+    background-color: #f4f4f4;
+    color: #333;
+    font-size: 32rpx;
+
+    .section {
+        padding: 0 24rpx;
+        .label {
+            height: 94rpx;
+            line-height: 94rpx;
+            .required {
+                color: #eb585f;
+            }
+        }
+        picker {
+            background-color: #fff;
+            height: 96rpx;
+            line-height: 96rpx;
+        }
+        input {
+            background-color: #fff;
+            height: 96rpx;
+            line-height: 96rpx;
+            padding-left: 38rpx;
+        }
+        textarea {
+            height: 185rpx;
+            line-height: 1.5;
+            width: auto;
+            background-color: #fff;
+            padding: 30rpx 38rpx;
+            font-size: 32rpx;
+        }
+        .remark {
+            color: #999;
+        }
+    }
+
+    .refundType {
+        .label {
+            height: 96rpx;
+            line-height: 96rpx;
+            padding-left: 24rpx;
+        }
+        .refund-type-btn {
+            background-color: #fff;
+            padding: 36rpx 24rpx;
+            display: flex;
+            button {
+                flex: 1;
+                background-color: #fff;
+                overflow: visible;
+                font-size: 30rpx;
+                color: #666;
+                border: 1px solid #dcdcdc;
+                outline: 0;
+                border-radius: 0;
+                &.active {
+                    border: 1px solid #ff414b;
+                    position: relative;
+                    top: 0;
+                    left: 0;
+                }
+                &.active::before {
+                    display: inline-block;
+                    width: 40rpx;
+                    height: 40rpx;
+                    overflow: hidden;
+                    content: '';
+                    position: absolute;
+                    bottom: -1px;
+                    left: -1px;
+                    background: url(https://i2.ygimg.cn/cmp/mp//btn-selected.png)
+                        0 0 no-repeat;
+                    background-size: 100%;
+                }
+            }
+            button::after {
+                border-radius: 0;
+            }
+        }
+        .refundAddress {
+            padding: 42rpx 30rpx;
+            background-color: #fff;
+            font-size: 28rpx;
+            color: #333;
+            view {
+                margin-bottom: 30rpx;
+                display: flex;
+                text {
+                    flex: 1;
+                }
+            }
+        }
+    }
+
+    .btn {
+        margin-top: 70rpx;
+        margin-bottom: 70rpx;
+        button {
+            width: 594rpx;
+            height: 80rpx;
+            line-height: 80rpx;
+            background-color: #ff414b;
+            font-size: 32rpx;
+            color: #fff;
+        }
+    }
+}
+.weui-select {
+    height: 96rpx;
+    line-height: 96rpx;
+    min-height: auto;
+    padding-left: 38rpx;
+    text {
+        color: #999;
+        &.choose {
+            color: #333;
+        }
+    }
+}
+.mtR5 {
+    margin-right: 16rpx;
+}
+.refundAddress-wrap {
+    text {
+        display: inline-block;
+    }
+    .refundAddress-label {
+        width: 21%;
+        vertical-align: top;
+    }
+    .refundAddress-descript {
+        width: 75%;
+    }
+}
+.refundCount-wrap {
+    .refundCount {
+        background-color: #fff;
+        height: 96rpx;
+        line-height: 96rpx;
+    }
+}
+view.counter-dist-index--counter {
+    // margin-top:0;
+}
+.disabled {
+    color: #999;
+}
+view.counter-dist-index--counter__number {
+    height: 96rpx;
+    line-height: 96rpx;
+}
+view.counter-dist-index--counter__modify.counter-dist-index--counter__opt {
+    width: 96rpx;
+    height: 94rpx;
+    line-height: 94rpx;
+}
+text.counter-dist-index--counter__modify.counter-dist-index--counter__text {
+    width: 96rpx;
+    height: 93rpx;
+    line-height: 93rpx;
+    background-color: #fff;
+}
+view.counter-dist-index--counter__modify.counter-dist-index--counter__opt.counter-dist-index--counter__no {
+    height: 94rpx;
+    line-height: 94rpx;
+}
+.upload-wrap {
+    .upload-add {
+        width: 120rpx;
+        height: 120rpx;
+        border: 1rpx solid #dcdcdc;
+        display: inline-block;
+        margin: 0 24rpx;
+        color: #dcdcdc;
+        line-height: 120rpx;
+        text-align: center;
+        vertical-align: middle;
+        background-color: #fff;
+        font-size: 60rpx;
+    }
+    .iamge-wrap {
+        position: relative;
+        top: 0;
+        left: 0;
+        display: inline-block;
+        width: 120rpx;
+        height: 120rpx;
+        border: 1rpx solid #dcdcdc;
+        margin: 0 24rpx;
+        vertical-align: middle;
+        .del {
+            width: 40rpx;
+            height: 40rpx;
+            background-color: #333;
+            color: #fff;
+            font-size: 35rpx;
+            position: absolute;
+            top: -15rpx;
+            right: -15rpx;
+            border-radius: 50%;
+            line-height: 34rpx;
+            text-align: center;
+        }
+        image {
+            width: 120rpx;
+            height: 120rpx;
+            border: 1rpx solid #000;
+            display: inline-block;
+        }
+    }
+}
+.img-mask {
+    width: 120rpx;
+    height: 120rpx;
+    background-color: rgba(0, 0, 0, 0.5);
+    position: absolute;
+    top: 1rpx;
+    left: 1rpx;
+    image {
+        width: 40rpx;
+        height: 40rpx;
+        position: absolute;
+        top: 1rpx;
+        left: 1rpx;
+        z-index: 10000;
+    }
+}
+</style>
+<template>
+  <view class="container">
+    <view class="refundType" wx:if="{{orderStatus !== 'WAIT_DELIVER'}}">
+      <view class="label">请选择退款类型</view>
+      <view class="refund-type-btn">
+        <button class="mtR5 {{curTabIndex == item.type ?'active' :''}}" wx:for="{{refundTypes}}" @tap="refundFormSelect" wx:key="{{index}}" data-type="{{item.type}}"  data-val="{{item.val}}">{{item.name}}</button>
+      </view>
+    </view>
+    <view class="refundType" wx:if="{{refundType === 'REJECTED_REFUND'}}">
+      <view class="label">请将商品寄回以下地址</view>
+      <view class="refundAddress">
+        <view>
+          <text>收货人：{{applicationInfo.backAddress.name}}</text>
+          <text>联系电话：{{applicationInfo.backAddress.phone}}</text>
+        </view>  
+        <text class="refundAddress-wrap">
+          <text class="refundAddress-label">收货地址：</text>
+          <text class="refundAddress-descript">{{applicationInfo.backAddress.address}}</text>
+        </text>
+        
+      </view>
+    </view>
+    <view class="section" wx:if="{{refundType === 'REJECTED_REFUND'}}">
+      <view class="label"><text class="required">*</text>物流公司</view>
+      <picker bindchange="bindLogisticChange" range="{{applicationInfo.expresses}}"  range-key="name" value="">
+        <view class="weui-select">
+          <!-- <text wx:if="{{logisticIndex == -1}}">请选择物流公司</text> -->
+          <!-- {{applicationInfo.expresses[logisticIndex].name}} -->
+          <text class="{{applicationInfo.orderRefund.companyName != '请选择物流公司' ? 'choose' : ''}}">{{applicationInfo.orderRefund.companyName == null? '请选择物流公司' :applicationInfo.orderRefund.companyName }}</text>
+        </view>
+      </picker>
+    </view>
+    <view class="section refundPrice" wx:if="{{refundType === 'REJECTED_REFUND'}}">
+      <view class="label"><text class="required">*</text>运单号</view>
+      <input type="number"  placeholder="请输入物流单号"  placeholder-style="color:#999" bindblur="bindexpressNo" value="{{applicationInfo.orderRefund.sid}}"/>
+    </view>
+    <view class="section refundReason">
+      <view class="label"><text class="required">*</text>退款原因</view>
+      <picker bindchange="bindReasonChange" range="{{ refundReason }}" value="">
+        <view class="weui-select">
+          <text class="{{applicationInfo.orderRefund.reason != '请选择退款原因' ? 'choose' : ''}}">{{applicationInfo.orderRefund.reason}}</text>
+        </view>
+      </picker>
+    </view>
+    <view class="section refundCount-wrap" wx:if="{{refundType === 'REJECTED_REFUND'}}">
+      <view class="label"><text class="required">*</text>退货数量</view>
+      <wxc-counter number="{{refundCount}}"  min="1" max="{{10000}}" bind:changenumber="onChangeNumber" class="refundCount"></wxc-counter>
+    </view>
+    <view class="section refundPrice">
+      <view class="label"><text class="required">*</text>退款金额<text class="remark" wx:if="{{refundType == 'REJECTED_REFUND'}}">(不可修改)</text></view>
+      <input type="digit" bindblur="bindRefundAmount" class="{{ refundType == 'DELIVERD_REFUND' ? '' : 'disabled'}}" placeholder="请输入退款金额" disabled="{{curTabIndex == '1' && refundType == 'DELIVERD_REFUND' ? false : true }}"  placeholder-style="color:#999" value="{{refundAmount}}"/>
+    </view>
+    <view class="section textareaSection"> 
+      <view class="label">退款说明<text class="remark">(可不填)</text></view>
+      <textarea bindblur="bindTextAreaBlur" placeholder="0-200字" maxlength="200" placeholder-style="color:#999" adjust-position value="{{applicationInfo.orderRefund.description}}"/>
+    </view>
+    <view class="section uploadImage" wx:if="{{orderStatus !== 'WAIT_DELIVER'}}">
+      <view class="label">上传图片<text class="remark">(最多三张)</text></view>
+      <view class="upload-wrap">
+        <view wx:for="{{imageArray}}" wx:key="{{index}}" class="iamge-wrap">
+          <view class="del" @tap="delImage({{index}})">x</view>
+          <view class="img-mask" wx:if="{{!item.isLoaded}}">
+            <image mode="aspectFit" src="https://i2.ygimg.cn/cmp/mp/loading.gif" style="40rpx;height:40rpx;margin-top:40rpx;"></image>
+          </view>
+          <image class="goods-image" src="{{item.img}}" mode="aspectFit" @tap="previewImage({{index}})"/>
+        </view>
+        <view @tap="uploadImages" wx:if="{{remainCount < 4 && remainCount > 0 || applicationInfo.picList.length == 0}}" class="upload-add">+</view>
+      </view>
+    </view>
+    <view class="section btn">
+      <button form-type="submit" @tap.stop="submit">提交申请</button>
+    </view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+export default class refundApplicationForm extends wepy.page {
+    shareType = {};
+    shareUrl = {};
+    config = {
+        navigationBarTitleText: '退款申请',
+        usingComponents: {
+            'wxc-counter': '../../packages/@minui/wxc-counter/dist/index'
+        }
+    };
+    components = {};
+    mixins = [];
+    data = {
+        curLoadIndex: -1, //当前上传图片Index值
+        orderStatus: '',
+        refundPriceDisable: true, //退款金额是否可编辑
+        logisticIndex: -1, //物流索引
+        refundReason: [],
+        refundReason1: [
+            '不想要了',
+            '拍错了/订单信息有误',
+            '七天无理由退货',
+            '未按约定时间发货'
+        ], //未发货仅退款
+        refundReason2: [
+            '七天无理由退货',
+            '退运费',
+            '收到商品破损',
+            '少件/漏发',
+            '收到商品与描述不符',
+            '商品质量问题',
+            '未收到货',
+            '未按约定时间发货'
+        ], //已发货，仅退款
+        refundReason3: [
+            '七天无理由退货',
+            '收到商品破损',
+            '少件/漏发',
+            '收到商品与描述不符',
+            '商品质量问题'
+        ], //已发货，退货退款
+        curTabIndex: '', //退款类型切换
+        refundType: '', //售后类型
+        refundCount: 1, //退货数量
+        refundAmount: 0, //退款金额
+        refundNo: '', //申请退款单号
+        //请求参数
+        orderId: '',
+        orderDetailId: '',
+        openId: wepy.getStorageSync('openid'),
+
+        applicationInfo: {
+            backAddress: {
+                name: '',
+                phone: '',
+                address: ''
+            },
+            orderRefund: {
+                canReturnNum: '', //可退货数量
+                canReturnFee: '', //可退金额
+                reason: '请选择退款原因', //退款原因
+                sid: ''
+            },
+            orderDetail: {
+                wfxPrice: '',
+                id: ''
+            },
+            order: {
+                id: '' //id
+            },
+            expresses: [],
+            picList: []
+        },
+        isChange: '',
+        // 退款类型：
+        refundTypes: [
+            { name: '退货退款', type: '0', val: 'REJECTED_REFUND' },
+            { name: '仅退款', type: '1', val: 'DELIVERD_REFUND' }
+        ],
+        imageArray: [], //照片数组，页面渲染的路径
+        imgUrl: [],
+        remainCount: 3, //剩余上传照片的张数
+
+        deleteImgId: '',
+        delIdArray: [],
+        previewImageList: [],
+        reason: {
+            reason: ''
+        }
+    };
+    computed = {};
+    methods = {};
+    events = {};
+
+    onLoad(opt) {
+        let that = this;
+        that.refundNo = opt.refundNo;
+        that.refundType = opt.refundType;
+        that.orderStatus = opt.orderStatus;
+        if (that.refundType === 'REJECTED_REFUND') {
+            that.curTabIndex = 0;
+            that.refundReason = that.refundReason3;
+            that.initPage('/api/v2/order/intoEditRefundAndGoods');
+        } else if (that.refundType === 'ONLY_REFUND') {
+            that.refundReason = that.refundReason1;
+        } else if (that.refundType === 'DELIVERD_REFUND') {
+            that.curTabIndex = 1;
+            that.refundReason = that.refundReason2;
+            that.initPage('/api/v2/order/editRefundInfo');
+        }
+    }
+    //加载更多
+    methods = {
+        bindLogisticChange: function(e) {
+            console.log(e);
+            // this.logisticIndex = e.detail.value;this.logisticName
+            this.applicationInfo.orderRefund.companyName = this.applicationInfo.expresses[e.detail.value].name;
+        },
+        bindReasonChange: function(e) {
+            this.applicationInfo.orderRefund.reason = this.refundReason[e.detail.value];
+            console.log(this.applicationInfo.orderRefund.reason);
+        },
+        submit: function() {
+            let that = this;
+            if (that.curTabIndex === 0 && that.refundType === 'REJECTED_REFUND') {
+                console.log(this.logisticCode);
+                if (
+                    that.applicationInfo.orderRefund.companyName === '' ||
+                    that.applicationInfo.orderRefund.companyName ===
+                        '请选择物流公司' ||
+                    that.applicationInfo.orderRefund.companyName === null
+                ) {
+                    wepy.showToast({
+                        title: '请选择物流公司',
+                        icon: 'none',
+                        duration: 2000
+                    });
+                    return;
+                }
+
+                if (
+                    that.applicationInfo.orderRefund.sid === '' ||
+                    that.applicationInfo.orderRefund.sid === null
+                ) {
+                    wepy.showToast({
+                        title: '请输入运单号',
+                        icon: 'none',
+                        duration: 2000
+                    });
+                    return;
+                }
+            }
+
+            if (
+                that.applicationInfo.orderRefund.reason === '请选择退款原因' ||
+                that.applicationInfo.orderRefund.reason === null
+            ) {
+                wepy.showToast({
+                    title: '请选择退款原因',
+                    icon: 'none',
+                    duration: 2000
+                });
+                return;
+            }
+
+            //  退款金额
+            if (
+                isNaN(that.refundAmount) ||
+                that.refundAmount === '' ||
+                that.refundAmount === '请输入退款金额'
+            ) {
+                wepy.showToast({
+                    title: '请输入退款金额',
+                    icon: 'none',
+                    duration: 2000
+                });
+                return;
+            }
+
+            if (that.refundType === 'REJECTED_REFUND') {
+                this.submitFun('/api/v2/order/updateRefundAndGoods');
+            }
+
+            // 编辑仅退款
+            if (
+                that.refundType === 'ONLY_REFUND' ||
+                that.refundType === 'DELIVERD_REFUND'
+            ) {
+                this.submitFun('/api/v2/order/updateRefundInfo');
+            }
+        },
+        async refundFormSelect(e) {
+          let typeIndex = parseInt(e.currentTarget.dataset.type);
+            if (typeIndex !== this.curTabIndex) {
+                this.delIdArray = [];
+                if (typeIndex === 1) {
+                    this.curTabIndex = 1;
+                    this.refundType = 'DELIVERD_REFUND';
+                    this.refundReason = this.refundReason2;
+                    await this.initPage('/api/v2/order/editRefundInfo');
+                } else {
+                    this.curTabIndex = 0;
+                    this.refundType = 'REJECTED_REFUND';
+                    this.refundReason = this.refundReason3;
+                    await this.initPage('/api/v2/order/intoEditRefundAndGoods');
+                }
+                console.log(this.reason.reason + '----');
+                this.applicationInfo.orderRefund.reason = '请选择退款原因';
+                this.$apply();
+            }
+        },
+        onChangeNumber(e) {
+            console.log(e);
+            this.$data.refundCount = parseInt(e.detail.number);
+            if (
+                e.detail.number >
+                    this.applicationInfo.orderRefund.canReturnNum &&
+                e.detail.type === 'add'
+            ) {
+                this.refundCount = this.applicationInfo.orderRefund.canReturnNum;
+                this.$apply();
+                wepy.showToast({
+                    title: '数量超过最大限制',
+                    icon: 'none',
+                    duration: 2000
+                });
+                return false;
+            } else {
+                console.log('小于');
+                this.refundCount = e.detail.number;
+            }
+        },
+        bindTextAreaBlur(e) {
+            this.applicationInfo.orderRefund.description = e.detail.value;
+            console.log(this.applicationInfo.orderRefund.description);
+        },
+        bindexpressNo(e) {
+            console.log(e.detail.value);
+            this.applicationInfo.orderRefund.sid = e.detail.value;
+            console.log(this.applicationInfo.orderRefund.sid);
+        },
+        bindRefundAmount(e) {
+            this.$data.refundAmount = parseFloat(e.detail.value);
+            if (
+                e.detail.value > this.applicationInfo.orderRefund.canReturnFee
+            ) {
+                this.refundAmount = this.applicationInfo.orderRefund.canReturnFee;
+                wepy.showToast({
+                    title: '超出最大可退金额',
+                    icon: 'none',
+                    duration: 2000
+                });
+                return false;
+            } else {
+                console.log('小于');
+                this.refundAmount = parseFloat(e.detail.value);
+            }
+            this.$apply();
+        },
+        uploadImages(e) {
+            console.log(e);
+            var that = this;
+            wepy.showActionSheet({
+                itemList: ['从相册中选择', '拍照']
+            })
+            .then(res => {
+              if (!res.cancel) {
+                        if (res.tapIndex === 0) {
+                            that.chooseWxImage('album');
+                        } else if (res.tapIndex === 1) {
+                            that.chooseWxImage('camera');
+                        }
+                    }
+            })
+            .catch(err => {
+              console.log(err.errMsg);
+            })
+        },
+        previewImage: function(i) {
+            let that = this;
+            for (var k = 0; k < that.imgUrl.length; k++) {
+                that.previewImageList[k] =
+                    that.applicationInfo.basePath + that.imgUrl[k];
+            }
+            wepy.previewImage({
+                current: that.previewImageList[i], // 当前显示图片的http链接
+                urls: that.previewImageList // 需要预览的图片http链接列表
+            });
+        },
+        delImage: function(i) {
+            let that = this;
+            that.delIdArray.push(that.imageArray[i].id);
+            that.imageArray.splice(i, 1);
+            that.imgUrl.splice(i, 1);
+            that.remainCount++;
+            console.log(that.delIdArray);
+            console.log('url' + JSON.stringify(that.imgUrl));
+            console.log('urlObj' + JSON.stringify(that.imageArray));
+        }
+    };
+
+    async initPage(url) {
+        let that = this;
+        wepy.showLoading();
+        try {
+            let res = await wepy.request({
+                url: that.$parent.globalData.apiBaseUrl + url,
+                method: 'GET',
+                data: {
+                    refundNo: that.refundNo,
+                    openId: wepy.getStorageSync('openid')
+                }
+            });
+            wepy.hideLoading();
+            if (res.data.code === 20000) {
+                that.applicationInfo = res.data.data;
+                that.refundAmount =
+                    that.applicationInfo.orderRefund.canReturnFee;
+                that.imageArray = that.applicationInfo.picList;
+                for (var i = 0; i < that.imageArray.length; i++) {
+                    that.imgUrl[i] = that.imageArray[i].picPath;
+                    that.imageArray[i].isLoaded = true;
+                    that.imageArray[i].img =
+                        that.applicationInfo.basePath +
+                        that.imageArray[i].picPath;
+                    that.imageArray[i].id = that.imageArray[i].id;
+                }
+                console.log(that.imgUrl);
+                that.remainCount = 3;
+                that.remainCount =
+                    that.remainCount - that.applicationInfo.picList.length;
+                that.$apply();
+            } else {
+                wepy.showToast({
+                    title: res.data.msg || res.data.errorMsg,
+                    icon: 'none',
+                    duration: 2000
+                });
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    submitFun(url) {
+        let that = this;
+        wepy.showLoading();
+
+        // 上传图片id，处理字符串
+        for (let i = 0; i < that.delIdArray.length; i++) {
+            if (that.delIdArray[i] !== undefined) {
+                that.deleteImgId += that.delIdArray[i] + ',';
+            }
+        }
+
+        if (this.refundType === 'DELIVERD_REFUND') {
+            this.applicationInfo.orderRefund.companyName = '';
+            this.applicationInfo.orderRefund.expressNo = '';
+        }
+
+        wepy
+            .request({
+                url: that.$parent.globalData.apiBaseUrl + url,
+                method: 'POST',
+                data: {
+                    // 请求数据
+                    openId: wepy.getStorageSync('openid'),
+                    picContent: that.imgUrl,
+                    orderId: that.applicationInfo.orderRefund.orderId,
+                    refundType: this.refundType,
+                    reason: this.applicationInfo.orderRefund.reason,
+                    refundFee: this.refundAmount,
+                    express: this.applicationInfo.orderRefund.companyName,
+                    expressNo: this.applicationInfo.orderRefund.sid,
+                    orderDetailId: this.applicationInfo.orderRefund
+                        .orderDetailId,
+                    description: this.applicationInfo.orderRefund.description,
+                    deleteImgId: that.deleteImgId.substring(
+                        0,
+                        that.deleteImgId.length - 1
+                    ),
+                    wfxOrderNo: this.applicationInfo.order.wfxOrderNo,
+                    proNum: this.refundCount,
+                    refundNo: that.refundNo
+                }
+            })
+            .then(res => {
+                wepy.hideLoading();
+                if (res.data.code === 20000) {
+                    console.log('返回数据成功');
+                    wepy.redirectTo({
+                        url:
+                            '/usercenter/pages/refundDetail?refundNo=' +
+                            that.refundNo
+                    })
+                    .then((result) => {
+                      console.log('请求成功！');
+                    }).catch((err) => {
+                       console.log('请求失败');
+                    });
+                    that.$apply();
+                } else {
+                    wepy.showToast({
+                        title: res.data.msg || res.data.errorMsg,
+                        icon: 'none',
+                        duration: 2000
+                    });
+                }
+            });
+    }
+
+    //照片处理函数
+    //照片处理函数
+    async chooseWxImage(type) {
+        try {
+            let res = await wepy.chooseImage({
+                count: this.remainCount,
+                sizeType: ['original', 'compressed'],
+                sourceType: [type]
+            });
+            var tempFilePaths = res.tempFilePaths;
+            console.log('照片准备上传');
+            console.log(res.tempFilePaths);
+            this.remainCount = this.remainCount - res.tempFilePaths.length;
+            this.imageArray = this.imageArray.concat(
+                res.tempFilePaths.map((item, i) => {
+                    return { img: item, isLoaded: false };
+                })
+            );
+
+            let uploader = null;
+            let maxIndex = this.imageArray.length - 1;
+            console.log(this.imageArray.length);
+            console.log(maxIndex);
+            for (let i = 0; i < tempFilePaths.length; i++) {
+                try {
+                    uploader = await wepy.uploadFile({
+                        url:
+                            this.$parent.globalData.apiBaseUrl +
+                            '/api/v2/order/uploadImg',
+                        filePath: tempFilePaths[i],
+                        name: 'file',
+                        formData: {
+                            // "merchantNo":""//5682e8d7120c411bb38ddc252e6a74ee
+                            merchantNo: '5682e8d7120c411bb38ddc252e6a74ee'
+                        }
+                    });
+                    if (JSON.parse(uploader.data).code === 20000) {
+                        let store = JSON.parse(uploader.data).data;
+                        this.imgUrl.push(store);
+                        this.curLoadIndex = i;
+                        this.imageArray[i].isLoaded = true;
+                        this.imageArray[maxIndex].isLoaded = true;
+                        this.$apply();
+                    }
+                } catch (error) {
+                    console.log(error);
+                }
+            }
+            console.log(this.imgUrl);
+            console.log(this.imageArray);
+            this.$apply();
+        } catch (error) {
+            console.log('fail' + error);
+        }
+    }
+}
+</script>

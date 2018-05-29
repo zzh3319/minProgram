@@ -1,0 +1,84 @@
+<template>
+  <GoodsDetailPopup class="coupons" animationMode="bottom" align="bottom" :status.sync="choosing" locked="true">
+    <view class="popup__content">
+      <view class="popup__main">
+        <view class="pop-title">
+        店铺优惠券
+        <view class="iconfont close-icon" @tap="closeChoose">&#xe602;</view>
+      </view>
+      <repeat for="{{coupons.items}}" key="index" index="index" item="Item">
+        <view class="choose-item">
+          <GoodsDetailCouponsItem :item.sync="Item" />
+        </view>
+      </repeat>
+      </view>
+      <view class="bottom-tool-bar" @tap="closeChoose">完成</view>
+    </view>
+    <view class="popup_bg" @tap="closeChoose" catchtouchmove="preventD"></view>
+  </GoodsDetailPopup>
+</template>
+<script>
+import wepy from 'wepy';
+import GoodsDetailPopup from '@/components/goodsDetail-popup';
+import GoodsDetailCouponsItem from '@/components/goodsDetail-coupons-item';
+import GTools from '@/mixins/g-tools';
+export default class goodsDetailCouponsChoose extends wepy.component {
+    mixins = [GTools];
+    components = {
+        GoodsDetailPopup,
+        GoodsDetailCouponsItem
+    };
+    props = {
+        choosing: {
+            type: String,
+            default: 'hide'
+        },
+        coupons: {
+            type: Object,
+            default: {}
+        }
+    };
+    data = {};
+    methods = {
+        preventD() {},
+        closeChoose() {
+            this.$emit('GoodsDetailCoupons:hide');
+        }
+    };
+}
+</script>
+<style lang="less">
+@height: 810rpx;
+.coupons {
+    .popup__content {
+        width: 100%;
+        padding: 10rpx 10rpx 70rpx 10rpx;
+        background: #eeeeee;
+        z-index: 1005;
+        position: relative;
+        height: @height;
+        overflow-y: hidden;
+        .close-icon {
+            padding: 10rpx 20rpx;
+        }
+    }
+    .pop-title {
+        text-align: center;
+        height: 56rpx;
+        line-height: 56rpx;
+        font-size: 30rpx;
+    }
+    .popup_bg {
+        height: 100%;
+        width: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1004;
+    }
+    .popup__main {
+        height: @height - 50rpx;
+        overflow-y: scroll;
+    }
+}
+</style>

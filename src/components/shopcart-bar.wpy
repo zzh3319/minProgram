@@ -1,0 +1,143 @@
+<template>
+  <view class="bottom-tool-bar">
+    <wxc-flex wrap="nowrap" dir="left" cross='center' main="between">
+      <view class="flex-select">
+        <wxc-flex wrap="nowrap" dir="left" cross='center' main="around">
+          <view class="goods-check">
+            <view class="radio">
+              <wxc-flex wrap="nowrap" dir="left" cross='center' main="center">
+                <view @tap="selectAll">
+                  <radio value="select" checked="true" color="red" wx:if="{{edit?editSelectAll:cartResultVo.select_all}}" />
+                  <text class="check-radio" wx:else></text>
+                </view>
+                <text>全选</text>
+              </wxc-flex>
+            </view>
+          </view>
+          <view class="goods-total">
+            <wxc-flex dir="top" wx:if="{{!edit}}">
+              <view>
+                合计:
+                <wxc-price>{{cartResultVo.total_checked_price}}</wxc-price>
+              </view>
+              <view>
+                总额:
+                <wxc-price>{{cartResultVo.total_price}}</wxc-price>
+                {{cartResultVo.discount_fee!=0?'已减:':''}}
+                <wxc-price wx:if="{{cartResultVo.discount_fee!=0}}">{{cartResultVo.discount_fee}}</wxc-price>
+              </view>
+            </wxc-flex>
+          </view>
+        </wxc-flex>
+      </view>
+      <view class="flex-button del-button" wx:if="{{edit}}" @tap="deleteHandle">删除</view>
+      <view class="flex-button {{isGoPay}}" @tap="goPay" wx:else>去结算 ({{cartResultVo.total_checked_count}})</view>
+    </wxc-flex>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+export default class ShopcartBar extends wepy.component {
+    props = {
+        edit: {
+            type: [Boolean, String],
+            default: false
+        },
+        editSelectAll: {
+            type: [Boolean],
+            default: false
+        },
+        cartResultVo: {
+            type: Object,
+            default: {
+                local_price: 0
+            }
+        },
+        cartCount: {
+            type: Number,
+            default: 0
+        }
+    };
+    watch = {
+        cartResultVo() {
+            this.cartResultVo.total_checked_price = this.cartResultVo.total_checked_price.toFixed(
+                2
+            );
+            this.cartResultVo.local_price = this.cartResultVo.local_price.toFixed(
+                2
+            );
+            this.cartResultVo.discount_fee = this.cartResultVo.discount_fee.toFixed(
+                2
+            );
+            this.cartResultVo.total_price = this.cartResultVo.total_price.toFixed(2);
+        }
+    };
+    data = {};
+    computed = {
+        isGoPay() {
+            return this.cartResultVo.total_checked_count ? '' : 'disabled';
+        }
+    };
+    methods = {
+        selectAll() {
+            this.$emit('shopcart:editSelectAll');
+        },
+        deleteHandle() {
+            this.$emit('shopcart:deleteGoods');
+        },
+        goPay() {
+            if (!this.cartResultVo.total_checked_count) {
+                return false;
+            }
+            this.$emit('shopcart:confirmOrder');
+        }
+    };
+}
+</script>
+<style lang="less">
+@height: 100rpx;
+.bottom-tool-bar {
+    height: @height;
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.75);
+    color: #ffffff;
+}
+.flex-select {
+    width: 73%;
+    .radio {
+        margin-left: 20rpx;
+        margin-right: 10rpx;
+    }
+}
+.flex-button {
+    width: 27%;
+    font-size: 26rpx;
+    text-align: center;
+    line-height: @height;
+    background-color: #ff434d;
+    &.disabled {
+        background-color: #ececec;
+    }
+}
+.goods-total {
+    width: 400rpx;
+    font-size: 22rpx;
+    margin-left: 10rpx;
+}
+.goods-check {
+    width: 150rpx;
+}
+.check-radio {
+    width: 48rpx;
+    height: 48rpx;
+    display: inline-block;
+    border: 1px solid #aaa;
+    border-radius: 50%;
+    margin-right: 6rpx;
+}
+</style>

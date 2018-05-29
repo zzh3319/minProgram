@@ -1,0 +1,198 @@
+<template>
+    <view class="shopcart-item" wx:if="{{itemValue}}">
+        <view style="padding:20rpx 0rpx 5rpx 0rpx;">
+            <wxc-flex cross="center">
+                <label @tap="checkHandle({{itemValue.id}},{{itemValue.checked}})" class="radio">
+                    <radio wx:if="{{edit}}" checked="{{itemValue.deleteStatus}}" color="#000" />
+                    <radio wx:else checked="{{itemValue.checked}}" color="#000" disabled="{{itemValue.isOnsale!==1||itemValue.stock==0||itemValue.stock<0}}"/>
+                </label>
+                <view class="goods-img" @tap="jumpDetail({{itemValue.commodityNo}})">
+                    <view class="barredBuy" wx:if="{{itemValue.isOnsale!==1||itemValue.stock<1}}">
+                    <text wx:if="{{itemValue.isOnsale!==1}}">已下架</text>
+                    <text wx:elif="{{itemValue.stock<1}}">已售罄</text>
+                    </view>
+                    <view class="booking-image" wx:if="{{itemValue.isPreSell&&itemValue.isOnsale==1&&itemValue.stock>0}}"></view>
+                    <image src="{{itemValue.imageUrl}}" />
+                </view>
+              
+                <view class="goods-info">
+                    <wxc-flex dir="top" main="start">
+                    <wxc-elip line="2"  @tap="jumpDetail({{itemValue.commodityNo}})">
+                        {{itemValue.name}}
+                    </wxc-elip>
+                    <view class="goods-size"  @tap="jumpDetail({{itemValue.commodityNo}})">
+                        {{itemValue.specName}} {{itemValue.size}}
+                    </view>
+                    <view class="goods-price"  @tap="jumpDetail({{itemValue.commodityNo}})">
+                        <wxc-flex main="between">
+                            <wxc-flex >
+                                <wxc-price>{{itemValue.wfxPrice}}</wxc-price>
+                                <view class="goods-num">
+                                X {{itemValue.count}}
+                                </view>
+                            </wxc-flex>
+                            <view class="goods-count">
+                                <!-- <wxc-counter  bind:changenumber="onChangeNumber" number="{{itemValue.count}}" max="{{itemValue.limitBuyNumPerOrder}}" min="1"></wxc-counter> -->
+                                <yh-counter wx:if="{{edit}}" number="{{itemValue.count}}" max="{{skuMaxCount}}" min="1" cartSkusCount="{{cartSkusCount}}" curCountValue="{{curCount}}" @changenumber="onChangeNumber({{curCount}})" @addHandler="addHandle" @addHandleTost="addHandleTost" disabled="{{itemValue.isOnsale!==1||itemValue.stock<1 }}"/>
+                                <!-- <ShopcarCount   @onChangeNumber.user="onChangeNumber" :max.sync="max" :number.sync="number" /> || noCanSale==0-->
+                            </view>
+                        </wxc-flex>
+                    </view>
+                    </wxc-flex>
+                </view>
+            </wxc-flex>
+        </view>    
+    </view>
+</template>
+<script>
+import wepy from 'wepy';
+import GTools from '@/mixins/g-tools';
+export default class ShopcartListItem extends wepy.component {
+    mixins = [GTools];
+    components = {};
+    props = {
+        edit: {
+            type: [Boolean, String],
+            default: false
+        },
+        itemValue: {
+            type: Object,
+            default: {},
+            twoWay: true
+        },
+        skuMaxCount: {
+            type: [String, Number],
+            default: 1
+        },
+        curCount: {
+            type: [Number, String],
+            default: 1 //为1,则可添加
+        },
+        cartSkusCount: {
+            type: [Boolean, String],
+            default: 1
+        }
+    };
+    onLoad() {
+        console.log(this);
+    }
+    data = {
+        firstflag: true,
+        noFlag: 0 //若为0，则可用
+    };
+    methods = {
+        checkHandle(id, checkState, e) {
+            console.log(this.edit);
+            // 如果是编辑状态,则根据deleteStatus改变
+            if (this.edit) {
+                this.itemValue = Object.assign(this.itemValue, {
+                    deleteStatus: !this.itemValue.deleteStatus
+                });
+
+                this.$emit('shopcart:editSelect');
+            } else {
+                // 如果是非编辑状态
+                this.$emit('shopcart:editSelect', id, !checkState);
+            }
+        },
+        onChangeNumber(curCount, evt) {
+            console.log(this);
+            // console.log(evt)
+            // 如果已编辑则加入edited状态
+            if (evt === '' || evt === undefined || evt === null) {
+                console.log('无');
+            } else {
+                console.log(123123123123);
+                this.$emit('carCount', evt.detail.curCount);
+                this.curCount = evt.detail.curCount;
+            }
+            this.$apply();
+        },
+        addHandle(evt) {
+            const max = evt.detail.max;
+            this.customFunction.toast(`该商品单次最多购买${max}件`);
+        },
+        addHandleTost(evt) {
+            this.customFunction.toast('只能买这么多了');
+        },
+        jumpDetail(goodsID, currentTarget) {
+            this.$emit('shopcart:junpGoodDetail', goodsID);
+        }
+    };
+}
+</script>
+<style lang="less">
+.shopcart-item {
+    background: #fff;
+    // height: 200rpx;
+    padding: 20rpx;
+    margin-bottom: 20rpx;
+    .goods-img {
+        width: 160rpx;
+        height: 160rpx;
+        border: 1px solid #cfcfcf;
+        margin-left: 20rpx;
+        position: relative;
+        image {
+            width: 100%;
+            height: 100%;
+        }
+        .booking-image {
+            @height: 54rpx;
+            width: @height;
+            height: @height;
+            line-height: @height;
+            position: absolute;
+            left: 4rpx;
+            top: 4rpx;
+            background: url(https://i2.ygimg.cn/cmp/mp/booking-label.png)
+                no-repeat;
+            background-size: 100% auto;
+            font-size: 26rpx;
+            color: #fff;
+            text-align: center;
+        }
+        .barredBuy {
+            @height: 80rpx;
+            width: @height;
+            height: @height;
+            border-radius: 50%;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            margin-left: -@height / 2;
+            margin-top: -@height / 2;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            line-height: @height;
+            text-align: center;
+            font-size: 22rpx;
+        }
+    }
+    .goods-info {
+        width: 450rpx;
+        height: 162rpx;
+        margin-left: 20rpx;
+        display: block;
+        padding-top: 20rpx;
+        font-size: 24rpx;
+    }
+    .goods-price {
+        margin-top: 5rpx;
+        position: relative;
+    }
+    .goods-num {
+        color: #848484;
+        margin-left: 5rpx;
+    }
+    .goods-size {
+        color: #848484;
+        margin-top: 5rpx;
+    }
+    .goods-count {
+        position: absolute;
+        top: -40rpx;
+        right: 0;
+    }
+}
+</style>

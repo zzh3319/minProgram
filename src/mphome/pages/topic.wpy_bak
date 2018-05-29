@@ -1,0 +1,177 @@
+<template>
+    <scroll-view class="topic-container" scroll-y>
+        <repeat for="{{render}}" key="index" index="index" item="item">
+            <!-- decorateGoodsTitle因repeat的子组件中传值错误,放在此处,升级后修改 -->
+            <decorateGoodsListTitle :item.sync="item" wx:if="{{item.widgetsContent.titleFlag==1}}" />
+            <decorateListArticleTab :item.sync="item" wx:if="{{item.type=='acticleChannle'}}" :itemIndex.sync="index" />
+            <!-- 基础组件,需要整个items -->
+            <decorateGoodsListSwiper :item.sync="item" wx:if="{{item.type=='goods4'}}" />
+            <decorateBlank :item.sync="item" wx:if="{{item.type=='space'}}" />
+            <decorateSearch :item.sync="item" wx:if="{{item.type=='search'}}" />
+            <decorateSwiper :item.sync="item" wx:if="{{item.type=='scroll'}}" />
+            <decorateCoupons :item.sync="item" wx:elif="{{item.type=='coupon'}}" />
+            <decorateTcNine :item.sync="item" wx:elif="{{item.type=='tc9'}}" />
+            <!-- 只需要循环widgetsContent内数组的组件 -->
+            <decorateList :item.sync="item" wx:else/>
+            <view wx:if="{{item.widgetsContent.marginBottom==1}}" class='margin-b'></view>
+        </repeat>
+        <decorateGoods1 wx:if="{{lastModuleDataObj}}" :hasMoreData.sync="hasMoreData" :lastModuleDataObj.sync="lastModuleDataObj" :lastModuleDataList.sync="lastModuleDataList" />
+        <returnTop :showReturnBotton.sync="showReturnBotton" />
+    </scroll-view>
+</template>
+<script>
+import wepy from 'wepy';
+import decorateGoods1 from '@/components/decorate-goods1';
+import decorateList from '@/components/decorate-list';
+import decorateSwiper from '@/components/decorate-swiper';
+import decorateSearch from '@/components/decorate-search';
+import decorateCoupons from '@/components/decorate-coupons';
+import decorateBlank from '@/components/decorate-blank';
+import decorateTcNine from '@/components/decorate-tc-nine';
+import decorateGoodsListSwiper from '@/components/decorate-list-goods-swiper';
+import decorateGoodsListTitle from '@/components/decorate-list-goods-title';
+import decorateListArticleTab from '@/components/decorate-list-article-tab';
+import returnTop from '@/components/return-top';
+import GTools from '@/mixins/g-tools';
+import linkHandle from '@/mixins/link-map';
+export default class topic extends wepy.page {
+    mixins = [GTools];
+    config = {
+        navigationBarTitleText: '专题',
+        usingComponents: {
+            'wxc-flex': '../../../packages/@minui/wxc-flex/dist/index',
+            'wxc-elip': '../../../packages/@minui/wxc-elip/dist/index',
+            'wxc-tab': '../../../packages/@minui/wxc-tab/dist/index',
+            'wxc-tab-panel': '../../../packages/@minui/wxc-tab/dist/panel',
+            'wxc-price': '../../../packages/@minui/wxc-price/dist/index'
+        }
+    };
+    components = {
+        decorateList,
+        decorateSwiper,
+        decorateSearch,
+        decorateBlank,
+        decorateCoupons,
+        decorateGoodsListSwiper,
+        decorateTcNine,
+        decorateGoodsListTitle,
+        returnTop,
+        decorateListArticleTab,
+        decorateGoods1
+    };
+    data = {
+        // url: "http://172.17.222.104:7001",
+        url: 'http://172.17.222.73:8295',
+        render: [],
+        showReturnBotton: false,
+        topicId: null,
+        //zzh
+        lastModuleDataList: null,
+        lastModuleDataObj: null,
+        pageNum: 1,
+        moduleContentContorlNum: 20, //模块内容list数量控制
+        onePageContentNum: 10, //分页一次加载个数
+        allPageContentNum: 0, //总页数
+        hasMoreData: true
+    };
+    onReachBottom() {
+        this.customFunction.onReachBottomHandler(this);
+    }
+    async onLoad({
+        // topicId = "5f0aec2422314ed1b1ec86f398bf92ba"
+        topicId,
+        type,
+        shopId
+    }) {
+      console.log('topic type', type);
+      let that = this;
+        if (type) {
+            let curUrl;
+            // 锁粉
+            this.$parent.lockFans(shopId, 4); //4,//专题页访问
+            curUrl = this.customFunction.getCurrentPageUrlWithArgs();
+            this.$parent.globalData.fromUrl.url = curUrl;
+        }
+        console.log(topicId);
+        this.topicId = topicId;
+        // const url = `${this.url}/api/v2/component/pagehome`;
+        const url = `${
+            this.$parent.globalData.apiBaseUrl
+        }/api/v2/component/pagehome`;
+        const params = {
+            type: 'TOPIC',
+            templateId: topicId
+        };
+        const { data, code } = await this.customFunction.fetchData(url, params);
+        if (code !== 20000) {
+            this.customFunction.showModal();
+            console.error('获取数据错误:code', code);
+            console.error('获取数据错误:data', data);
+            return;
+        }
+        data.forEach(item => {
+            item.widgetsContent = JSON.parse(item.widgetsContent);
+            // if (item.widgetsContent['list'].length > 0){
+            //     that.noticeList = item.widgetsContent['list'][0]['rules']
+            // }
+        });
+        // zzh
+        this.customFunction.pagingHandler(data, this);
+        // zzh
+        const title = data[0].templateName || '专题页';
+        wepy.setNavigationBarTitle({
+            title
+        });
+        this.render = data;
+        this.$apply();
+    }
+    onPageScroll({ scrollTop }) {
+        if (scrollTop > 400 && !this.showReturnBotton) {
+            this.showReturnBotton = true;
+            this.$apply();
+        }
+        if (scrollTop < 400 && this.showReturnBotton) {
+            this.showReturnBotton = false;
+            this.$apply();
+        }
+    }
+    onShareAppMessage(options) {
+        // URL 增加 shopId
+        let topicId = this.topicId;
+        let shopId = wepy.getStorageSync('shopId');
+        let path = `/mphome/pages/topic?type=share&shopId=${shopId}&topicId=${topicId}`;
+        return {
+            title: '{$shareTitle}',
+            path: path,
+            // imageUrl: "{$shareImg}",
+            success: function(res) {
+                // 转发成功
+                wepy.showToast({
+                    title: '转发成功',
+                    icon: 'success',
+                    duration: 2000
+                });
+            },
+            fail: function(res) {
+                wepy.showToast({
+                    icon: 'none',
+                    title: '转发失败',
+                    duration: 2000
+                });
+            }
+        };
+    }
+    events = linkHandle;
+}
+</script>
+<style lang="less">
+page {
+    background: white;
+}
+.topic-container {
+    // height: 100vh;
+    .margin-b {
+        margin-bottom: 20rpx;
+    }
+}
+</style>

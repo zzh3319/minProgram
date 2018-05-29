@@ -1,0 +1,127 @@
+<template>
+  <web-view src='{{webViewUrl}}'></web-view>
+</template>
+
+<script>
+import wepy from 'wepy';
+// 发现弹出窗
+export default class specialPage extends wepy.page {
+    shareType = {};
+    shareUrl = {};
+    config = {};
+    components = {};
+    mixins = [];
+    data = {
+        webViewUrl: '',
+        userInfo: {},
+        hasUserInfo: false
+    };
+    computed = {};
+    methods = {};
+    events = {};
+    onLoad(options) {
+        if (!wx.canIUse('web-view')) {
+            this.$parent.webviewNoCanUsewx();
+            return false;
+        }
+        // wx.showLoading();
+
+        let discoverURL = decodeURIComponent(options.url);
+        let returnUrl = options.return_url;
+        this.shareType = options.type;
+        this.shopId = options.shopId;
+        if (options.type && options.type === 'share') {
+            let decodeURL = decodeURIComponent(returnUrl);
+            if (decodeURL.indexOf('|') > 0) {
+                decodeURL = decodeURL.split('|').join('%7C');
+            }
+            this.shareUrl = this.appendWxpageParam(decodeURL);
+            return false;
+        }
+        setTimeout(() => {
+            if (returnUrl !== undefined) {
+                this.webViewUrl = this.appendWxpageParam(returnUrl);
+            } else {
+                this.webViewUrl = this.appendWxpageParam(discoverURL);
+            }
+        }, 1);
+    }
+    onReady() {
+        if (this.shareType) {
+            this.webViewUrl = this.shareUrl;
+            this.shareType = null;
+
+            // 锁粉
+            this.$parent.lockFans(this.shopId, 4); //4,//专题页访问
+        }
+    }
+    onShow() {}
+    onShareAppMessage(options) {
+        let webViewUrl = options.webViewUrl;
+        // URL 增加 shopId
+        let shopId = wepy.getStorageSync('shopId');
+        if (webViewUrl.indexOf('?') < 0) {
+            webViewUrl = webViewUrl + '?shopId=' + shopId;
+        } else {
+            let regexp = /^.*\?.*shopId=.*/;
+            if (!regexp.test(webViewUrl)) {
+                webViewUrl = webViewUrl + '&shopId=' + shopId;
+            } else {
+                // 将 WebView 连接中原 shopId 替换成当前用户的shopId
+                let regexp2 = /shopId=(.*?)&/;
+                if (regexp2.test(webViewUrl)) {
+                    webViewUrl = webViewUrl.replace(
+                        regexp2,
+                        'shopId=' + shopId + '&'
+                    );
+                } else {
+                    webViewUrl = webViewUrl.replace(
+                        /shopId=.*$/,
+                        'shopId=' + shopId
+                    );
+                }
+            }
+        }
+        // 增加 wxpage 参数
+        let wxpage = 'specialPage';
+        if (webViewUrl.indexOf('?') < 0) {
+            webViewUrl = webViewUrl + '?wxpage=' + wxpage;
+        } else {
+            webViewUrl = webViewUrl + '&wxpage=' + wxpage;
+        }
+        //
+        let imageUrl = '';
+        let path =
+            '/pages/specialPage?return_url=' +
+            encodeURIComponent(webViewUrl) +
+            '&type=share&shopId=' +
+            shopId;
+        return {
+            title: '{$shareTitle}',
+            path: path,
+            imageUrl: imageUrl,
+            success: function(res) {
+                // 转发成功
+                wx.showToast({
+                    title: '转发成功',
+                    icon: 'success',
+                    duration: 2000
+                });
+            },
+            fail: function(res) {
+                wx.showToast({
+                    title: '转发失败',
+                    duration: 2000
+                });
+            }
+        };
+    }
+    appendWxpageParam(url) {
+        if (!/(^|&|\?)wxpage=([^&]*)(&|$)/i.test(url)) {
+            let connectFlag = url.indexOf('?') !== -1 ? '&' : '?';
+            return url + connectFlag + 'wxpage=specialPage';
+        }
+        return url;
+    }
+}
+</script>

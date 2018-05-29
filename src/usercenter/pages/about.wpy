@@ -1,0 +1,23 @@
+<template>
+  <view class="userinfo" @tap="tapMe">
+    》》{{msg}}
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+export default class about extends wepy.page {
+    config = {
+        navigationBarTitleText: '我的'
+    };
+    data = {
+        msg: '这是我的'
+    };
+    methods = {
+        tapMe(e) {
+            wepy.showModal({
+                content: '押后22!'
+            });
+        }
+    };
+}
+</script>

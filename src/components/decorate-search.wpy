@@ -1,0 +1,85 @@
+<template>
+  <view class="search-container {{item.widgetsContent.searchType==0?'search-type-one':''}}" @tap.stop="linkSearch">
+    <view class="search">
+      <view class="search-input">
+        {{item.widgetsContent.searchType==0?'请输入商品名称':'搜索'}}
+      </view>
+      <view class="search-btn" wx:if="{{item.widgetsContent.searchType==1}}">
+          <i class="iconfont">&#xe667;</i>
+      </view>
+    </view>
+    <view class="search-btn" wx:if="{{item.widgetsContent.searchType==0}}">
+         <view >
+           {{item.widgetsContent.title}}
+         </view>
+      </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+export default class decorateSearch extends wepy.component {
+    data = {};
+    props = {
+        item: {
+            type: Object,
+            default: {}
+        }
+    };
+    methods = {
+        linkSearch() {
+            const url = '/mphome/pages/search';
+            wepy.navigateTo({
+                url
+            });
+        }
+    };
+}
+</script>
+
+<style lang="less">
+@btn-width: 80rpx;
+.search-container {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 24rpx 40rpx;
+    background: #fff;
+
+    .iconfont {
+        font-size: 26rpx;
+    }
+    .search {
+        @height: 60rpx;
+        display: flex;
+        border: 1px solid #d9d9dc;
+        color: #d9d9dc;
+        border-radius: @height;
+        overflow: hidden;
+        height: @height;
+        line-height: @height;
+        padding-left: 25rpx;
+    }
+    &.search-type-one {
+        display: flex;
+        align-items: center;
+        .search {
+            border-radius: 0;
+            width: e('calc(100% - 80rpx)');
+        }
+        .search-btn {
+            border-left: 0;
+            background: #fff;
+        }
+        .search-input {
+        }
+    }
+}
+.search-input {
+    font-size: 24rpx;
+    width: e('calc(100% - 80rpx)');
+}
+.search-btn {
+    width: @btn-width;
+    font-size: 24rpx;
+    text-align: center;
+}
+</style>

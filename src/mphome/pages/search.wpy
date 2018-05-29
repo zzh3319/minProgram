@@ -1,0 +1,272 @@
+<style lang="less">
+.page {
+    width: 100%;
+    background: #f4f4f4;
+}
+.wrap_box {
+    box-sizing: border-box;
+    width: 100%;
+    background: white;
+    padding: 10rpx 20rpx;
+    .search_wrap {
+        overflow: hidden;
+        box-sizing: border-box;
+        border-radius: 50rpx;
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        border: 1rpx solid #ccc;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 10rpx;
+        .input {
+            font-size: 30rpx;
+            width: e('calc(100% - 30rpx)');
+            height: 70rpx;
+            color: #b4b4b4;
+            margin-left: 20rpx;
+        }
+        .search {
+            background: #fff;
+            margin: 0;
+            height: 50rpx;
+            color: white;
+            font-size: 30rpx;
+            text-align: center;
+            line-height: 50rpx;
+            .icon {
+                color: #ccc;
+                font-size: 40rpx;
+                line-height: 50rpx;
+                margin-left: 75rpx;
+            }
+        }
+        .search::after {
+            border: none;
+        }
+    }
+}
+.hot_products {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    .title {
+        color: black;
+        font-size: 30rpx;
+        margin-bottom: 5rpx;
+    }
+    .hot_item {
+        box-sizing: border-box;
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        text {
+            font-size: 30rpx;
+            margin: 10rpx 20rpx 10rpx 0;
+            border: 1rpx solid #ccc;
+            padding: 8rpx 25rpx;
+            border-radius: 6px;
+            color: #6b6b6b;
+        }
+    }
+}
+.search_history {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    .empty_history {
+        width: 70%;
+        height: 65rpx;
+        border: 1rpx solid #666;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto;
+        margin-top: 30rpx;
+        border-radius: 10rpx;
+    }
+    .title {
+        color: black;
+        font-size: 30rpx;
+        margin-bottom: 5rpx;
+    }
+    .history_item {
+        box-sizing: border-box;
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        text {
+            text-align: center;
+            color: #6b6b6b;
+            font-size: 30rpx;
+            padding: 18rpx 40rpx 18rpx 15rpx;
+        }
+    }
+}
+</style>
+<template>
+  <view class="wrap_box">
+    <view class="search_wrap">
+      <input class="input" type='text' placeholder="输入商品名称" maxlength="20" bindconfirm="searchHandler" bindinput="bindKeyInput" confirm-type="search" auto-focus="{{true}}" value="{{inputTxt}}" />
+      <button form-type="submit" size="mini" @tap="searchHandler" type="default" class="search">
+            <i class="iconfont icon">&#xe667;</i>
+          </button>
+    </view>
+  </view>
+  <view hidden="{{!showHotName}}" class="hot_products">
+    <view class="title">热门搜索</view>
+    <view class="hot_item">
+      <repeat for="{{hotNameArr}}" key="index" index="index" item="item">
+        <text @tap="clickHotItems({{item}})">{{item}}</text>
+      </repeat>
+    </view>
+  </view>
+  <view hidden="{{!showHistory}}" class="search_history">
+    <view class="title">搜索历史</view>
+    <view class="history_item">
+      <repeat for="{{historyArr}}" key="index" index="index" item="item">
+        <text @tap="clickHistoryItems({{item}})">{{item}}</text>
+      </repeat>
+    </view>
+    <view @tap="emptyHistory" class="empty_history">清空历史记录</view>
+  </view>
+</template>
+
+
+<script>
+import wepy from 'wepy';
+import GTools from '@/mixins/g-tools';
+// 商品列表
+export default class search extends wepy.page {
+    mixins = [GTools];
+    config = {
+        navigationBarTitleText: '搜索',
+        backgroundColor: '#f4f4f4',
+        usingComponents: {}
+    };
+    data = {
+        inputTxt: '',
+        historyArr: [],
+        showHistory: false,
+        hotNameArr: [],
+        showHotName: false
+    };
+    methods = {
+        searchHandler() {
+            this.clickSearchAction();
+        },
+        bindKeyInput(event) {
+            this.inputTxt = event.detail.value;
+            this.$apply();
+        },
+        emptyHistory() {
+            wepy.setStorageSync('search_history', []);
+            this.renderStorage();
+        },
+        clickHotItems(item) {
+            this.navigatToGoodsList(item);
+        },
+        clickHistoryItems(item) {
+            let uniqueHistory = [];
+            let hasHistory = this.getStorageHandler();
+            hasHistory.unshift(item);
+            uniqueHistory = Array.from(new Set(hasHistory)); //去重
+            wepy.setStorageSync('search_history', uniqueHistory);
+            this.navigatToGoodsList(item);
+        }
+    };
+    navigatToGoodsList(item) {
+        let navigate = `/mphome/pages/goodsList?commodity_name=${item}`;
+        wepy.navigateTo({
+            url: navigate
+        });
+    }
+    clickSearchAction() {
+        let inputTxt = this.inputTxt;
+        if (!inputTxt.length) {
+            //input 为空
+            wepy.showToast({
+                title: '请输入内容！',
+                icon: 'none',
+                duration: 2000
+            });
+        } else {
+            this.setStorageHandler(inputTxt);
+            this.navigatToGoodsList(inputTxt);
+        }
+    }
+    setStorageHandler(inputTxt) {
+        let hasHistory = this.getStorageHandler();
+        let length = hasHistory.length;
+        let uniqueHistory = [];
+        if (length === 0) {
+            wepy.setStorageSync('search_history', [inputTxt]);
+        } else if (length >= 10) {
+            //要保存最新的10个
+            hasHistory.unshift(inputTxt);
+            uniqueHistory = Array.from(new Set(hasHistory)); //去重
+            if (uniqueHistory.length > 10) {
+                uniqueHistory.pop();
+            }
+            wepy.setStorageSync('search_history', uniqueHistory);
+        } else {
+            hasHistory.unshift(inputTxt);
+            uniqueHistory = Array.from(new Set(hasHistory)); //去重
+            wepy.setStorageSync('search_history', uniqueHistory);
+        }
+    }
+    getStorageHandler() {
+        let hasHistory = wepy.getStorageSync('search_history');
+        return hasHistory;
+    }
+    renderStorage() {
+        let hasHistory = this.getStorageHandler();
+        hasHistory.length > 0
+            ? (this.showHistory = true)
+            : (this.showHistory = false);
+        this.historyArr = hasHistory || [];
+        this.$apply();
+    }
+    async renderHotName() {
+        let url = `${
+            this.$parent.globalData.apiBaseUrl
+        }/api/v2/search/getHostKeys`;
+        let param = {};
+        let response = await this.customFunction.fetchData(url, param);
+        let { data, code, errorMsg } = response;
+        if (code !== 20000) {
+            this.customFunction.toast(errorMsg);
+            return;
+        }
+        this.hotNameArr = data.slice(0, 10);
+        data.length === 0
+            ? (this.showHotName = false)
+            : (this.showHotName = true);
+        this.$apply();
+    }
+    async renderDefaultProduct() {
+        let url = `${
+            this.$parent.globalData.apiBaseUrl
+        }/api/v2/search/queryDefault`;
+        let param = {};
+        let response = await this.customFunction.fetchData(url, param);
+        let { data, code, errorMsg } = response;
+        if (code !== 20000) {
+            this.customFunction.toast(errorMsg || '数据错误！');
+            return;
+        }
+        this.inputTxt = data || '';
+        this.$apply();
+    }
+    onLoad(options) {
+        this.renderStorage(); //显示搜索历史
+        this.renderHotName(); //显示热门搜索
+        this.renderDefaultProduct(); //显示默认搜索词
+    }
+    onShow() {
+        this.renderStorage(); //显示搜索历史
+    }
+}
+</script>

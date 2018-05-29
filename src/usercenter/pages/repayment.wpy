@@ -1,0 +1,246 @@
+<style>
+page {
+    background: #f4f4f4;
+}
+
+.container {
+    width: 100%;
+    position: relative;
+    padding: 0 0 0;
+    color: #777;
+}
+
+.view,
+.payPrice,
+.payWay {
+    display: block;
+    width: 100%;
+}
+
+.orderstatus {
+    padding: 20px 20px;
+    /*width:100%;*/
+    text-align: center;
+    background: #fff;
+    margin-bottom: 20px;
+}
+
+.orderstatus text {
+    display: block;
+    padding: 10px 0 0;
+    color: #4fbb2a;
+}
+
+.payCon {
+    width: 100%;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+.payBtn {
+    margin-top: 50px;
+    width: 40%;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.goToOrder {
+    float: left;
+    background: #ff434d;
+    border: 1px solid #ff434d;
+    color: #fff;
+}
+
+.goOnBuy {
+    float: right;
+    background: #f4f4f4;
+    border: 1px solid #777;
+    color: #777;
+}
+
+.payPrice text {
+    color: #ff434d;
+}
+
+.payPrice,
+.payWay {
+    font-size: 13px;
+}
+
+.repayment {
+    text-align: left;
+    font-size: 15px;
+    padding-left: 20px;
+    padding-right: 20px;
+    color: #666;
+}
+
+.orderstatusWrap {
+    width: 100%;
+    background: #fff;
+}
+</style>
+<template>
+    <view class='container'>
+        <ShareCard wx:if="{{hasShareCard}}" />
+        <view class="orderstatus orderstatusWrap" hidden="{{successStatus ? false : true}}">
+            <icon type="success" size="50"></icon>
+            <text>订单支付成功!</text>
+        </view>
+        <view class="orderstatus repayment" hidden="{{successStatus ? true : false}}">您的订单未支付成功，系统将会为您保留1个小时，1个小时后系统将会自动取消订单，请尽快完成支付。</view>
+        <view class="payCon">
+            <view class='payPrice'>支付金额：
+                <text>{{orderPrice}}</text>
+            </view>
+            <view class='payWay'>支付方式：在线支付(微信支付)</view>
+            <view @tap="goPay" class="payBtn goToOrder goToPay" hidden="{{successStatus ? true : false}}">去支付</view>
+            <view @tap="goToOrder" class="payBtn goToOrder" hidden="{{successStatus ? false : true}}">查看订单</view>
+            <view @tap="goOnBuy" class="payBtn goOnBuy">继续购买</view>
+        </view>
+    </view>
+</template>
+<script>
+import wepy from 'wepy';
+import ShareCard from '@/components/shareCard';
+export default class repayment extends wepy.page {
+    getOrderId = '';
+    orderNo = '';
+    config = {
+        navigationBarTitleText: '支付失败'
+    };
+    components = {
+        ShareCard
+    };
+    data = {
+        orderPrice: '',
+        successStatus: false,
+        hasShareCard: false
+    };
+    methods = {
+        goPay() {
+            var getOrderNo = this.orderNo;
+            this.requestPay(getOrderNo);
+        },
+        goOnBuy() {
+            wepy.switchTab({
+                url: '/pages/index'
+            });
+        },
+        goToOrder() {
+            var getOrderId = this.getOrderId;
+            wepy.redirectTo({
+                url: `/usercenter/pages/orderDetail?url=${
+                this.$parent.globalData.h5BaseUrl
+                }/order/${getOrderId}.sc`
+            });
+        }
+    };
+    onLoad(options) {
+        console.log('重新支付order_id:' + options.order_id);
+        this.orderNo = options.order_no;
+        this.getOrderId = options.order_id;
+        //return false;
+        this.orderPrice = options.order_price;
+    }
+    requestPay(getOrder) {
+        var _that = this;
+               let openId = wepy.getStorageSync('openid');
+        wepy
+            .request({
+                url:
+                this.$parent.globalData.apiBaseUrl + `/api/v2/pay/sendData?merchantNo={$merchantNo}&openId=${openId}`,
+                method: 'POST',
+                data: {
+                    biz_no: getOrder,
+                    open_id: wepy.getStorageSync('openid')
+                }
+            })
+            .then(res => {
+                //console.log(res)
+                var paysignInfo = res.data;
+                //console.log(res);
+                wepy.hideLoading();
+                wepy.requestPayment({
+                    appId: paysignInfo.appId,
+                    timeStamp: paysignInfo.timeStamp + '',
+                    nonceStr: paysignInfo.nonceStr,
+                    package: paysignInfo.package,
+                    signType: 'MD5',
+                    paySign: paysignInfo.sign
+                }).then(getData => {
+                    wepy.showLoading();
+                    let openId = wepy.getStorageSync('openid');
+                    wepy
+                        .request({
+                            url:
+                            _that.$parent.globalData.apiBaseUrl +
+                            `/api/v2/order/payok?merchantNo={$merchantNo}&openId=${openId}`,
+                        method: 'POST',
+                        data: {
+                            order_no: getOrder,
+                             receiveRedPacketPagePath: 'mphome/pages/getCouponResult'
+                        }
+                        })
+                    .then(getRes => {
+                        console.log(getRes);
+                        wepy.hideLoading();
+                        if (res.statusCode === 200) {
+                            wepy.setNavigationBarTitle({
+                                title: '支付成功'
+                            });
+                            _that.successStatus = true;
+                            let redPacket = getRes.data.data.redPacket;
+                            if (redPacket) {
+                                _that.hasShareCard = true;
+                                _that.$broadcast('shareCard:show', redPacket, 'mask');
+                            }
+                            _that.$apply();
+                        }
+                    });
+            }).catch(res => {
+                console.log(res);
+                console.log('支付失败');
+            })
+        // wepy.requestPayment({
+        //     appId: paysignInfo.appId,
+        //     timeStamp: paysignInfo.timeStamp + '',
+        //     nonceStr: paysignInfo.nonceStr,
+        //     package: paysignInfo.package,
+        //     signType: 'MD5',
+        //     paySign: paysignInfo.sign,
+        //     success: function(getData) {
+        //         wepy.showLoading();
+        //         wepy
+        //             .request({
+        //                 url:
+        //                     _that.$parent.globalData.apiBaseUrl +
+        //                     '/api/v2/order/payok',
+        //                 method: 'POST',
+        //                 data: {
+        //                     order_no: getOrder
+        //                 }
+        //             })
+        //             .then(getRes => {
+        //                 console.log(getRes);
+        //                 wepy.hideLoading();
+        //                 if (res.statusCode === 200) {
+        //                     wepy.setNavigationBarTitle({
+        //                         title: '支付成功'
+        //                     });
+        //                     _that.successStatus = true;
+        //                     _that.$apply();
+        //                 }
+        //             });
+        //     },
+        //     fail: function(res) {
+        //         console.log(res);
+        //         console.log('支付失败');
+        //     }
+        // });
+    });
+}
+}
+</script>

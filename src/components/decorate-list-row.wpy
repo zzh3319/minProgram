@@ -1,0 +1,89 @@
+<template>
+  <view class="decorate-item">
+    <image  @tap="link({{subItem.linkType}},{{subItem.linkValue}})"  src="{{subItem.imgUrl}}" class="decorate-item-image product_image {{animationMode}}" bindload="imageLoad" lazy-load='{{true}}' mode="widthFix" />
+  </view>
+</template>
+<script>
+import wepy from "wepy";
+export default class decorateColRow extends wepy.component {
+  props = {
+    subItem: {
+      type: Object,
+      default: {
+        imgUrl: "/static/img/ST/default.png"
+      }
+    },
+    marginInner: {
+      type: Object
+    }
+  };
+  data = {
+    animationMode: ""
+  };
+  methods = {
+    imageLoad() {
+      this.animationMode = "loaded";
+    },
+    link(linkType, linkUrl) {
+      // if (getCurrentPages().pop().__route__ === "mphome/pages/topic") {
+      //   // let linkUrlArr = linkUrl.split("/");
+      //   // let paramId = linkUrlArr[linkUrlArr.length - 1].slice(0, -3);
+      //   // wepy.redirectTo({
+      //   //   url: `/mphome/pages/topic?topicId=${paramId}`
+      //   // });
+      //   // return;
+      //   this.$parent.globalData.topicList.push()
+      // }
+      this.$emit("link-Handle", linkType, linkUrl);
+    }
+  };
+
+  computed = {};
+}
+</script>
+
+<style lang="less">
+.index-container {
+  .decorate-item {
+    
+    &.marginInner {
+      padding: 5rpx;
+    }
+    .image {
+      border: 0;
+      display: block
+    }
+  }
+}
+
+.cms-column-tc1-floor {
+  background: #fff;
+  .decorate-item {
+    width: 100%;
+  }
+}
+.cms-column-tc2-floor {
+  background: #fff;
+  .decorate-item {
+    width: 50%;
+  }
+}
+.cms-column-tc3-floor {
+  background: #fff;
+  .decorate-item {
+    width: 33.33%;
+  }
+}
+.cms-column-tc4-floor {
+  background: #fff;
+  .decorate-item {
+    width: 25%;
+    &::after,::before{
+      display: none
+    }
+    .decorate-item-image {
+      vertical-align:top
+    }
+  }
+}
+</style>

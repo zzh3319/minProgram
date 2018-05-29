@@ -1,0 +1,275 @@
+<template>
+    <view class="order-item">
+        <view class="title-box mt20">
+          <wxc-flex class="wrap"> 
+               <view class="item main">
+                <text>预估提成：￥{{item.brokerage}}</text>
+              </view>
+              <view class="item main tr">
+                |<text class="ml18">订单实付：￥{{item.paying}}</text>
+              </view>
+          </wxc-flex>
+        </view>
+        <view class="title-box childTitle">
+          <wxc-flex class="wrap"> 
+               <view class="item main">
+                <text>订单号：{{item.order_num}}</text>
+              </view>
+              <view class="item main tr">
+                <text class="color666" >{{item.state_flag}}</text>
+              </view>
+          </wxc-flex>
+        </view>
+        <view class="lists-box">
+          <view class="item-box" wx:for="{{item.products}}" wx:key="index"  wx:for-item="productItem">
+               <wxc-flex class="wrap">
+                <view class="item side">
+                   <navigator url="/pages/goodsDetail?commodityNo={{productItem.commodity_no}}&shopId={{item.shop_id}}" hover-class="none" >
+                    <image src="{{productItem.url}}" class="pruimg"></image>
+                  </navigator>
+                </view>
+                <view class="item main pl32 mtf4">
+                  <navigator url="/pages/goodsDetail?commodityNo={{productItem.commodity_no}}&shopId={{item.shop_id}}" hover-class="none" >
+                    <view class="item-line1">
+                      <wxc-flex class="wrap">
+                        <wxc-elip line="2" class="item main minheight">{{productItem.describe}}</wxc-elip>
+                        <view class="item side">
+                          <text class="block">￥{{productItem.price}}</text>
+                          <text class="block">￥{{productItem.pay_price}}</text>
+                        </view>
+                      </wxc-flex>
+                    </view>
+                    <view class="item-line2">
+                      <wxc-flex class="wrap">
+                        <view class="item main">
+                          <text>{{productItem.prod_spec}}</text>  
+                        </view>
+                        <view class="item side">
+                            x<text class="num">{{productItem.num}}</text>
+                        </view>
+                      </wxc-flex>
+                    </view>
+                  </navigator>
+                  <view class="item-line3">
+                    <wxc-flex class="wrap">
+                      <view class="item main iconfont">
+                        <block wx:if="{{productItem.refund_show_status.length}}">&#xe61f;<text class="state">{{productItem.refund_show_status}}</text></block>
+                      </view>
+                      <view class="item side" wx:if="{{item.commission_status==1||item.commission_status==2}}">预估提成：￥{{productItem.commission}}</view>
+                      <view class="item side" wx:if="{{item.commission_status==3}}">提成：￥{{productItem.commission}}</view>
+                    </wxc-flex>
+                  </view>
+                </view>
+              </wxc-flex>
+          </view>
+        </view>
+        <view class="userinfo-box">
+          <wxc-flex class="wrap">
+             <view class="item side">
+                 <wxc-avatar class="avatar" src="{{item.head_show_img}}"></wxc-avatar>
+              </view>
+               <view class="item main">
+                 <view class="fl">
+                      <text class="nickName">{{item.platform_username}}</text>
+                      <text class="orderTime mt6">{{item.created_time_str}}</text>
+                 </view>
+                 <navigator  wx:if="{{item.state_flag=='部分发货'||item.state_flag=='已发货'}}" url="/usercenter/pages/logisticTrack?orderNo={{item.id}}" class="btn btn-grey fr mt15">物流跟踪</navigator>
+              </view>
+          </wxc-flex>
+        </view>
+    </view>
+</template>
+<style lang="less">
+@import '../static/less/base/fn';
+.btn {
+    border: 1rpx solid #cccccc;
+    border-radius: 5px;
+    overflow: visible;
+}
+.block {
+    display: block;
+}
+.order-item {
+    .title-box {
+        height: 90rpx;
+        line-height: 90rpx;
+        padding: 0 20rpx;
+        background: #7c7c7c;
+        color: #fffefe;
+        font-size: 30rpx;
+        &.childTitle {
+            height: 84rpx;
+            line-height: 84rpx;
+            padding: 0 20rpx;
+            background: #ffffff;
+            color: #333333;
+            font-size: 28rpx;
+            border-bottom: 1rpx solid #e9e9e9;
+        }
+    }
+    .lists-box {
+        padding: 0 20rpx;
+        background: #ffffff;
+        .item-box {
+            padding: 36rpx 0;
+            border-bottom: 1rpx solid #e9e9e9;
+            &:last-child {
+                border-bottom: none;
+            }
+            .item-line1 {
+                font-size: 26rpx;
+                color: #333333;
+                vertical-align: text-top;
+                .minheight {
+                    height: 74rpx;
+                }
+                .side {
+                    font-size: 24rpx;
+                }
+            }
+            .item-line2 {
+                font-size: 26rpx;
+                height: 32rpx;
+                vertical-align: text-top;
+                .main {
+                    color: #999999;
+                }
+                .side {
+                    font-size: 24rpx;
+                    color: #b8b8b8;
+                    .num {
+                        margin-left: 10rpx;
+                        display: inline-block;
+                    }
+                }
+            }
+
+            .item-line3 {
+                height: 40rpx;
+                vertical-align: text-top;
+                .main {
+                    color: #f0990f;
+                    .state {
+                        margin-left: 8rpx;
+                        display: inline-block;
+                        font-size: 26rpx;
+                    }
+                }
+                .side {
+                    font-size: 24rpx;
+                    color: #ff6563;
+                }
+            }
+        }
+        .pruimg {
+            width: 138rpx;
+            height: 138rpx;
+            border: 1rpx solid #cfcfcf;
+        }
+    }
+    .userinfo-box {
+        padding: 22rpx 20rpx;
+        background: #ffffff;
+        border-top: 1rpx solid #e9e9e9;
+        .fl {
+            float: left;
+            width: 300rpx;
+        }
+        .nickName {
+            max-width: 340rpx;
+            height: 48rpx;
+            line-height: 48rpx;
+            padding-left: 14rpx;
+            color: #333333;
+            font-size: 32rpx;
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .orderTime {
+            max-width: 340rpx;
+            height: 32rpx;
+            line-height: 32rpx;
+            padding-left: 14rpx;
+            color: #777777;
+            font-size: 24rpx;
+            display: block;
+        }
+    }
+}
+//
+.btn-grey {
+    max-width: 160rpx;
+    height: 60rpx;
+    line-height: 60rpx;
+    text-align: center;
+    padding: 0 26rpx;
+    font-size: 26rpx;
+    color: #666666;
+    overflow: visible;
+    background: #ffffff;
+    &::after {
+        border: 1rpx solid #666666;
+    }
+    cursor: pointer;
+    box-sizing: border-box;
+}
+.mt12 {
+    margin-top: 12rpx;
+}
+.fr {
+    float: right;
+}
+.side {
+    flex-grow: 0;
+}
+.main {
+    flex-grow: 1;
+}
+.avatar {
+    display: block;
+    width: 78rpx;
+    height: 78rpx;
+    border-radius: 50%;
+}
+</style>
+<script>
+import wepy from 'wepy';
+export default class OrderItem extends wepy.component {
+    computed = {};
+    methods = {};
+    props = {
+        item: {
+            type: Object,
+            default: {
+                id: '',
+                platform_username: '加载中...', //用户姓名-1
+                brokerage: 32800, //预估提成，总提成 --1
+                paying: 32800, //订单实付 --1
+                order_num: 20172202154889544, //订单号-1
+                created_time_str: '2017-06-22 13:30:30', //下单时间-1
+                head_show_img:
+                    'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1521453701474&di=ae061bf4345c7e4ce50c47cdaea2cd94&imgtype=0&src=http%3A%2F%2Fp1.qqyou.com%2Ftouxiang%2FUploadPic%2F2015-4%2F2%2F2015040210335561811.jpg', //头像链接-1
+                state_flag: '', //订单状态  0 为成功 -1
+                commission_status: '', //佣金状态 (1 未生成，2 生成失败，3 生成成功)(未生成和生产失败显示订单预估提成,生成成功显示订单提成)
+                products: [
+                    {
+                        describe: '产品名字12', //商品名
+                        price: 23000, //商品价格
+                        prod_spec: '卡其色22', //商品规格
+                        commission: 12800, //预估提成
+                        num: 2, //购买数量
+                        refund_show_status: '', //退款状态(退款中,已退款,卖家拒绝退款)
+                        url: 'https://i2.ygimg.cn/cmp/mp/shoes.png', //图片链接
+                        pay_price: '' //成交单价
+                    }
+                ]
+            }
+        }
+    };
+    data = {};
+    methods = {};
+    events = {};
+}
+</script>

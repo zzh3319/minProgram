@@ -1,0 +1,49 @@
+<template>
+  <view class="decorate-block-item"   @tap="link({{subItem.url}})" style="padding-top:{{paddingT}}rpx">
+    <image  class="decorate-item-image"  src="{{subItem.picCover}}" mode="widthFix" />
+    <view  class="decorate-item-text">
+      <wxc-flex main="center" cross="center">
+        {{subItem.title}}
+      </wxc-flex>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+export default class decorateBlock extends wepy.component {
+    props = {
+        subItem: {
+            type: Object,
+            default: {}
+        }
+    };
+    methods = {
+        link(linkUrl) {
+            this.$emit('link-Handle', 2, linkUrl);
+        }
+    };
+}
+</script>
+<style lang="less">
+.decorate-block-item {
+    background: #fff;
+    width: 50%;
+    font-size: 0;
+    padding: 8rpx;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+
+    .decorate-item-image {
+        width: 100%;
+        display: block;
+    }
+    .decorate-item-text {
+        padding: 20rpx;
+        font-size: 28rpx;
+        box-sizing: border-box;
+        background: #fff;
+    }
+}
+</style>

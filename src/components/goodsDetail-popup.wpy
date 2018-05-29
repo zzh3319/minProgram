@@ -1,0 +1,161 @@
+<template>
+  <view>
+    <wxc-mask status="{{maskStatus}}" locked="{{locked}}" catchtouchmove="move">
+    </wxc-mask>
+    <view style="z-index: {{zIndex}};" class="popup {{status}}  {{align}} animotion-{{animationMode}}" >
+      <slot></slot>
+    </view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+export default class GoodsDetailPopup extends wepy.component {
+    props = {
+        locked: {
+            type: String,
+            default: 'hide'
+        },
+        animationMode: {
+            type: String,
+            default: 'none'
+        },
+        align: {
+            type: String,
+            default: 'center'
+        },
+        status: {
+            type: String,
+            default: 'hide'
+        }
+    };
+    computed = {};
+    data = {
+        maskStatus: 'hide',
+        zIndex: 1200,
+        animation: ''
+    };
+    methods = {
+        move() {},
+        test(e) {},
+        toggle(mode) {
+            let status = this.status;
+            if (typeof mode !== 'boolean') {
+                mode = status !== 'show';
+            }
+            if (mode) {
+                this.show();
+            } else {
+                this.hide();
+            }
+        },
+        popupTap() {
+            if (this.data.locked !== 'true') {
+                this.hide();
+            }
+        }
+    };
+    show() {
+        this.showMask();
+        this.status = 'show';
+        this.$apply();
+        this.animation = this.animationMode;
+        setTimeout(() => {
+            this.animationMode = 'none';
+            this.$apply();
+        }, 50);
+    }
+    hide() {
+        this.hideMask();
+        this.status = 'hide';
+        this.animationMode = this.animation;
+        this.$apply();
+    }
+    showMask() {
+        this.maskStatus = 'show';
+    }
+    hideMask() {
+        this.maskStatus = 'hide';
+    }
+}
+</script>
+
+<style lang="less">
+.popup {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    overflow: hidden;
+}
+.hide {
+    display: none;
+}
+.show {
+    display: flex;
+    transition: all 300ms linear;
+}
+.fadeOut {
+    display: flex;
+    transition: all 300ms linear;
+}
+.animotion-center {
+    width: 0;
+    height: 0;
+}
+.animotion-top {
+    top: -100%;
+}
+.animotion-bottom {
+    transform: translate(-50%, 50%);
+}
+.animotion-left {
+    left: -100%;
+}
+.animotion-right {
+    transform: translate(50%, -50%);
+}
+.fadeIn {
+    display: flex;
+    transition: all 300ms linear;
+}
+.animotion-center {
+    width: 0;
+    height: 0;
+}
+.animotion-top {
+    top: -100%;
+}
+.animotion-bottom {
+    transform: translate(-50%, 50%);
+}
+.animotion-left {
+    left: -100%;
+}
+.animotion-right {
+    transform: translate(50%, -50%);
+}
+.center {
+    align-items: center;
+    justify-content: center;
+}
+.top {
+    align-items: flex-start;
+    justify-content: center;
+}
+.bottom {
+    align-items: flex-end;
+    justify-content: center;
+}
+.left {
+    align-items: center;
+    justify-content: flex-start;
+}
+.right {
+    align-items: center;
+    justify-content: flex-end;
+}
+</style>

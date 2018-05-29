@@ -1,0 +1,157 @@
+<template>
+  <view class="bottom-tool-bar">
+    <wxc-flex wrap="nowrap" dir="left" cross='center'>
+      <view class="flex-icon mdContact" @tap="junmCustomerService">
+        <view class="flex-icon-box">
+          <text class="iconfont item_img">&#xe60a;</text>
+          <text class="text">客服</text>
+        </view>
+      </view> 
+      <view class="flex-icon mdShop" @tap="jumpShop">
+        <view class="flex-icon-box">
+          <text class="iconfont item_img">&#xe601;</text>
+          <text class="text">商城</text>
+        </view>
+      </view>
+      <view class="flex-icon shop-card-icon"  @tap="jumpCart">
+        <view class="flex-icon-box">
+          <wxc-badge class="shop-card-count">{{carCount}}</wxc-badge>
+          <text class="iconfont item_img">&#xe603;</text>
+          <text class="text">购物车</text>
+        </view>
+      </view>
+      <block wx:if="{{(outSale||soldOut)}}">
+        <view class="flex-button cannot-buy" @tap="soldOut">商品已售罄</view>
+      </block>
+       <block wx:else>
+        <view class="flex-button button-add-cart" @tap="addToCart">加入购物车</view>
+        <view class="flex-button button-go-buy" @tap="goBuy">立即购买</view>
+      </block>
+    </wxc-flex>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+import GTools from '@/mixins/g-tools';
+
+export default class GoodsDetailBar extends wepy.component {
+    data = {};
+    mixins = [GTools];
+
+    methods = {
+        jumpShop() {
+            wepy.switchTab({
+                url: '/pages/index'
+            });
+        },
+        jumpCart() {
+            wepy.switchTab({
+                url: '/pages/shopcart'
+            });
+        },
+        addToCart() {
+            this.isAddCart = true;
+            this.$emit('goodsDetailChoose:show');
+        },
+        junmCustomerService() {
+            this.$emit('goodsDetailBar:junmCustomerService');
+        },
+        goBuy() {
+            this.isAddCart = true;
+            this.isGopay = true;
+            this.$emit('goodsDetailChoose:show');
+        },
+        soldOut() {
+            this.customFunction.toast('商品已售罄');
+        }
+    };
+    props = {
+        carCount: {
+            type: Number,
+            default: 0
+        },
+        isAddCart: {
+            type: Boolean,
+            default: false,
+            twoWay: true
+        },
+        outSale: {
+            type: Boolean,
+            default: false
+        },
+        soldOut: {
+            type: Boolean,
+            default: false
+        },
+        isGopay: {
+            type: Boolean,
+            default: false,
+            twoWay: true
+        }
+    };
+}
+</script>
+<style lang="less">
+@height: 100rpx;
+.bottom-tool-bar {
+    height: @height;
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    background-color: rgba(0, 0, 0, 0.75);
+    color: #ffffff;
+}
+.flex-icon {
+    width: 15.333333%;
+    height: 100%;
+    overflow: hidden;
+    font-size: 0;
+    .text {
+        font-size: 24rpx;
+        margin-top: -12px;
+    }
+    .flex-icon-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        margin: auto;
+    }
+}
+.flex-button {
+    width: 27%;
+    font-size: 26rpx;
+    text-align: center;
+    line-height: @height;
+    background-color: #ff434d;
+}
+.button-add-cart {
+    background-color: #eaeaea;
+    color: #333;
+}
+.item_img {
+    font-size: 60rpx;
+    color: #fff;
+    margin-top: -5rpx;
+    &.custom-icon {
+        font-size: 40rpx;
+        margin-bottom: 5rpx;
+    }
+}
+.shop-card-icon {
+    position: relative;
+}
+.shop-card-count {
+    position: absolute;
+    top: 8rpx;
+    right: 8rpx;
+}
+.cannot-buy {
+    background-color: #eaeaea;
+    color: #333;
+    width: 54%;
+}
+</style>

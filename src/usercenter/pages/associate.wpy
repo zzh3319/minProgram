@@ -1,0 +1,31 @@
+<style>
+.empty {
+    width: 80%;
+    margin: 0 auto;
+    margin-top: 5%;
+    font-size: 18px;
+}
+</style>
+<template>
+  <view class="container">
+    <view bindtap="toast" class="empty">
+      <p>您好</p>
+      <p>此页面仅限于内部人员使用。</p>
+      <p>请您依次允许授权获取信息及手机号码,</p>
+      <p>确认导购身份,谢谢</p>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+export default class associate extends wepy.page {
+    config = {
+        navigationBarTitleText: '导购升级'
+    };
+    data = {};
+    methods = {};
+    onLoad(options) {
+        this.$parent.wxxlogin('associate');
+    }
+}
+</script>

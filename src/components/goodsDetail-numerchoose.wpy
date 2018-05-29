@@ -1,0 +1,73 @@
+<template>
+  <view class="number-choose" @tap="openChoose">
+    <wxc-flex main="between" cross="center" class="number-choose-flex">
+      <wxc-elip line="1" class="choose-info">
+        <label class="choose-label">已选</label>
+        <text class="choose-item">{{chooseColor}}</text>
+        <text class="choose-item" wx:if="{{chooseSize}}">{{chooseSize}}</text>
+        <text class="choose-item">{{chooseNum}}件</text>
+      </wxc-elip>
+      <view>
+        <wxc-icon size="30" type="arrow-right" color="#848484"></wxc-icon>
+      </view>
+    </wxc-flex>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+export default class GoodsDetailChoose extends wepy.component {
+    props = {
+        chooseNum: {
+            type: Number,
+            default: 1,
+            twoWay: true
+        },
+        chooseSize: {
+            type: Number,
+            default: 0
+        },
+        chooseColor: {
+            type: String,
+            default: ''
+        },
+        isAddCart: {
+            type: Boolean,
+            default: false,
+            twoWay: true
+        }
+    };
+    computed = {};
+    methods = {
+        openChoose() {
+            this.isAddCart = false;
+            this.$emit('goodsDetailChoose:show');
+        }
+    };
+    onLoad(options) {}
+}
+</script>
+<style lang="less">
+.number-choose {
+    display: block;
+    margin-bottom: 20rpx;
+    height: 90rpx;
+    background: #fff;
+    padding: 0 20rpx;
+
+    .number-choose-flex {
+        width: 100%;
+    }
+    .choose-label {
+        font-size: 22rpx;
+        color: #b8b8b8;
+        margin-right: 20rpx;
+    }
+    .choose-info {
+        font-size: 24rpx;
+        .choose-item {
+            display: inline-block;
+            margin: 0 5rpx;
+        }
+    }
+}
+</style>

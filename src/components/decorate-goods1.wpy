@@ -1,0 +1,47 @@
+<template>
+  <view class="cms-column-goods1-floor">
+    <decorateGoodsListTitle :item.sync="lastModuleDataObj" wx:if="{{lastModuleDataObj.widgetsContent.titleFlag==1}}" />
+    <wxc-flex wrap="wrap">
+      <repeat for="{{lastModuleDataList}}" key="index" index="index" item="subItem">
+        <decorateListGoodsBlock :subItem.sync="subItem" class="goods-col2" />
+      </repeat>
+    </wxc-flex>
+    <view class="weui-loadmore" wx:if="{{hasMoreData}}">
+      <view class="weui-loading"></view>
+      <view class="weui-loadmore__tips">正在加载</view>
+    </view>
+    <view wx:if="{{!hasMoreData}}" class="weui-loadmore">没有更多数据</view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+import decorateGoodsListTitle from '@/components/decorate-list-goods-title';
+import decorateListGoodsBlock from '@/components/decorate-list-goods-block';
+export default class decorateGoods1 extends wepy.component {
+  props = {
+    lastModuleDataObj: {
+      type: Object,
+      default: {
+        'widgetsContent': {
+          'title': 6666
+        }
+      }
+    },
+    lastModuleDataList: {
+      'type': Array,
+      'default': []
+    },
+    hasMoreData: {
+      'type': Boolean,
+      'default': true
+    }
+  };
+  components = {
+    decorateListGoodsBlock,
+    decorateGoodsListTitle
+  }
+}
+</script>
+<style lang="less">
+
+</style>

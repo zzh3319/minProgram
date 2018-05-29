@@ -1,0 +1,48 @@
+<template>
+  <view class="shopcart-edit" @tap="clickEvents">
+    <text class="iconfont editing" wx:if="{{edit}}">&#xe6b2;</text>
+    <text class="iconfont normal" wx:else>&#xe609;</text>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+export default class ShopcartEdit extends wepy.component {
+    props = {
+        edit: {
+            type: [Boolean, String],
+            default: false
+        }
+    };
+    methods = {
+        clickEvents() {
+            this.$emit('shopcart:edit');
+        }
+    };
+}
+</script>
+<style lang="less">
+.shopcart-edit {
+    position: fixed;
+    z-index: 99;
+    bottom: 140rpx;
+    right: 5%;
+    display: block;
+    width: 88rpx;
+    height: 88rpx;
+    text-align: center;
+    border-radius: 50%;
+    box-shadow: 1px 1px 5px rgba(130, 130, 130, 0.5);
+    background-color: #fff;
+    .iconfont {
+        line-height: 88rpx;
+    }
+    .editing {
+        color: #67bb1b;
+        font-size: 40rpx;
+    }
+    .normal {
+        color: #848484;
+    }
+}
+</style>

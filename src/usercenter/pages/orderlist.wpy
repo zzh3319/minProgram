@@ -1,0 +1,445 @@
+<template>
+  <view class="tab-box">
+     <view class="top" catchtap="pageHdtap">
+        <view class="tab01 {{curSelectKey==0? 'active': ''}}" data-id="0">全部</view>
+        <view class="tab02 {{curSelectKey==1? 'active': ''}}" data-id="1">待付款</view>
+        <view class="tab03 {{curSelectKey==2? 'active': ''}}" data-id="2">待发货</view>
+        <view class="tab04 {{curSelectKey==3? 'active': ''}}" data-id="3">待收货</view>
+        <view class="tab05 {{curSelectKey==4? 'active': ''}}" data-id="4">交易成功</view>
+     </view>
+     <view class="tab-bd" style="height: 100%;">
+        <view class="tab-bd01 {{curSelectKey==0? 'show': ''}}" style="height: 100%;">
+            <!--tab01-->
+              <view class="order-content-box" wx:if="{{tabs[0].list.length}}">
+                  <repeat for="{{tabs[0].list}}" key="index" index="index" item="item">
+                      <orderItem :item="item"></orderItem>
+                  </repeat>
+                  <block class="loadMore">
+                    <view class="weui-loadmore" wx:if="{{tabs[0].hasMore}}">
+                      <view class="weui-loading" wx:if="{{loadtxt == '正在加载'}}"></view>
+                      <view class="weui-loadmore__tips">{{loadtxt}}</view>
+                    </view>
+                    <view class="weui-loadmore" wx:else>
+                      <view class="weui-loadmore__tips">{{loadtxt}}</view>
+                    </view>
+                </block>
+              </view>
+              <!-- hasFlag 默认是false, -->
+              <view class=" mt200 mb10"  wx:if="{{tabs[0].hasFlag}}">
+                <empty :info="emptyInfo"></empty>
+              </view>
+        </view>
+        <view class="tab-bd02 {{curSelectKey==1? 'show': ''}}">
+            <!--tab02-->
+            <view class="order-content-box" wx:if="{{tabs[1].list.length}}">
+                <repeat for="{{tabs[1].list}}" key="index" index="index" item="item">
+                    <orderItem :item="item"></orderItem>
+                </repeat>
+                 <block class="loadMore">
+                  <view class="weui-loadmore" wx:if="{{tabs[1].hasMore}}">
+                    <view class="weui-loading" wx:if="{{loadtxt == '正在加载'}}"></view>
+                    <view class="weui-loadmore__tips">{{loadtxt}}</view>
+                  </view>
+                    <view class="weui-loadmore" wx:else>
+                    <view class="weui-loadmore__tips">{{loadtxt}}</view>
+                  </view>
+              </block>
+            </view>
+              <view class=" mt200 mb10"  wx:if="{{tabs[1].hasFlag}}">
+                <empty :info="emptyInfo"></empty>
+              </view>
+        </view>
+        <view class="tab-bd02 {{curSelectKey==2? 'show': ''}}">
+            <!--tab03-->
+            <view class="order-content-box" wx:if="{{tabs[2].list.length}}">
+                <repeat for="{{tabs[2].list}}" key="index" index="index" item="item">
+                    <orderItem :item="item"></orderItem>
+                </repeat>
+                <block class="loadMore" >
+                    <view class="weui-loadmore" wx:if="{{tabs[2].hasMore}}">
+                      <view class="weui-loading" wx:if="{{loadtxt == '正在加载'}}"></view>
+                      <view class="weui-loadmore__tips">{{loadtxt}}</view>
+                    </view>
+                      <view class="weui-loadmore" wx:else>
+                      <view class="weui-loadmore__tips">{{loadtxt}}</view>
+                    </view>
+                </block>
+            </view>
+               <view class=" mt200 mb10" wx:if="{{tabs[2].hasFlag}}">
+                <empty :info="emptyInfo"></empty>
+              </view>
+        </view>
+        <view class="tab-bd02 {{curSelectKey==3? 'show': ''}}">
+            <!--tab04-->
+              <view class="order-content-box" wx:if="{{tabs[3].list.length}}">
+                <repeat for="{{tabs[3].list}}" key="index" index="index" item="item">
+                    <orderItem :item="item"></orderItem>
+                </repeat>
+                 <block class="loadMore">
+                  <view class="weui-loadmore" wx:if="{{tabs[3].hasMore}}">
+                    <view class="weui-loading" wx:if="{{loadtxt == '正在加载'}}"></view>
+                    <view class="weui-loadmore__tips">{{loadtxt}}</view>
+                  </view>
+                    <view class="weui-loadmore" wx:else>
+                    <view class="weui-loadmore__tips">{{loadtxt}}</view>
+                  </view>
+                </block>
+              </view>
+               <view class=" mt200 mb10"  wx:if="{{tabs[3].hasFlag}}">
+                <empty :info="emptyInfo"></empty>
+              </view>
+        </view>
+        <view class="tab-bd02 {{curSelectKey==4? 'show': ''}}">
+            <!--tab05-->
+            <view class="order-content-box" wx:if="{{tabs[4].list.length}}">
+                  <repeat for="{{tabs[4].list}}" key="index" index="index" item="item">
+                      <orderItem :item="item"></orderItem>
+                  </repeat>
+                  <block class="loadMore">
+                    <view class="weui-loadmore" wx:if="{{tabs[4].hasMore}}">
+                      <view class="weui-loading" wx:if="{{loadtxt == '正在加载'}}"></view>
+                      <view class="weui-loadmore__tips">{{loadtxt}}</view>
+                    </view>
+                      <view class="weui-loadmore" wx:else>
+                      <view class="weui-loadmore__tips">{{loadtxt}}</view>
+                    </view>
+                </block>
+            </view>
+            <view class=" mt200 mb10"  wx:if="{{tabs[4].hasFlag}}">
+              <empty :info="emptyInfo"></empty>
+            </view>
+        </view>
+      </view>
+  </view>
+</template>
+<style lang="less">
+@import '../../static/less/base/fn';
+.empty {
+    display: none;
+}
+/*tab top*/
+.top {
+    position: fixed;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 60rpx;
+    line-height: 60rpx;
+    font-size: 30rpx;
+    background: #fff;
+    padding: 14rpx 0;
+    border-bottom: 1rpx solid #cccccc;
+}
+.tab01,
+.tab02,
+.tab03,
+.tab04,
+.tab05 {
+    flex: 1;
+    text-align: center;
+}
+.top .active {
+    color: #e60012;
+}
+/*tab top end*/
+/*bd item start*/
+.show {
+    display: block !important;
+}
+.tab-bd {
+    padding: 80rpx 0rpx 0rpx 0;
+    height: 100%;
+}
+.tab-bd01,
+.tab-bd02 {
+    display: none;
+    height: 100%;
+}
+
+//tab end
+.tab-fixed-box {
+    position: fixed;
+    left: 0;
+    top: 0;
+    background: #ffffff;
+}
+.panel-box {
+    margin-top: 90rpx;
+}
+.no-info-box {
+    width: 100%;
+    background-color: #fff;
+    margin-bottom: 10px;
+    padding: 0 10px;
+    overflow: hidden;
+}
+.yg-empty-icon {
+    width: 220rpx;
+    height: 220rpx;
+    display: block;
+    margin: 0 auto;
+}
+.Gray {
+    color: #848484 !important;
+    display: block;
+    text-align: center;
+}
+.side {
+    flex-grow: 0;
+}
+.main {
+    flex-grow: 1;
+}
+.avatar {
+    display: block;
+    width: 78rpx;
+    height: 78rpx;
+    border-radius: 50%;
+}
+</style>
+<script>
+import wepy from 'wepy'; //引入组件
+import orderItem from '@/components/orderItem';
+import empty from '@/components/empty';
+export default class buyerOrderList extends wepy.page {
+    config = {
+        navigationBarTitleText: '我的订单',
+        usingComponents: {
+            'wxc-flex': '../../../packages/@minui/wxc-flex/dist/index',
+            'wxc-avatar': '../../../packages/@minui/wxc-avatar/dist/index',
+            'wxc-elip': '../../../packages/@minui/wxc-elip/dist/index'
+        }
+    };
+    components = {
+        orderItem,
+        empty
+    };
+    computed = {};
+    methods = {};
+    data = {
+        baseUrl: '',
+        isSeller: 0,
+        isShow: true,
+        emptyInfo: {
+            desc: '暂没有相关数据',
+            imgUrl: 'https://i2.ygimg.cn/cmp/mp/shopping_no.png'
+        },
+        loadtxt: '正在加载',
+        curSelectKey: 0, //初始进入，默认选项卡第一个元素，即全部
+        orderStatus: '', //""：全部 WAIT_PAY：待付款 WAIT_DELIVER：待发货 TRADE_SUCCESS：交易成功 ALREADY_SHIPPED：已发货
+        pageSize: '10', //每页多少条，都是一样为10条
+        tabs: [
+            //list 里放的应该是多个产品的列表信息。写样式，先写一个示例信息
+            {
+                title: '全部',
+                hasMore: true,
+                hasFlag: false,
+                totalPage: '', //总共的页数
+                pageNo: 1, //当前页数
+                list: [] //列表数据,存储值
+            },
+            {
+                title: '待付款',
+                hasMore: true,
+                hasFlag: false,
+                totalPage: '',
+                pageNo: 1,
+                list: []
+            },
+            {
+                title: '待发货',
+                hasMore: true,
+                hasFlag: false,
+                totalPage: '',
+                pageNo: 1,
+                list: []
+            },
+            {
+                title: '待收货',
+                hasMore: true,
+                hasFlag: false,
+                totalPage: '',
+                pageNo: 1,
+                list: []
+            },
+            {
+                title: '交易成功',
+                hasMore: true,
+                hasFlag: false,
+                totalPage: '',
+                pageNo: 1,
+                list: []
+            }
+        ]
+    };
+    methods = {
+        // 上拉加载回调接口
+        onReachBottom: function() {
+            this.loadMore(this.curSelectKey);
+        }
+    };
+    events = {};
+    pageHdtap(e) {
+        //点击子元素
+        var _selectedKey = e.target.dataset.id;
+        if (this.curSelectKey !== _selectedKey) {
+            //禁止重复切换
+            wepy.showLoading();
+            //0  1  2 3 4 5 分别对应全部，待付款，待发货，待收货，交易成功
+            this.curSelectKey = _selectedKey; //当前点击的选项卡tab--序号
+            this.$apply();
+            this.loadMore(this.curSelectKey);
+        }
+    }
+    initLoadMore(SelectKey) {
+        // 0 1 2 3 4 ,按点击的tab序号来
+        //初次加载，orderStatus 全部
+        var _this = this;
+        let pageSize = 10;
+        var curKey = SelectKey;
+        this.curSelectKey = Number(curKey); //当前头部tab
+        _this.orderStatusFun(curKey);
+        var params = {
+            status: this.orderStatus,
+            pageNo: _this.tabs[curKey].pageNo,
+            pageSize: pageSize
+        };
+        wepy
+            .request({
+                url: `${
+                    this.$parent.globalData.apiBaseUrl
+                }/api/v2/order/customerList`,
+                data: params
+            })
+            .then(res => {
+                let response = res.data;
+                if (response.code === 20000) {
+                    //请求成功
+                    if (
+                        response.data === undefined ||
+                        response.data === '' ||
+                        response.data === null
+                    ) {
+                        //无数据返回状态
+                        //若无数据
+                        wepy.showToast({
+                            icon: 'none',
+                            title: '网络错误',
+                            duration: 4000
+                        });
+                        wepy.hideLoading();
+                    } else {
+                        //代码执行
+                        let len;
+                        let pageN;
+                        let totalP;
+                        _this.tabs[curKey].pageNo = response.data.searcher.page; //当前页
+                        _this.tabs[curKey].totalPage = response.data.total; //总条数
+                        _this.tabs[curKey].pageNo++;
+                        //存储元素 tabs[0].list.length
+                        _this.tabs[curKey].list = _this.tabs[curKey].list.concat(response.data.items);
+                        len = _this.tabs[curKey].list.length;
+                        pageN = _this.tabs[curKey].pageNo;
+                        totalP = _this.tabs[curKey].totalPage / pageSize;
+                        len === 0
+                            ? (_this.tabs[curKey].hasFlag = true)
+                            : (_this.tabs[curKey].hasFlag = false);
+                        pageN <= totalP
+                            ? (_this.tabs[curKey].hasMore = true)
+                            : (_this.tabs[curKey].hasMore = false);
+                        _this.tabs[curKey].hasMore
+                            ? (_this.loadtxt = '正在加载')
+                            : (_this.loadtxt = '没有更多数据');
+                        this.$apply();
+                        wepy.hideLoading();
+                    }
+                    //无数据end
+                } else {
+                    //若请求失败，则显示信息
+                    wepy.showToast({
+                        icon: 'none',
+                        title: response.errorMsg + ' ',
+                        duration: 4000
+                    });
+                    wepy.hideLoading();
+                }
+            });
+    }
+    loadMore(SelectKey) {
+        // 0 1 2 3 4 ,按点击的tab序号来
+        var _this = this;
+        var curKey = SelectKey; //若总数为空，则加载。若还有页数，则加载。否则不加载
+        if (_this.tabs[curKey].hasMore) {
+            _this.initLoadMore(curKey);
+        } else {
+            wepy.hideLoading();
+        }
+        //more end
+    }
+    //订单状态转换
+    orderStatusFun(status) {
+        var _this = this;
+        let sta = Number(status);
+        switch (sta) {
+            case 0:
+                //全部
+                _this.orderStatus = 1;
+                break;
+            case 1:
+                _this.orderStatus = 2;
+                //待付款
+                break;
+            case 2:
+                _this.orderStatus = 3;
+                //待发货
+                break;
+            case 3:
+                _this.orderStatus = 5;
+                //待收货-已发货
+                break;
+            case 4:
+                _this.orderStatus = 6;
+                //交易成功
+                break;
+            default:
+                return false;
+        }
+    }
+    //初始状态判断
+    orderStatusJudge(key) {
+        var _this = this;
+        switch (key) {
+            case 0:
+                //全部
+                _this.loadMore(0);
+                break;
+            case 1:
+                _this.loadMore(1);
+                //待付款
+                break;
+            case 2:
+                _this.loadMore(2);
+                //待发货
+                break;
+            case 3:
+                _this.loadMore(3);
+                //待收货-已发货
+                break;
+            case 4:
+                _this.loadMore(4);
+                //交易成功
+                break;
+            default:
+                return false;
+        }
+    }
+    onLoad(opt) {
+        wepy.showLoading();
+        this.orderStatusJudge(this.curSelectKey); //初始状态判断,this.curSelectKey 点击的tab序号
+    }
+    onReady() {}
+    onShow() {}
+}
+</script>

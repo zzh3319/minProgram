@@ -1,0 +1,157 @@
+<style>
+.container {
+    display: block;
+    text-align: center;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 300rpx;
+}
+.getUserInfoBtn {
+    margin: 30px 0;
+    height: 45px;
+    line-height: 45px;
+    background: #ff414b;
+    border-radius: 8px;
+    color: #fff;
+    display: block;
+    width: 100%;
+}
+</style>
+<template>
+  <view class='container'>
+    <text>授权后才能正常使用小程序</text>
+    <button class='getUserInfoBtn' open-type='getUserInfo' bindgetuserinfo='userInfoHandler'>点击授权</button>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+export default class authorize extends wepy.page {
+    associate = 'associate';
+    payNeedLogin = '';
+    config = {};
+    data = {
+        fromUrl: ''
+    };
+    methods = {};
+    onLoad(options) {
+        console.log('---options----');
+        console.log(options);
+        this.fromUrl = this.$parent.globalData.fromUrl;
+        console.log(this.fromUrl)
+        var getAssociate = options.associate;
+        var payNeedLogin = options.payneedlogin;
+        var orderNo = options.orderNo;
+        getAssociate =
+            getAssociate !== 'undefined' &&
+            (getAssociate === 'associate' || getAssociate === 'customer')
+                ? getAssociate
+                : '';
+        payNeedLogin =
+            payNeedLogin !== 'undefined' && payNeedLogin === 'yes'
+                ? payNeedLogin
+                : '';
+        this.orderNo = orderNo;
+        this.associate = getAssociate;
+        this.payNeedLogin = payNeedLogin;
+    }
+    async userInfoHandler(userInfoRes) {
+        this.$parent.clearLogin();
+        const { detail: { errMsg } } = userInfoRes;
+        if (errMsg === 'getUserInfo:ok') {
+            await this.$parent.wxxlogin(this.associate, {
+                success: this.loginSuccess.bind(this)
+            });
+        }
+    }
+    loginSuccess(res) {
+        if (
+            this.associate !== '' &&
+            (this.associate === 'associate' || this.associate === 'customer')
+        ) {
+            //导购的页面过来的
+            wepy.redirectTo({
+                url: '/usercenter/pages/atoPhone'
+            });
+            return false;
+        }
+
+        //去支付未授权过来的
+        if (this.payNeedLogin === 'yes') {
+            let url = `/usercenter/pages/orderDetail?orderNo=${this.orderNo}`;
+            wepy.redirectTo({
+                url
+            });
+            return;
+        }
+          let fromUrlVa = this.$parent.globalData.fromUrl.url
+          if (fromUrlVa) {
+            if (fromUrlVa.indexOf('find') !== -1){ //若包含
+              wx.switchTab({
+                  url: '/pages/find',
+                  success: function (param) {
+                    this.$parent.globalData.fromUrl.url = '';
+                  }
+              }
+            )
+          } else {
+            //文章详情页过来的
+            wepy
+                .redirectTo({
+                    url: '/' + this.$parent.globalData.fromUrl.url
+                })
+                .then(res => {
+                    this.$parent.globalData.fromUrl.url = '';
+                });
+          }
+          return false;
+        }
+        wepy.showToast({
+            icon: 'none',
+            title: '授权成功!',
+            duration: 2000
+        });
+
+         wepy.switchTab({
+              url: '/pages/index'
+          });
+    }
+    // 原逻辑.废弃
+    userInfoHand() {
+        // if (rawData) {
+        //   //登陆
+        //   const res = await wepy.login({});
+        //   if (!res.code) {
+        //     console.log("获取用户登录态失败！" + res.errMsg);
+        //     return;
+        //   }
+        //   // 获取用户信息
+        //   const data = await wepy.getUserInfo({});
+        //   const { code } = res;
+        //   const { encryptedData, iv } = data;
+        //   if (
+        //     this.associate !== "" &&
+        //     (this.associate === "associate" || this.associate === "customer")
+        //   ) {
+        //     //导购的页面过来的
+        //     wepy.redirectTo({
+        //       url: "/usercenter/pages/atoPhone"
+        //     });
+        //     this.$parent.encryptData(
+        //       res.code,
+        //       data.encryptedData,
+        //       data.iv,
+        //       this.associate
+        //     );
+        //     return;
+        //   }
+        //   if (this.payNeedLogin !== "" && this.payNeedLogin === "yes") {
+        //     //去支付未授权过来的
+        //     wepy.navigateBack({
+        //       delta: 1
+        //     });
+        //   }
+        //   this.$parent.encryptData(res.code, data.encryptedData, data.iv);
+        // }
+    }
+}
+</script>

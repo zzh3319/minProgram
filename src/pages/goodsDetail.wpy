@@ -1,0 +1,437 @@
+<template>
+  <view class="container">
+    <scroll-view scroll-y="false" style="height:100vh">
+      <GoodsDetailSwiper :pictures.sync="pictures" outSale.sync="outSale" :soldOut.sync="soldOut" />
+      <GoodsDetailTitle :commodity.sync="commodity" />
+      <GoodsDetailDiscount wx:if="{{commodity.activityType=='7'}}" :commodity.sync="commodity" :allDiscountInfo.sync="allDiscountInfo"/>
+      <GoodsDetailCoupons :coupons.sync="coupons" />
+      <GoodsDetailNumerChoose :isAddCart.sync="isAddCart" :chooseNum.sync="chooseNum" :commodity.sync="commodity" :chooseColor.sync="chooseColor" :chooseSize.sync="chooseSize" />
+      <GoodsDetailList :propInfo.sync="propInfo" :commodity.sync="commodity" :sizeConList.sync="sizeConList" />
+      <GoodsDetailBar :carCount.sync="carCount" :isGopay.sync="isGopay" :isAddCart.sync="isAddCart" :outSale.sync="outSale" :soldOut.sync="soldOut" />
+      <GoodsDetailCouponsChooes :coupons.sync="coupons" />
+      <GoodsDetailDiscountChooes wx:if="{{commodity.activityType}}" :commodity.sync="commodity"/>
+      <GoodsDetailChoose :chooseNum.sync="chooseNum" :chooseSizeId.sync="chooseSizeId" :chooseColorId.sync="chooseColorId" :chooseColor.sync="chooseColor" :chooseSize.sync="chooseSize" :choosing.sync="choosing" :commodity.sync="commodity" :styleCommoditys.sync="styleCommoditys"
+        :skuMaxCount.sync="skuMaxCount" />
+      <FixedBox :bConfig.sync="fixedConfig" wx:if="{{fixBoxShow}}" />
+    </scroll-view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+import GoodsDetailSwiper from '@/components/goodsDetail-swiper';
+import GoodsDetailTitle from '@/components/goodsDetail-title';
+import GoodsDetailNumerChoose from '@/components/goodsDetail-numerchoose';
+import GoodsDetailList from '@/components/goodsDetail-list';
+import GoodsDetailBar from '@/components/goodsDetail-bar';
+import GoodsDetailChoose from '@/components/goodsDetail-choose';
+import GoodsDetailDiscount from '@/components/goodsDetail-discount'
+import GoodsDetailCoupons from '@/components/goodsDetail-coupons';
+import GoodsDetailCouponsChooes from '@/components/goodsDetail-coupons-choose';
+import GoodsDetailDiscountChooes from '@/components/goodsDetail-discount-choose';
+import FixedBox from '@/components/fixedBox';
+import linkHandle from '@/mixins/link-map';
+import GTools from '@/mixins/g-tools';
+export default class GoodsDetail extends wepy.page {
+    mixins = [GTools];
+    config = {
+        navigationBarTitleText: '商品详情',
+        usingComponents: {
+            'wxc-flex': '../../../packages/@minui/wxc-flex/dist/index',
+            'wxc-elip': '../../../packages/@minui/wxc-elip/dist/index',
+            'wxc-price': '../../../packages/@minui/wxc-price/dist/index',
+            'wxc-icon': '../../../packages/@minui/wxc-icon/dist/index',
+            'wxc-badge': '../../../packages/@minui/wxc-badge/dist/index',
+            'wxc-counter': '../../../packages/@minui/wxc-counter/dist/index',
+            'wxc-mask': '../../../packages/@minui/wxc-mask/dist/index',
+            'yh-counter': '../../../@minuiChange/yh-count',
+            'wxc-popup': '../../../packages/@minui/wxc-popup/dist/index'
+        }
+    };
+    components = {
+        GoodsDetailSwiper,
+        GoodsDetailTitle,
+        GoodsDetailNumerChoose,
+        GoodsDetailList,
+        GoodsDetailBar,
+        GoodsDetailChoose,
+        GoodsDetailDiscount,
+        GoodsDetailCoupons,
+        GoodsDetailCouponsChooes,
+        GoodsDetailDiscountChooes,
+        FixedBox
+    };
+    data = {
+        propInfo: [],
+        commodity: {},
+        pictures: [],
+        sizeConList: [],
+        styleCommoditys: [],
+        coupons: [],
+        skuMaxCount: 2,
+        choosing: 'hide',
+        chooseSize: 0,
+        chooseSizeId: null,
+        chooseNum: 1,
+        chooseColorId: 0,
+        chooseColor: null,
+        carCount: 0,
+        isAddCart: false,
+        outSale: false,
+        soldOut: false,
+        isGopay: false,
+        shopId: null,
+        fixBoxShow: false,
+        fixedConfig: {
+            forword: false,
+            share: false
+        },
+        allDiscountInfo: ''
+    };
+    async init(commodityNo) {
+        wepy.showLoading({
+            title: '加载中',
+            mask: true
+        });
+        const url = `${
+            this.$parent.globalData.apiBaseUrl
+        }/api/v2/shop/commodity/detail`;
+        const param = {
+            commodityNo
+        };
+        const { data, errorMsg } = await this.customFunction.fetchData(
+            url,
+            param,
+            {},
+            {
+                isShowLoad: false
+            }
+        );
+        if (!data) {
+            this.customFunction.showModal(errorMsg);
+            return;
+        }
+        await this.getCartCount();
+        const shopId = await this.getShopId();
+        this.commodityDetail(data, shopId);
+        await this.setShareData(data);
+        await this.getCouponList();
+        this.fixBoxShow = true;
+        this.$apply();
+        wepy.hideLoading();
+    }
+    async getSelectSize(id) {
+        // const url = `${
+        //   this.$parent.globalData.apiBaseUrl
+        // }/api/v2/shop/commodity/selectSize`;
+        // const param = {
+        //   commodityNo: id
+        // };
+        // const {
+        //   data
+        // } = await this.customFunction.fetchData(url, param);
+        // const {
+        //   commodity,
+        //   styleCommoditys
+        // } = data;
+        // this.commodity = commodity;
+        // this.styleCommoditys = styleCommoditys;
+        this.init(id);
+    }
+    commodityDetail(data, shopId) {
+        const {
+            propInfo,
+            commodity,
+            sizeConList,
+            styleCommoditys,
+            skuMaxCount
+        } = data;
+        this.propInfo = propInfo;
+        this.commodity = commodity;
+        this.allDiscountInfo = this.commodity.ruleDesc?this.commodity.ruleDesc.join(';'):'';
+        this.pictures = commodity.pictures;
+        this.chooseColor = commodity.specName;
+        this.chooseColorId = commodity.no;
+        this.sizeConList = sizeConList;
+        this.styleCommoditys = styleCommoditys;
+        this.skuMaxCount = skuMaxCount;
+        this.soldOut = commodity.stock < 1;
+        this.outSale = commodity.isOnsale !== 1;
+        this.shopId = shopId;
+        this.$apply();
+    }
+    async getCartCount() {
+        const url = `${
+            this.$parent.globalData.apiBaseUrl
+        }/api/v2/shoppingcart/countCart`;
+        const { data } = await this.customFunction.fetchData(
+            url,
+            {},
+            {},
+            {
+                isShowLoad: false
+            }
+        );
+        if (data) {
+            this.carCount = data;
+        }
+        this.$apply();
+    }
+    onLoad(options = {}) {
+        const { commodityNo, shopId } = options;
+        let curUrl;
+        this.commodityNo = commodityNo;
+        this.shopId = shopId;
+        if (options.type || options.scene) {
+            if (options.scene) {
+                let ops = options.scene.split('-');
+                this.shopId = ops[0];
+                this.commodityNo = ops[1];
+            } else {
+                curUrl = this.customFunction.getCurrentPageUrlWithArgs();
+                this.$parent.globalData.fromUrl.url = curUrl;
+            }
+            // 锁粉
+            this.$parent.lockFans(this.shopId, 1); //1 店铺访问
+        }
+        this.init(this.commodityNo);
+    }
+    onReady() {}
+    async getShopId() {
+        const openId = await this.customFunction.getOpenId();
+        const url = `${
+            this.$parent.globalData.apiBaseUrl
+        }/api/v2/shop/getShopId?openId=${openId}`;
+        const { data } = await this.customFunction.fetchData(
+            url,
+            {},
+            {},
+            {
+                isShowLoad: false
+            }
+        );
+        return data;
+    }
+    async addToCart(num) {
+        if (!this.chooseSizeId) {
+            this.customFunction.toast('请选择尺码!');
+            return;
+        }
+        if (this.chooseNum < 1) {
+            this.customFunction.toast('最小需要选择一件商品');
+            return;
+        }
+        const openId = await this.customFunction.getOpenId();
+        const shopID = this.shopId;
+        const url = `${
+            this.$parent.globalData.apiBaseUrl
+        }/api/v2/shoppingcart/addCart?openId=${openId}`;
+        const params = {
+            activity_id: null,
+            checked: true,
+            commodity_no: this.chooseColorId,
+            id: this.commodity.id,
+            is_gift: 2,
+            merchant_code: '{$merchantNo}',
+            shop_id: shopID,
+            sku_count: this.chooseNum,
+            sku_id: this.chooseSizeId,
+            buy_mode: num
+        };
+        const data = await this.customFunction.fetchData(url, params, {
+            method: 'POST'
+        });
+        if (data.code !== 20000) {
+            this.customFunction.toast(data.errorMsg);
+            if (data.code === 42002) {
+                setTimeout(() => {
+                    wepy.redirectTo({
+                        url: '/usercenter/pages/authorize'
+                    });
+                }, 500);
+            }
+            return false;
+        }
+        return true;
+    }
+    async setShareData(data) {
+        const commodity = data.commodity;
+        let shopId = wepy.getStorageSync('shopId');
+        const qrCodePath = await this.customFunction.fetchData(
+            `${this.$parent.globalData.apiBaseUrl}/api/v2/getwxBcode`,
+            {
+                path: 'pages/goodsDetail',
+                scene: `${shopId}-${commodity.no}`
+            },
+            {},
+            {
+                isShowLoad: false
+            }
+        );
+        this.fixedConfig = {
+            forword: true,
+            share: {
+                commodityName: commodity.commodityName,
+                wfxPrice: commodity.wfxPrice,
+                imgUrl: commodity.pictures[0].url,
+                sharePage: `${this.$parent.globalData.h5BaseUrl}/mpshop/item/${
+                    commodity.no
+                }.sc`,
+                qrCodePath: qrCodePath.data
+            }
+        };
+        this.$apply();
+        return true;
+    }
+    hidePop() {
+        this.$invoke('GoodsDetailChoose/GoodsDetailPopup', 'hide');
+    }
+    async showPop() {
+        this.$invoke('GoodsDetailChoose/GoodsDetailPopup', 'show');
+    }
+    showCouponsPop() {
+        this.$invoke('GoodsDetailCouponsChooes/GoodsDetailPopup', 'show');
+    }
+    hideCouponsPop() {
+        this.$invoke('GoodsDetailCouponsChooes/GoodsDetailPopup', 'hide');
+    }
+    showDiscountPop(){
+        this.$invoke('GoodsDetailDiscountChooes/GoodsDetailPopup', 'show');
+    }
+    hideDiscountPop(){
+        this.$invoke('GoodsDetailDiscountChooes/GoodsDetailPopup', 'hide');
+    }
+    vilidateGoodsError() {
+        if (this.outSale) {
+            this.customFunction.toast('商品已下架');
+            return false;
+        }
+        if (this.soldOut) {
+            this.customFunction.toast('商品已售罄');
+            return false;
+        }
+        return true;
+    }
+    async getCouponList() {
+        // const url = `http://172.18.236.49:7001/coupons`;
+        const url = `${
+            this.$parent.globalData.apiBaseUrl
+        }/api/v2/coupon/getCouponSinglePage`;
+        const { data } = await this.customFunction.fetchData(
+            url,
+            {},
+            {},
+            {
+                isShowLoad: false
+            }
+        );
+        this.coupons = data;
+    }
+    events = {
+        'GoodsDetailDiscount:show'(){
+            this.showDiscountPop();
+        },
+        'GoodsDetailDiscount:hide'(){
+            this.hideDiscountPop();
+        },
+        'GoodsDetailCoupons:show'() {
+            this.showCouponsPop();
+            this.$apply();
+        },
+        'GoodsDetailCoupons:hide'() {
+            this.hideCouponsPop();
+        },
+        'goodsDetailChoose:show'() {
+            if (!this.vilidateGoodsError()) return;
+            this.showPop();
+            this.$apply();
+        },
+        'goodsDetailChoose:hide'() {
+            this.hidePop();
+        },
+        'goodsDetailChoose:selectSize'(id) {
+            this.getSelectSize(id);
+        },
+        async 'shopBar:goShopCart'() {
+            let res = null;
+            if (this.isAddCart) {
+                const num = this.isGopay ? 1 : 0;
+                res = await this.addToCart(num);
+            } else {
+                this.hidePop();
+            }
+            if (!res) {
+                return;
+            }
+            // 如果是立即购买
+            if (!this.isGopay) {
+                this.customFunction.toast('添加购物车成功!');
+                this.getCartCount();
+                this.hidePop();
+                this.$apply();
+            } else {
+                const opt = {
+                    url: '/usercenter/pages/confirmPay'
+                };
+                wepy.navigateTo(opt);
+                this.initData();
+            }
+        },
+        'goodsDetailBar:junmCustomerService'() {
+            const shopId = this.shopId;
+            const commodity = this.commodity;
+            const commodityUrl = `${
+                this.$parent.globalData.apiBaseUrl
+            }/${shopId}/item/${this.commodity.no}.sc`;
+            const qrCodePath = this.fixedConfig.share.qrCodePath; //微信码地址
+            const param = `title=${commodity.commodityName}&price=${
+                commodity.wfxPrice
+            }&commodityUrl=${qrCodePath}&imageUrl=${commodity.defaultPic}`;
+            const opt = {
+                url: `/usercenter/pages/customService?${param}`
+            };
+            wepy.navigateTo(opt);
+        },
+        ...linkHandle
+    };
+    initData() {
+        this.isGopay = false;
+        this.hidePop();
+    }
+    onShareAppMessage(options) {
+        let { share } = this.fixedConfig;
+        let shopId = wepy.getStorageSync('shopId');
+        let path =
+            '/pages/goodsDetail?commodityNo=' +
+            this.commodityNo +
+            '&type=share&shopId=' +
+            shopId;
+        return {
+            title: share.commodityName,
+            path: path,
+            imageUrl: share.imgUrl,
+            success: function(res) {
+                // 转发成功
+                wepy.showToast({
+                    title: '转发成功',
+                    icon: 'success',
+                    duration: 2000
+                });
+            },
+            fail: function(res) {
+                wepy.showToast({
+                    icon: 'none',
+                    title: '转发失败',
+                    duration: 2000
+                });
+            }
+        };
+    }
+}
+</script>
+<style lang="less">
+.detail-wrap {
+    display: flex;
+    width: 100%;
+    border-top: 1px solid #e3e5e9;
+}
+</style>

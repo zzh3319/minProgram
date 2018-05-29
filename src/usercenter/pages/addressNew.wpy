@@ -1,0 +1,243 @@
+<style lang="less">
+@import '../../static/less/base/fn';
+.field-line {
+    display: block;
+    padding: 20rpx 24rpx;
+    font-size: 24rpx;
+    background-color: #fff;
+    border-bottom: 1px solid @c-gray-1;
+    &.border-none {
+        border-bottom: none;
+    }
+    &.w200 {
+        .side {
+            width: 200rpx;
+        }
+        .main {
+            width: e('calc(100% - 200rpx)');
+        }
+    }
+    &.input {
+        padding-top: 0;
+        padding-bottom: 0;
+        .main > input {
+            padding: 20rpx 0;
+        }
+    }
+    &.region {
+        padding-top: 0;
+        padding-bottom: 0;
+        .main > .picker {
+            padding: 20rpx 0;
+            background: green;
+        }
+    }
+    .side {
+        display: inline-block;
+        width: 130rpx;
+        color: @c-black-2;
+        vertical-align: middle;
+    }
+    .main {
+        display: inline-block;
+        width: e('calc(100% - 130rpx)');
+        vertical-align: middle;
+        // picker{
+        //   padding:30rpx;
+        // }
+        .picker_items {
+            height: 37rpx;
+            width: 100%;
+        }
+    }
+}
+.save-btn-box {
+    padding: 50rpx;
+    margin-top: 150rpx;
+}
+</style>
+<template>
+  <view class="bl-container">
+    <form @submit="addAddress">
+      <input hidden name="id" value="{{item.id}}"></input>
+      <view class="field-line input">
+        <view class="item side">收件人：</view>
+        <view class="item main"><input name="name" value="{{item.name}}" type="text" placeholder="" placeholder-style="" placeholder-class="" maxlength="10" auto-focus="false" focus="false"></input>
+        </view>
+      </view>
+      <view class="field-line input">
+        <view class="item side">手机号码：</view>
+        <view class="item main"><input name="phone" type="number" value="{{item.phone}}" placeholder="" placeholder-style="" placeholder-class="" maxlength="11"></input>
+        </view>
+      </view>
+      <view class="field-line">
+        <view class="item side">所在地区：</view>
+        <view class="item main">
+          <picker mode="region" @change="regionChange" value="{{region}}">
+            <view class="picker picker_items">
+              {{region[0]}} {{region[1]}} {{region[2]}}
+              <input name="province" type="text" hidden="true" value="{{region[0]}}"></input>
+              <input name="city" type="text" hidden="true" value="{{region[1]}}"></input>
+              <input name="district" type="text" hidden="true" value="{{region[2]}}"></input>
+            </view>
+          </picker>
+        </view>
+      </view>
+      <view class="field-line input">
+        <view class="item side">详细地址：</view>
+        <view class="item main"><input name="address" value="{{item.address}}" type="text" placeholder="" placeholder-style="" placeholder-class="" maxlength="30"></input>
+        </view>
+      </view>
+      <view class="field-line w200">
+        <view class="item side">设为默认地址</view>
+        <view class="item main t-right">
+          <switch name="whether_default" @change="whetherDefault" value="{{item.defaultAddress}}" checked="{{item.defaultAddress}}" type="switch"></switch>
+        </view>
+      </view>
+      <view class="save-btn-box">
+        <button size="default" type="primary" form-type="submit" hover-class="button-hover">保存</button>
+      </view>
+    </form>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+import GTools from '@/mixins/g-tools';
+export default class addressNew extends wepy.page {
+    mixins = [GTools];
+    config = {
+        navigationBarTitleText: '编辑收货地址',
+        usingComponents: {
+            'wxc-flex': '../../../packages/@minui/wxc-flex/dist/index'
+        }
+    };
+    data = {
+        item: {
+            address: '',
+            cardNo: null,
+            city: '',
+            defaultAddress: true,
+            district: '',
+            id: '',
+            name: '',
+            phone: '',
+            phoneEncode: '',
+            province: ''
+        },
+        type: 0, //0:编辑;1:新增;
+        region: [],
+        customItem: '全部',
+        checking: false
+    };
+    methods = {
+        regionChange(e) {
+            this.region = e.detail.value;
+        },
+        // 修改地址
+        async addAddress(e) {
+            let params = e.detail.value;
+            // 验证参数
+            const validate = this.vilidateRule(params);
+            if (!validate) return;
+            const openId = await this.customFunction.getOpenId();
+            // 处理url
+            let postUrl = '';
+            if (this.type === 1) {
+                postUrl = 'addAddress';
+            } else {
+                postUrl = 'updateAddress';
+            }
+            let url = `${
+                this.$parent.globalData.apiBaseUrl
+            }/api/v2/address/${postUrl}?openId=${openId}`;
+            // 发送请求
+            const res = await this.customFunction.fetchData(url, params, {
+                method: 'POST'
+            });
+            const { data, code } = res;
+            // 判断返回值是否正常
+            if (!(data && code === 20000 && data.success)) {
+                this.customFunction.showModal('网络错误,请稍后重试');
+                return;
+            }
+            let meg = '修改地址成功';
+            if (this.type === 1) {
+                meg = '新增地址成功';
+            }
+            this.customFunction.toast(meg, {
+                icon: 'success',
+                mask: true
+            });
+            setTimeout(() => {
+                this.customFunction.setPrevPage({
+                    type: addressNew
+                });
+            }, 500);
+        },
+        // 控制选中和取消默认地址
+        whetherDefault(e) {
+            this.defaultAddress = e.detail.value;
+        }
+    };
+    vilidateRule(params) {
+        let phoneRule = /^(13[0-9]|14[5-9]|15[012356789]|166|17[0-8]|18[0-9]|19[8-9])[0-9]{8}$/; // 手机号码校验规则
+        this.checking = true;
+        this.vilidateRequire(params.name, '收件人不能为空,请确认,');
+        this.vilidateRequire(params.phone, '手机号不能为空,请确认,');
+        this.validateRegular(params.phone, phoneRule, '手机号格式错误');
+        this.vilidateRequire(params.address, '详细地址不能为空,请确认');
+        return this.checking;
+    }
+    validateRegular(value = '', rule = '', errorMes = '核对信息错误') {
+        if (!this.checking) return;
+        if (!rule.test(value)) {
+            this.customFunction.toast(errorMes);
+            this.checking = false;
+            return false;
+        }
+    }
+    vilidateRequire(value = '', errorMes = '不能为空') {
+        if (!this.checking) return;
+        if (value === '') {
+            this.customFunction.toast(errorMes);
+            this.checking = false;
+            return false;
+        }
+    }
+    // 设置所在区域
+    formatRegion() {
+        this.region[0] = this.item.province;
+        this.region[1] = this.item.city;
+        this.region[2] = this.item.district;
+    }
+    async onLoad(options) {
+        const { addressId, type } = options;
+        if (type === 'addAddress' || type === 'confirmPay') {
+            this.type = 1;
+        }
+        // 编辑
+        if (this.type === 0) {
+            const url = `${
+                this.$parent.globalData.apiBaseUrl
+            }/api/v2/address/getAddress/${addressId}`;
+            const data = await this.customFunction.fetchData(url);
+            if (data.code === 20000 && data.data) {
+                this.item = data.data;
+                this.formatRegion();
+                this.$apply();
+            } else {
+                this.customFunction.toast('查询收货地址失败，地址不存在');
+            }
+            wepy.setNavigationBarTitle({
+                title: '编辑收货地址'
+            });
+        }
+        // 新增
+        if (this.type === 1) {
+            wepy.setNavigationBarTitle({
+                title: '新增收货地址'
+            });
+        }
+    }
+}
+</script>

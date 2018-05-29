@@ -1,0 +1,497 @@
+<style lang="less">
+@import '../../static/less/base/fn';
+page {
+    background: #ffffff;
+}
+.wrap {
+    display: block;
+}
+.side {
+    flex-grow: 0;
+}
+.main {
+    flex-grow: 1;
+}
+.half-in70 {
+    width: 80%;
+    float: left;
+}
+.half-in30 {
+    width: 20%;
+    float: right;
+}
+.container {
+    .shopimg-box {
+        width: 100%;
+        .shop-img {
+            width: 750rpx;
+            height: 300rpx;
+            margin: 0 auto;
+            display: block;
+        }
+    }
+    .tit-box {
+        width: 100%;
+        padding-left: 40rpx;
+        box-sizing: border-box;
+        height: 84rpx;
+        line-height: 84rpx;
+        background: #f5f5f5;
+        text {
+            font-size: 26rpx;
+            color: #b0b0b0;
+        }
+    }
+    .shop-box {
+        width: 100%;
+        background: #ffffff;
+        .shop-info-con {
+            padding: 30rpx 0;
+            margin: 0 40rpx;
+            border-bottom: 1rpx solid #eeeeee;
+            overflow: hidden;
+            .tit {
+                width: 96%;
+                font-size: 32rpx;
+                color: #231815;
+                overflow: hidden;
+                word-wrap: break-word;
+                word-break: normal;
+                text-overflow: ellipsis;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+            }
+            .info {
+                width: 378rpx;
+                height: 70rpx;
+                margin-top: 16rpx;
+                font-size: 24rpx;
+                color: #b0b0b0;
+                overflow: hidden;
+                word-wrap: break-word;
+                word-break: normal;
+                text-overflow: ellipsis;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+            }
+            .icon-box {
+                width: 88rpx;
+                height: 88rpx;
+                .zimg {
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 50%;
+                }
+            }
+            .banner-box {
+                width: 180rpx;
+                height: 102rpx;
+                overflow: hidden;
+                .zimg {
+                    width: 100%;
+                    height: 100%;
+                }
+            }
+            .type {
+                padding: 2rpx 12rpx;
+                display: inline-block;
+                font-size: 18rpx;
+                color: #ee0000;
+                margin-top: 24rpx;
+                border: 1rpx solid #ee0000;
+            }
+        }
+    }
+    .info-box {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0 40rpx;
+        .info-con {
+            border-bottom: 1rpx solid #eeeeee;
+            padding: 14rpx 0 40rpx 0;
+            &.noborder {
+                border: none;
+            }
+            .tit {
+                font-size: 24rpx;
+                color: #b0b0b0;
+            }
+            .info-cont {
+                width: 100%;
+                padding-top: 10rpx;
+                .half {
+                    width: 50%;
+                    display: inline-block;
+                }
+                .item-text {
+                    display: inline-block;
+                    margin-left: 10rpx;
+                    font-size: 28rpx;
+                    color: #231815;
+                }
+                .item-icon {
+                    display: inline-block;
+                    position: relative;
+                    width: 40rpx;
+                    height: 40rpx;
+                    font-size: 28rpx;
+                    color: #231815;
+                    .item-icon-c {
+                        width: 28rpx;
+                        height: 28rpx;
+                        font-size: 28rpx;
+                        display: inline-block;
+                    }
+                }
+            }
+        }
+    }
+    .list-box {
+        width: 100%;
+        background: #ffffff;
+        .shop-info-item {
+            padding: 0 40rpx;
+            .bt {
+                padding: 40rpx 0;
+                border-bottom: 1rpx solid #eeeeee;
+            }
+            &:last-child {
+                .bt {
+                    padding: 40rpx 0;
+                    border-bottom: none;
+                }
+            }
+            .tit {
+                width: 310rpx;
+                font-size: 32rpx;
+                color: #231815;
+            }
+            .info {
+                width: 378rpx;
+                margin-top: 16rpx;
+                font-size: 24rpx;
+                color: #b0b0b0;
+            }
+            .icon-box {
+                width: 88rpx;
+                height: 88rpx;
+                .zimg {
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 50%;
+                }
+            }
+            .banner-box {
+                width: 180rpx;
+                height: 102rpx;
+                overflow: hidden;
+                .zimg {
+                    width: 100%;
+                    height: 100%;
+                }
+            }
+            .type {
+                padding: 2rpx 12rpx;
+                display: inline-block;
+                font-size: 18rpx;
+                min-height: 28rpx;
+                line-height: 28rpx;
+                box-sizing: border-box;
+                color: #ee0000;
+                margin-top: 24rpx;
+                border: 1rpx solid #ee0000;
+            }
+        }
+    }
+    //end
+}
+</style>
+<template>
+  <view class='container'>
+    <view class="shopimg-box">
+      <image src="https://i2.ygimg.cn/cmp/mp/storeActivity.png" class="shop-img"></image>
+    </view>
+    <view class="tit-box">
+      <text>门店信息</text>
+    </view>
+    <view class="shop-box">
+        <view class="shop-info-con wrap" @tap="bindLocation">
+            <view class="half-in70">
+              <text class="tit block" wx:if="{{storeInfo.fullName}}">{{storeInfo.fullName}}</text>
+              <text wx:if="{{storeInfo.address}}" class="info block">{{storeInfo.address}}</text>
+            </view>
+            <view class="half-in30">
+              <view class="icon-box fr">
+                 <image src="https://i2.ygimg.cn/cmp/mp/map_guide.png" class="zimg"></image>
+              </view>
+            </view>
+          </view>
+    </view>
+    <view class="info-box" wx:if="{{storeInfo.tel}}">
+      <view class="info-con">
+        <view class="tit">门店电话</view>
+        <view class="info-cont">
+            <view class="item-icon">
+              <text class="item-icon-c iconfont">&#xe623;</text>
+            </view>
+            <text class="item-text">{{storeInfo.tel}}</text>
+        </view>
+      </view>
+    </view>
+      <view class="info-box">
+      <view class="info-con noborder">
+        <view class="tit">基础服务</view>
+        <view class="info-cont">
+           <view class="wrap">
+             <view class="item half">
+                <view class="item-icon">
+                  <text class="item-icon-c iconfont">&#xe626;</text>
+                </view>
+                <text class="item-text">7天退换货</text>
+             </view>
+             <view class="item half">
+                <view class="item-icon">
+                  <text class="item-icon-c iconfont">&#xe622;</text>
+                </view><text class="item-text">专业导购</text>
+             </view>
+             <view class="item half">
+                <view class="item-icon">
+                  <text class="item-icon-c iconfont">&#xe624;</text>
+                </view>
+                <text class="item-text">积分累计</text>
+             </view>
+             <view class="item half">
+                <view class="item-icon">
+                  <text class="item-icon-c iconfont">&#xe625;</text>
+                </view>
+                <text class="item-text">顺丰快递</text>
+             </view>
+          </view>
+        </view>
+      </view>
+    </view>
+    <block wx:if="{{total}}">
+    <view class="tit-box">
+      <text>门店活动</text>
+    </view>
+    <view class="list-box">
+      <view class="shop-info-item" wx:for="{{storeAcitveList}}"  wx:for-index="index" wx:for-item="item" wx:key="id" >
+          <wxc-flex class="wrap bt">
+            <view class="item main">
+              <text class="tit block slh" wx:if="{{item.proName}}">{{item.proName}}</text>
+              <text class="info block slh" wx:if="{{item.proRemark}}">{{item.proRemark}}</text>
+              <text class="type" wx:if="{{item.activityTypeStr}}">{{item.activityTypeStr}}</text>
+            </view>
+            <view class="item side">
+              <view class="banner-box">
+                 <image src="https://i2.ygimg.cn/cmp/mp/storeDefault.jpg" class="zimg"></image>
+              </view>
+            </view>
+          </wxc-flex>
+      </view>
+      <view class="weui-loadmore" wx:if="{{isLoading}}">
+        <view class="weui-loading" wx:if="{{loadtxt == '正在加载'}}"></view>
+        <view class="weui-loadmore__tips">{{loadtxt}}</view>
+      </view>
+    </view>
+    </block>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+export default class shopDetail extends wepy.page {
+    config = {
+        navigationBarTitleText: '门店详情',
+        usingComponents: {
+            'wxc-flex': '../../../packages/@minui/wxc-flex/dist/index'
+        }
+    };
+    components = {};
+    computed = {};
+    data = {
+        hasMore: true,
+        isLoading: true,
+        loadtxt: '正在加载',
+        total: 0, //总数量
+        pageNo: 1, //当前页
+        storeInfo: {
+            shopImg: 'https://i2.ygimg.cn/cmp/mp/shoes.png', // 门店图片
+            fullName: '加载中...', //店铺名称
+            address: '加载中...', //店铺地址
+            tel: '--',
+            shopNo: '', //店铺编码
+            shopLongitude: '',
+            shopLatitude: '',
+            shortName: '' //店铺简称
+        },
+        storeService: [], //服务信息
+        storeAcitveList: [],
+        curMarkerId: '', //当前店铺的id
+        storeNo: ''
+    };
+    methods = {
+        bindLocation() {
+            let _this = this;
+            let latitude = parseFloat(_this.storeInfo.shopLatitude);
+            let longitude = parseFloat(_this.storeInfo.shopLongitude);
+            console.log('lati', latitude, 'lon', longitude);
+            wepy.openLocation({
+                latitude: latitude,
+                longitude: longitude,
+                name: _this.storeInfo.shortName,
+                scale: 14
+            });
+        },
+        onReachBottom: function() {
+            let _this = this;
+            if (this.hasMore) {
+                //如果还有更多
+                console.log('加载更多', _this.storeNo);
+                _this.isLoading = true;
+                // _this.pageNo++;
+                _this.getStoreActive(_this.storeNo); //初始加载数据
+                _this.$apply();
+            } else {
+                _this.loadtxt = '没有更多数据';
+                _this.$apply();
+            }
+        }
+    };
+    events = {};
+    onLoad(options) {
+        wepy.showLoading();
+        let _this = this;
+        _this.curMarkerId = options.markerId;
+        this.getStoreInfo(_this.curMarkerId);
+    }
+    onReady(e) {}
+    onShow() {}
+    initDate() {}
+    getStoreInfo(markerId) {
+        let _this = this;
+        let params = {
+            id: markerId
+        };
+        wepy
+            .request({
+                url: `${
+                    this.$parent.globalData.apiBaseUrlMock
+                }/api/v2/store/findStoreDetails`,
+                data: params
+            })
+            .then(res => {
+                let response = res.data;
+                if (response.code === 20000) {
+                    //请求成功
+                    if (
+                        response.data === undefined ||
+                        response.data === '' ||
+                        response.data === null
+                    ) {
+                        //若无数据
+                        wepy.showToast({
+                            title: '网络错误',
+                            icon: 'none',
+                            duration: 3000
+                        });
+                    } else {
+                        //代码执行
+                        if (
+                            response.data.storeInfo === undefined ||
+                            response.data.storeInfo === '' ||
+                            response.data.storeInfo === null
+                        ) {
+                            wepy.showToast({
+                                title: '网络错误',
+                                icon: 'none',
+                                duration: 3000
+                            });
+                        } else {
+                            let storeNo;
+                            _this.storeInfo = response.data.storeInfo;
+                            storeNo = response.data.storeInfo.storeNo;
+                            _this.storeNo = storeNo;
+                            _this.getStoreActive(storeNo);
+                            console.log('shopNo', storeNo);
+                            _this.$apply();
+                        }
+                    }
+                    wepy.hideLoading();
+                    //无数据end
+                } else {
+                    //若请求失败，则显示信息
+                    wepy.showToast({
+                        title: response.errorMsg + ' ' || response.msg + ' ',
+                        icon: 'none',
+                        duration: 3000
+                    });
+                    wepy.hideLoading();
+                }
+            });
+    }
+    getStoreActive(storeNo) {
+        // wepy.showLoading();
+        let _this = this;
+        let pageSize = 10;
+        let params = {
+            storeNo: storeNo,
+            id: _this.curMarkerId,
+            page: _this.pageNo,
+            limit: pageSize
+        };
+        wepy
+            .request({
+                url: `${
+                    this.$parent.globalData.apiBaseUrlMock
+                }/api/v2/store/findStoreActive`,
+                data: params
+            })
+            .then(res => {
+                let response = res.data;
+                if (response.code === 20000) {
+                    //请求成功
+                    if (
+                        response.data === undefined ||
+                        response.data === '' ||
+                        response.data === null
+                    ) {
+                        //若无数据
+                        wepy.showToast({
+                            title: '网络错误',
+                            icon: 'none',
+                            duration: 3000
+                        });
+                    } else {
+                        //代码执行
+                        let totalPage;
+                        _this.total = response.data.resultData.total;
+                        _this.pageNo = response.data.resultData.pageNo;
+                        totalPage = _this.total / pageSize;
+                        _this.storeAcitveList = _this.storeAcitveList.concat(
+                            response.data.resultData.list
+                        ); //分页主句
+                        if (_this.pageNo > totalPage) {
+                            _this.hasMore = false;
+                            _this.loadtxt = '没有更多数据';
+                        } else {
+                            _this.hasMore = true;
+                        }
+                        _this.$apply();
+                    }
+                    wepy.hideLoading();
+                    //无数据end
+                } else {
+                    //若请求失败，则显示信息
+                    wepy.showToast({
+                        title: response.errorMsg + ' ' || response.msg + ' ',
+                        icon: 'none',
+                        duration: 3000
+                    });
+                    wepy.hideLoading();
+                }
+            });
+    }
+}
+</script>

@@ -1,0 +1,43 @@
+<template>
+  <view class="coupon-container">
+    <CouponsEmpty wx:if="{{isEmpty}}" />
+    <scroll-view class="coupon-list" wx:else>
+      <repeat for="{{list}}" key="index" index="index" item="item">
+        <CouponsList :item="item" />
+      </repeat>
+    </scroll-view>
+  </view>
+  
+</template>
+
+<script>
+import wepy from 'wepy';
+import CouponsList from '@/components/coupons-list';
+import CouponsEmpty from '@/components/coupons-empty';
+export default class couponsEffective extends wepy.page {
+    config = {
+        navigationBarTitleText: '失效的优惠券'
+    };
+    components = {
+        CouponsList,
+        CouponsEmpty
+    };
+    data = {
+        list: [{}, {}, {}],
+        isEmpty: false
+    };
+    methods = {};
+}
+</script>
+
+<style lang="less">
+page {
+    height: 100%;
+    background: #f4f4f4;
+}
+.coupon-list {
+    padding: 19rpx;
+    box-sizing: border-box;
+    height: 100%;
+}
+</style>

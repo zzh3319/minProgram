@@ -1,0 +1,143 @@
+<style lang="less">
+.container {
+    background-color: rgb(240, 240, 246);
+    padding: 0 40rpx;
+    padding-bottom: 60rpx;
+
+    .tittxt {
+        padding: 60rpx 0;
+        color: rgb(0, 0, 0);
+        font-size: 48rpx;
+        text-align: center;
+    }
+
+    .block {
+        margin-bottom: 110rpx;
+        line-height: 1.8;
+        color: rgb(82, 82, 82);
+        font-size: 26rpx;
+
+        .subtit {
+            font-size: 32rpx;
+            color: rgb(0, 0, 0);
+        }
+
+        .callPhone {
+            text-decoration: underline;
+            font-weight: bold;
+        }
+
+        .addressStyle {
+            margin-top: 60rpx;
+        }
+    }
+}
+</style>
+<template>
+  <view class="container">
+    <view class="tittxt">售后须知</view>
+
+    <view class="block">
+      <view class="subtit">【售后服务承诺】</view>
+      <view>售后服务时间：9：00-23：00，全年无休</view>
+      <view>本店郑重承诺不影响二次销售的前提下，提供7天无理由退换货。</view>
+      <view>所有产品均执行国家商品质量三包规定服务。</view>
+    </view>
+
+    <view class="block">
+      <view class="subtit">【关于退换邮费】:</view>
+      <view>1、我方承担运费：因发错货或者质量等问题，需要进行退换货，我方全额承担运费；（注：仓库拒收到付件，请您先垫付邮费，联系客服进行全额退还）</view>
+      <view>2、顾客承担运费：非质量问题（如：不喜欢，与图片有色差，气味，色差，面料做工，码数不合，舒适度，皮面有轻微褶皱，（真皮鞋属正常）价格变动等原因）需要进行退换货，顾客需承担运费。</view>
+    </view>
+
+    <view class="block">
+      <view class="subtit">【以下情形不属于退换货范围】:</view>
+      <view>1、超过我们店铺承诺的7天退换货有效时间（产品属质量问题除外）；</view>
+      <view>2、鞋面有明显折痕、鞋底磨损、脏污、鞋头已经楦过、已有穿着痕迹、已粘上鞋垫或后跟贴；以上情况均会影响二次销售；鞋盒必须完整，如鞋盒丢失，则不可退换货。</view>
+      <view>3、因非正常使用、保养（贮存）不当，造成的商品损坏（如污损、自行维修，修改加工，洗涤等）；</view>
+      <view>4、快递选择到付，一律拒收（请亲先行垫付）。</view>      
+    </view>
+
+    <view class="block">
+      <view class="subtit">【当场验货】:</view>
+      <view>您在查收货品时当着快递员直接打开核对再签收，如果发现以下几种情况下请直接拒收：</view>
+      <view>1、发货商品数量不符、少件（包括赠品数量）；</view>
+      <view>2、发货物内容不符；</view>
+      <view>3、包装、货物损坏；</view>
+      <view>4、商品存在质量问题。</view>
+    </view>
+
+    <view class="block">
+      <view class="subtit">【退换货流程】:</view>
+      <!-- <view>以下为我司仓库退货地址，均能处理退换货，为节省邮费，您可选择就近地址寄回。</view> -->
+      <view>
+        <view>我司仓库退换货地址：上海市青浦区崧泽大道6699号2号库 </view>
+        <view>收货人：田景龙  电话：4008-878-668</view>
+        <view>注：建议发圆通、申通、EMS等快递寄回，不接受安能、全峰、平邮、到付、货运。</view>
+      </view>
+
+      <!-- <view class="addressStyle">
+        <view>深圳地址：广东省深圳市宝安区龙华镇石观工业区新百丽鞋业物流中心 </view> 
+        <view>收件人：张石增  电话：4008-878-668 邮编： 518054 注：建议发圆通、中通、申通、EMS等快递寄回，不接收平邮、到付，货运。</view>
+      </view> -->
+
+      <!-- <view class="addressStyle">
+        <view>上海地址：上海市闵行区莘庄工业园区元江路5116号百丽4号楼</view>
+        <view>收件人：张先生 电话：4008-878-668  注：建议发圆通、申通、EMS等快递寄回，不接收安能、全峰、平邮、到付、货运。</view>
+      </view> -->
+
+      <!-- <view class="addressStyle">
+        <view>北京地址：北京市大兴区黄村镇天河北路9号百利威物流二分公司6号库2楼</view>
+        <view>收货人:张先生 电话4008-878-668,注：建议发圆通、中通、申通、EMS等，不接速尔、安能、平邮、到付，货运。</view>
+      </view> -->
+
+    </view>
+ 
+    <view class="block">
+      <view class="subtit">【退换货流程及注意事项】：</view>
+      <view>1、退换货申请流程：请您在签收之日起7天内发起退换货流程（换货需与售后客服电话申请），3天内寄出商品，以便我司在收到商品后及时安排退换货。</view>
+      <view>2、请填写好退换货单，并注明退换货原因，订单号码，联系方式；快递面单要写清退回件数；如以上信息缺失，可能造成我们无法及时为您办理退换货事宜。</view>
+      <view>3、请保持货品原样，鞋盒、鞋盒标签及商品的任何附件的完整，如果商品有吊牌，请您不要轻易剪掉或损坏吊牌，吊牌被剪掉或损坏，会直接影响退换服务；货品必须没有使用过且不影响二次销售，不符合上述条件，不予受理退换货。</view>
+      <view>4、发普通快递（圆通、中通、申通、韵达、EMS等）均可到达，我司不接收全峰、平邮、到付、货运。</view>
+      <view>5、不要把胶带及快递底单直接粘在原装鞋盒上，请保持货品及包装原样，如买家退回商品鞋盒粘有胶带，一律不予以退换。</view>
+      <view>
+        <view>6、我们会在收到您寄回商品后的1-2个工作日内完成质检，为您办理退换货。</view>
+        <view>（1）退货审核通过：您寄回的商品符合办理退换货标准，那么我们会尽快为您办理退换货服务；如办理退货，货款将原路退回。</view>
+        <view>（2）退货审核不通过：不符合退换货标准的，我们将会把商品原物寄还给您。</view>
+      </view>
+      <view>7、如果鞋子穿着后出现质量问题则按三包规定提供售后服务。</view>
+    </view>
+
+    <view class="block">
+      <view class="subtit">【发票问题】：</view>
+      <view>请联系客服人员登记后寄出，发票抬头可以是单位和个人。</view>
+    </view>
+
+    <view class="block">
+      <view class="subtit">【客服电话】：</view>
+      <view bindtap="calling" class="callPhone">4008-878-668</view>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+export default class afterInstructions extends wepy.page {
+    config = {
+        navigationBarTitleText: '售后须知'
+    };
+    data = {
+        phoneNumber: '4008-878-668'
+    };
+    methods = {
+        calling: function() {
+            wepy.makePhoneCall({
+                phoneNumber: this.data.phoneNumber
+            }).then(function(){
+              console.log('拨打电话成功！');
+            }).catch(function(){
+              console.log('拨打电话失败！');
+            });
+        }
+    };
+}
+</script>

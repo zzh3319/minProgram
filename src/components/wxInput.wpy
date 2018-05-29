@@ -1,0 +1,33 @@
+<template>
+  <view>
+      <input placeholder="{{placeholder}}" value="{{tValue}}" type="text" maxlength="{{maxlength}}" @blur="changeText"></input> 
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+export default class empty extends wepy.component {
+    props = {
+        maxlength: String,
+        tValue: {
+            type: String,
+            default: '',
+            twoWay: true
+        },
+        placeholder: {
+            type: String,
+            default: ''
+        },
+        changeFnName: String
+    };
+    data = {};
+    methods = {
+        changeText(e) {
+            this.$emit(this.changeFnName || 'input-change', e.detail.value);
+        }
+    };
+}
+</script>
+<style lang="less">
+
+</style>

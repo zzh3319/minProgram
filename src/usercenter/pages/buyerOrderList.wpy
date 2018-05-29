@@ -1,0 +1,875 @@
+<template>
+    <view class="tab-box">
+        <view class="top" catchtap="pageHdtap">
+            <view class="tab01 {{curSelectKey==0? 'active': ''}}" data-id="0">全部</view>
+            <view class="tab02 {{curSelectKey==1? 'active': ''}}" data-id="1">待付款</view>
+            <view class="tab03 {{curSelectKey==2? 'active': ''}}" data-id="2">待发货</view>
+            <view class="tab04 {{curSelectKey==3? 'active': ''}}" data-id="3">待收货</view>
+            <view class="tab05 {{curSelectKey==4? 'active': ''}}" data-id="4">交易成功</view>
+        </view>
+        <view class="tab-bd" style="height: 100%;">
+            <view class="tab-bd01 {{curSelectKey==0? 'show': ''}}" style="height: 100%;">
+                <!--tab01-->
+                <view class="order-content-box" wx:if="{{tabs[0].list.length}}">
+                    <repeat for="{{tabs[0].list}}" key="index" index="index" item="item">
+                        <orderItemBuyer :item="item"></orderItemBuyer>
+                    </repeat>
+                    <block class="loadMore" wx:if="{{tabs[0].list.length!=0}}">
+                        <view class="weui-loadmore" wx:if="{{tabs[0].hasMore}}">
+                            <view class="weui-loading" wx:if="{{loadtxt == '正在加载'}}"></view>
+                            <view class="weui-loadmore__tips">{{loadtxt}}</view>
+                        </view>
+                        <view class="weui-loadmore" wx:else>
+                            <view class="weui-loadmore__tips">{{loadtxt}}</view>
+                        </view>
+                    </block>
+                </view>
+                <view class=" mt200 mb10" wx:if="{{tabs[0].hasFlag}}">
+                    <empty :info="emptyInfo"></empty>
+                </view>
+            </view>
+            <view class="tab-bd02 {{curSelectKey==1? 'show': ''}}">
+                <!--tab02-->
+                <view class="order-content-box" wx:if="{{tabs[1].list.length}}">
+                    <repeat for="{{tabs[1].list}}" key="index" index="index" item="item">
+                        <orderItemBuyer :item="item"></orderItemBuyer>
+                    </repeat>
+                    <block class="loadMore" wx:if="{{tabs[1].list.length!=0}}">
+                        <view class="weui-loadmore" wx:if="{{tabs[1].hasMore}}">
+                            <view class="weui-loading" wx:if="{{loadtxt == '正在加载'}}"></view>
+                            <view class="weui-loadmore__tips">{{loadtxt}}</view>
+                        </view>
+                        <view class="weui-loadmore" wx:else>
+                            <view class="weui-loadmore__tips">{{loadtxt}}</view>
+                        </view>
+                    </block>
+                </view>
+                <view class=" mt200 mb10" wx:if="{{tabs[1].hasFlag}}">
+                    <empty :info="emptyInfo"></empty>
+                </view>
+            </view>
+            <view class="tab-bd02 {{curSelectKey==2? 'show': ''}}">
+                <!--tab03-->
+                <view class="order-content-box" wx:if="{{tabs[2].list.length}}">
+                    <repeat for="{{tabs[2].list}}" key="index" index="index" item="item">
+                        <orderItemBuyer :item="item"></orderItemBuyer>
+                    </repeat>
+                    <block class="loadMore" wx:if="{{tabs[2].list.length!=0}}">
+                        <view class="weui-loadmore" wx:if="{{tabs[2].hasMore}}">
+                            <view class="weui-loading" wx:if="{{loadtxt == '正在加载'}}"></view>
+                            <view class="weui-loadmore__tips">{{loadtxt}}</view>
+                        </view>
+                        <view class="weui-loadmore" wx:else>
+                            <view class="weui-loadmore__tips">{{loadtxt}}</view>
+                        </view>
+                    </block>
+                </view>
+                <view class=" mt200 mb10" wx:if="{{tabs[2].hasFlag}}">
+                    <empty :info="emptyInfo"></empty>
+                </view>
+            </view>
+            <view class="tab-bd02 {{curSelectKey==3? 'show': ''}}">
+                <!--tab04-->
+                <view class="order-content-box" wx:if="{{tabs[3].list.length}}">
+                    <repeat for="{{tabs[3].list}}" key="index" index="index" item="item">
+                        <orderItemBuyer :item="item"></orderItemBuyer>
+                    </repeat>
+                    <block class="loadMore">
+                        <view class="weui-loadmore" wx:if="{{tabs[3].hasMore}}">
+                            <view class="weui-loading" wx:if="{{loadtxt == '正在加载'}}"></view>
+                            <view class="weui-loadmore__tips">{{loadtxt}}</view>
+                        </view>
+                        <view class="weui-loadmore" wx:else>
+                            <view class="weui-loadmore__tips">{{loadtxt}}</view>
+                        </view>
+                    </block>
+                </view>
+                <view class=" mt200 mb10" wx:if="{{tabs[3].hasFlag}}">
+                    <empty :info="emptyInfo"></empty>
+                </view>
+            </view>
+            <view class="tab-bd02 {{curSelectKey==4? 'show': ''}}">
+                <!--tab05-->
+                <view class="order-content-box" wx:if="{{tabs[4].list.length}}">
+                    <repeat for="{{tabs[4].list}}" key="index" index="index" item="item">
+                        <orderItemBuyer :item="item"></orderItemBuyer>
+                    </repeat>
+                    <block class="loadMore">
+                        <view class="weui-loadmore" wx:if="{{tabs[4].hasMore}}">
+                            <view class="weui-loading" wx:if="{{loadtxt == '正在加载'}}"></view>
+                            <view class="weui-loadmore__tips">{{loadtxt}}</view>
+                        </view>
+                        <view class="weui-loadmore" wx:else>
+                            <view class="weui-loadmore__tips">{{loadtxt}}</view>
+                        </view>
+                    </block>
+                </view>
+                <view class=" mt200 mb10" wx:if="{{tabs[4].hasFlag}}">
+                    <empty :info="emptyInfo"></empty>
+                </view>
+            </view>
+        </view>
+    </view>
+</template>
+<style lang="less">
+@import '../../static/less/base/fn';
+
+
+
+/*tab top*/
+
+.top {
+    position: fixed;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 60rpx;
+    line-height: 60rpx;
+    font-size: 30rpx;
+    background: #fff;
+    padding: 14rpx 0;
+    border-bottom: 1rpx solid #cccccc;
+}
+
+.tab01,
+.tab02,
+.tab03,
+.tab04,
+.tab05 {
+    flex: 1;
+    text-align: center;
+}
+
+.top .active {
+    color: #e60012;
+}
+
+
+
+
+/*tab top end*/
+
+
+/*bd item start*/
+
+.show {
+    display: block !important;
+}
+
+.tab-bd {
+    padding: 80rpx 0rpx 0rpx 0;
+    height: 100%;
+}
+
+.tab-bd01,
+.tab-bd02 {
+    display: none;
+    height: 100%;
+}
+
+//tab end
+.tab-fixed-box {
+    position: fixed;
+    left: 0;
+    top: 0;
+    background: #ffffff;
+}
+
+.panel-box {
+    margin-top: 90rpx;
+}
+
+.no-info-box {
+    width: 100%;
+    background-color: #fff;
+    margin-bottom: 10px;
+    padding: 0 10px;
+    overflow: hidden;
+}
+
+.yg-empty-icon {
+    width: 220rpx;
+    height: 220rpx;
+    display: block;
+    margin: 0 auto;
+}
+
+.Gray {
+    color: #848484 !important;
+    display: block;
+    text-align: center;
+}
+
+.side {
+    flex-grow: 0;
+}
+
+.main {
+    flex-grow: 1;
+}
+
+.avatar {
+    display: block;
+    width: 78rpx;
+    height: 78rpx;
+    border-radius: 50%;
+}
+</style>
+<script>
+import wepy from 'wepy'; //引入组件
+import orderItemBuyer from '@/components/orderItemBuyer';
+import empty from '@/components/empty';
+export default class buyerOrderList extends wepy.page {
+    config = {
+        navigationBarTitleText: '我的订单',
+        usingComponents: {
+            'wxc-flex': '../../../packages/@minui/wxc-flex/dist/index',
+            'wxc-avatar': '../../../packages/@minui/wxc-avatar/dist/index',
+            'wxc-elip': '../../../packages/@minui/wxc-elip/dist/index'
+        }
+    };
+    components = {
+        orderItemBuyer,
+        empty
+    };
+    computed = {};
+    methods = {};
+    data = {
+        baseUrl: '',
+        isSeller: 0,
+        isShow: true,
+        emptyInfo: {
+            desc: '暂没有相关数据',
+            imgUrl: 'https://i2.ygimg.cn/cmp/mp/shopping_no.png'
+        },
+        loadtxt: '正在加载',
+        curSelectKey: 0, //初始进入，默认选项卡第一个元素，即全部
+        orderStatus: '', //""：全部 WAIT_PAY：待付款 WAIT_DELIVER：待发货 TRADE_SUCCESS：交易成功 ALREADY_SHIPPED：已发货
+        pageSize: '10', //每页多少条，都是一样为10条
+        tabs: [
+            //list 里放的应该是多个产品的列表信息。写样式，先写一个示例信息
+            {
+                title: '全部',
+                hasMore: true,
+                hasFlag: false,
+                totalPage: '', //总共的页数
+                pageNo: 1, //当前页数
+                list: [] //列表数据,存储值
+            },
+            {
+                title: '待付款',
+                hasMore: true,
+                hasFlag: false,
+                totalPage: '',
+                pageNo: 1,
+                list: []
+            },
+            {
+                title: '待发货',
+                hasMore: true,
+                hasFlag: false,
+                totalPage: '',
+                pageNo: 1,
+                list: []
+            },
+            {
+                title: '待收货',
+                hasMore: true,
+                hasFlag: false,
+                totalPage: '',
+                pageNo: 1,
+                list: []
+            },
+            {
+                title: '交易成功',
+                hasMore: true,
+                hasFlag: false,
+                totalPage: '',
+                pageNo: 1,
+                list: []
+            }
+        ]
+    };
+    methods = {
+        // 上拉加载回调接口
+        onReachBottom: function() {
+            this.loadMore(this.curSelectKey);
+        }
+    };
+    events = {
+        async 'order:refund'(orderId, orderStatus, childId, $event) {
+            wepy.setStorageSync('refundFlag', 'true'); //设置是否点击退款按钮
+            let path =
+                '/usercenter/pages/refundApplicationForm?orderId=' +
+                orderId +
+                '&orderDetailId=' +
+                childId +
+                '&orderStatus=' +
+                orderStatus;
+            wepy.navigateTo({
+                url: path
+            });
+        },
+        async 'order:logisticsTrack'(orderNo) {
+            let path = '/usercenter/pages/logisticTrack?orderNo=' + orderNo;
+            wepy.navigateTo({
+                url: path
+            });
+        },
+        async 'order:goPay'(orderId, wfxOrderNo) {
+            var _this = this;
+            let openIdVal = wepy.getStorageSync('openid');
+            wepy.showLoading();
+            var params = {
+                orderNo: orderId, //订单id
+                openId: openIdVal
+            };
+            wepy
+                .request({
+                    url: `${
+                    this.$parent.globalData.apiBaseUrlMock
+                    }/api/v2/order/orderTopay`,
+                    data: params
+                })
+                .then(res => {
+                    let response = res.data;
+                    if (response.code === 20000) {
+                        //请求成功
+                        if (
+                            response.data === undefined ||
+                            response.data === '' ||
+                            response.data === null
+                        ) {
+                            //无数据返回状态
+                            //若无数据
+                            wepy.showToast({
+                                title: '产品卖光啦',
+                                duration: 4000
+                            });
+                            wepy.hideLoading();
+                        } else {
+                            //代码执行
+                            let wfxOrderNoz = response.data.wfxOrderNo;
+                            _this.requestPay(orderId, wfxOrderNoz);
+                        }
+                        //无数据end
+                    } else {
+                        //若请求失败，则显示信息
+                        wepy.showToast({
+                            image: './../../static/img/notice.png',
+                            icon: 'none',
+                            title: '支付失败',
+                            duration: 4000
+                        });
+                        setTimeout(() => {
+                            wepy.redirectTo({
+                                url: '/usercenter/pages/payfail'
+                            });
+                        }, 500);
+                    }
+                });
+            //end
+        },
+        async 'order:goPayAgain'(orderId) {
+            let openIdVal = wepy.getStorageSync('openid');
+            wepy.showLoading();
+            var params = {
+                order_no: orderId,
+                open_id: openIdVal
+            };
+            wepy
+                .request({
+                    method: 'POST',
+                    url: `${
+                    this.$parent.globalData.apiBaseUrlMock
+                    }/api/v2/order/cmpBuyAgin`,
+                    data: params
+                })
+                .then(res => {
+                    let response = res.data;
+                    if (response.code === 20000) {
+                        //请求成功
+                        if (
+                            response.data === undefined ||
+                            response.data === '' ||
+                            response.data === null
+                        ) {
+                            //无数据返回状态
+                            //若无数据
+                            wepy.showToast({
+                                title: response.errorMsg + ' ',
+                                duration: 4000
+                            });
+                            wepy.hideLoading();
+                        } else {
+                            //代码执行
+                            wepy.showToast({
+                                icon: 'none',
+                                title: '正在跳转...',
+                                duration: 4000
+                            });
+                            setTimeout(() => {
+                                wepy.redirectTo({
+                                    url: '/usercenter/pages/confirmPay'
+                                });
+                            }, 500);
+                        }
+                        //无数据end
+                    } else {
+                        //若请求失败，则显示信息
+                        wepy.showToast({
+                            icon: 'none',
+                            title: response.errorMsg + ' ',
+                            duration: 4000
+                        });
+                    }
+                });
+            //end
+        },
+        async 'order:cancleOrder'(orderId) {
+            var _this = this;
+            wepy
+                .showModal({
+                    title: '取消订单',
+                    content: '是否取消？'
+                })
+                .then(res => {
+                    if (res.confirm) {
+                        _this.cancleOrderFun(orderId);
+                    } else {
+                        wepy.showToast({
+                            icon: 'none',
+                            title: '取消失败',
+                            duration: 4000
+                        });
+                    }
+                })
+                .catch(err => {
+                    wepy.showToast({
+                        icon: 'none',
+                        title: '取消失败',
+                        duration: 4000
+                    });
+                });
+        },
+        async 'order:confirmReceipt'(orderId) {
+            var _this = this;
+            wepy
+                .showModal({
+                    title: '确认收货',
+                    content: '是否确认收货？'
+                })
+                .then(res => {
+                    if (res.confirm) {
+                        _this.confirmReceiptSub(orderId);
+                    }
+                })
+                .catch(err => {
+                    wepy.showToast({
+                        icon: 'none',
+                        title: '取消失败',
+                        duration: 4000
+                    });
+                });
+        }
+    };
+    cancleOrderFun(orderId) {
+        var _this = this;
+        let openIdVal = wepy.getStorageSync('openid');
+        wepy.showLoading();
+        var params = {
+            order_no: orderId,
+            open_id: openIdVal
+        };
+        wepy
+            .request({
+                method: 'POST',
+                url: `${
+                this.$parent.globalData.apiBaseUrlMock
+                }/api/v2/order/cancelOrder`,
+                data: params
+            })
+            .then(res => {
+                let response = res.data;
+                if (response.code === 20000) {
+                    //请求成功
+                    if (
+                        response.data === undefined ||
+                        response.data === '' ||
+                        response.data === null
+                    ) {
+                        //无数据返回状态
+                        //若无数据
+                        wepy.showToast({
+                            title: '产品卖光啦',
+                            duration: 4000
+                        });
+                        wepy.hideLoading();
+                    } else {
+                        //代码执行
+                        wepy.showToast({
+                            icon: 'success',
+                            title: '取消订单成功',
+                            duration: 4000
+                        });
+                        setTimeout(() => {
+                            _this.loadMoreAgain(this.curSelectKey);
+                        }, 500);
+                    }
+                    //无数据end
+                } else {
+                    //若请求失败，则显示信息
+                    wepy.showToast({
+                        icon: 'none',
+                        title: response.errorMsg + ' ',
+                        duration: 4000
+                    });
+                }
+            });
+        //end
+    }
+    confirmReceiptSub(orderId) {
+        var _this = this;
+        let openIdVal = wepy.getStorageSync('openid');
+        wepy.showLoading();
+        var params = {
+            order_no: orderId,
+            open_id: openIdVal
+        };
+        wepy
+            .request({
+                method: 'POST',
+                url: `${
+                this.$parent.globalData.apiBaseUrlMock
+                }/api/v2/order/sureOrder`,
+                data: params
+            })
+            .then(res => {
+                let response = res.data;
+                if (response.code === 20000) {
+                    //请求成功
+                    if (
+                        response.data === undefined ||
+                        response.data === '' ||
+                        response.data === null
+                    ) {
+                        //无数据返回状态
+                        //若无数据
+                        wepy.showToast({
+                            title: response.errorMsg + ' ',
+                            duration: 4000
+                        });
+                        wepy.hideLoading();
+                    } else {
+                        //代码执行
+                        wepy.showToast({
+                            icon: 'success',
+                            title: '确认收货成功',
+                            duration: 4000
+                        });
+                        _this.loadMoreAgain(this.curSelectKey); //重新加载数据
+                    }
+                    //无数据end
+                } else {
+                    //若请求失败，则显示信息
+                    wepy.showToast({
+                        icon: 'none',
+                        title: response.errorMsg + ' ',
+                        duration: 4000
+                    });
+                }
+            });
+        //end
+    }
+    payOkHandler(orderId, wfxOrderNoz) {
+        //更新订单状态
+        let _that = this;
+        let openId = wepy.getStorageSync('openid');
+        wepy
+            .request({
+                url:
+                _that.$parent.globalData.apiBaseUrl + `/api/v2/order/payok?merchantNo={$merchantNo}&openId=${openId}`,
+                method: 'POST',
+                data: {
+                    order_no: wfxOrderNoz,
+                     receiveRedPacketPagePath: 'mphome/pages/getCouponResult'
+                }
+            })
+            .then(getRes => {
+                wepy.hideLoading();
+                if (getRes.data.code === 20000) {
+                    wepy.showToast({
+                        icon: 'success',
+                        title: '支付成功',
+                        duration: 4000
+                    });
+                    let redPacket = getRes.data.data.redPacket;
+                    let encodeData = '';
+                    if (redPacket) {
+                        encodeData = JSON.stringify(redPacket);
+                    }
+                    setTimeout(() => {
+                        wepy.redirectTo({
+                            //ff参
+                            url:
+                            '/usercenter/pages/paysuccess?orderNo=' +
+                            orderId + '&data=' + encodeData
+                        });
+                    }, 500);
+                } else {
+                    wepy.showToast({
+                        image: './../../static/img/notice.png',
+                        icon: 'none', //ff 图标要改
+                        title: '支付失败',
+                        duration: 4000
+                    });
+                    setTimeout(() => {
+                        wepy.redirectTo({
+                            url: '/usercenter/pages/payfail'
+                        });
+                    }, 500);
+                }
+            });
+    }
+    requestPay(orderId, wfxOrderNoz) {
+        var _that = this;
+        let openId = wepy.getStorageSync('openid');
+        wepy
+            .request({
+                url:
+                this.$parent.globalData.apiBaseUrl + `/api/v2/pay/sendData?merchantNo={$merchantNo}&openId=${openId}`,
+                method: 'POST',
+                data: {
+                    biz_no: wfxOrderNoz,
+                    open_id: wepy.getStorageSync('openid')
+                }
+            })
+            .then(res => {
+                if (res.data.code !== 20000) {
+                    wepy.showToast({
+                        image: './../../static/img/notice.png',
+                        icon: 'none',
+                        title: res.data.errorMsg,
+                        duration: 4000
+                    });
+                    wepy.hideLoading();
+                    return;
+                }
+                wepy.hideLoading();
+                var paysignInfo = JSON.parse(res.data.data.actionForm);
+                if (!paysignInfo) {
+                    //0元单
+                    return;
+                }
+                wepy
+                    .requestPayment({
+                        //支付中心
+                        appId: paysignInfo.appId,
+                        timeStamp: paysignInfo.timeStamp + '',
+                        nonceStr: paysignInfo.nonceStr,
+                        package: paysignInfo.package,
+                        signType: 'MD5',
+                        paySign: paysignInfo.sign
+                    })
+                    .then(getData => {
+                        wepy.showLoading();
+                        _that.payOkHandler(orderId, wfxOrderNoz);
+                    })
+                    .catch(err => {
+                        wepy.showToast({
+                            image: './../../static/img/notice.png',
+                            icon: 'none',
+                            title: '支付失败',
+                            duration: 4000
+                        });
+                        //取消操作后，刷新当前页面数据
+                        setTimeout(() => {
+                            _that.loadMore(this.curSelectKey);
+                        }, 500);
+                    });
+            });
+    }
+    pageHdtap(e) {
+        //tab 点击事件
+        var _selectedKey = e.target.dataset.id;
+        if (this.curSelectKey !== _selectedKey) {
+            //禁止重复切换
+            wepy.showLoading(); //0  1  2 3 4 5 分别对应全部，待付款，待发货，待收货，交易成功
+            this.curSelectKey = _selectedKey; //当前点击的选项卡tab--序号
+            this.$apply();
+            this.loadMore(this.curSelectKey);
+        }
+    }
+    initLoadMore(SelectKey) {
+        //初次加载，orderStatus 全部
+        var _this = this;
+        var curKey = SelectKey;
+        let pageSize = 10;
+        this.curSelectKey = curKey; //当前头部tab
+        _this.orderStatusFun(this.curSelectKey);
+        var params = {
+            orderStatus: _this.orderStatus,
+            pageNo: _this.tabs[curKey].pageNo,
+            pageSize: pageSize
+        };
+        wepy
+            .request({
+                url: `${
+                this.$parent.globalData.apiBaseUrlMock
+                }/api/v2/order/getMyOrderList`,
+                data: params
+            })
+            .then(res => {
+                let response = res.data;
+                if (response.code === 20000) {
+                    //请求成功
+                    if (
+                        response.data === undefined ||
+                        response.data === '' ||
+                        response.data === null
+                    ) {
+                        //无数据返回状态
+                        //若无数据
+                        wepy.showToast({
+                            title: '网络错误',
+                            duration: 4000
+                        });
+                        wepy.hideLoading();
+                    } else {
+                        //代码执行
+                        let len;
+                        let pageN;
+                        let totalP;
+                        _this.tabs[curKey].totalPage = response.data.pageCount;
+                        _this.tabs[curKey].pageNo++;
+                        //存储元素
+                        _this.tabs[curKey].list = _this.tabs[curKey].list.concat(response.data.items);
+                        len = _this.tabs[curKey].list.length;
+                        pageN = _this.tabs[curKey].pageNo;
+                        totalP = _this.tabs[curKey].totalPage;
+                        len === 0
+                            ? (_this.tabs[curKey].hasFlag = true)
+                            : (_this.tabs[curKey].hasFlag = false);
+                        pageN <= totalP
+                            ? (_this.tabs[curKey].hasMore = true)
+                            : (_this.tabs[curKey].hasMore = false);
+                        _this.tabs[curKey].hasMore
+                            ? (_this.loadtxt = '正在加载')
+                            : (_this.loadtxt = '没有更多数据');
+                        this.$apply();
+                        wepy.hideLoading();
+                    }
+                    //无数据end
+                } else {
+                    //若请求失败，则显示信息
+                    wepy.showToast({
+                        icon: 'none',
+                        title: response.errorMsg + ' ',
+                        duration: 4000
+                    });
+                    wepy.hideLoading();
+                }
+            });
+    }
+    loadMore(SelectKey) {
+        // wepy.showLoading();
+        let _this = this;
+        let curKey = SelectKey;
+        this.curSelectKey = Number(curKey); //当前头部tab
+        _this.orderStatusFun(curKey);
+        //若总数为空，则加载。若还有页数，则加载。否则不加载
+        if (_this.tabs[curKey].hasMore) {
+            _this.initLoadMore(curKey);
+        } else {
+            wepy.hideLoading();
+        }
+        //more end
+    }
+    loadMoreAgain(SelectKey) {
+        wepy.showLoading();
+        //取消订单之后与确认订单重复加载当前页面数据时调用。列表页的数据进行刷新。
+        let _this = this;
+        let curKey = SelectKey;
+        this.curSelectKey = Number(curKey); //当前头部tab
+        _this.orderStatusFun(curKey);
+        //清空当前列表页的数据,重新加载当前页面数据。
+        _this.tabs[curKey].pageNo = 1;
+        _this.tabs[curKey].hasMore = true;
+        _this.tabs[curKey].hasFlag = false;
+        _this.tabs[curKey].totalPage = '';
+        _this.tabs[curKey].list = [];
+        _this.loadMore(curKey);
+    }
+    //订单状态转换
+    orderStatusFun(status) {
+        var _this = this;
+        let sta = Number(status);
+        switch (sta) {
+            case 0:
+                //全部
+                _this.orderStatus = '';
+                break;
+            case 1:
+                _this.orderStatus = 'WAIT_PAY';
+                //待付款
+                break;
+            case 2:
+                _this.orderStatus = 'WAIT_DELIVER';
+                //待发货
+                break;
+            case 3:
+                _this.orderStatus = 'ALREADY_SHIPPED';
+                //待收货-已发货
+                break;
+            case 4:
+                _this.orderStatus = 'TRADE_SUCCESS';
+                //交易成功
+                break;
+            default:
+                return false;
+        }
+    }
+    onLoad(options) {
+        let key = options.key;
+        //判断进入参数 全部0，待付款1，待发货2，待收货3，交易成功4
+        wepy.showLoading();
+        if (key) {
+            this.curSelectKey = key;
+            this.loadMore(this.curSelectKey);
+        } else {
+            this.loadMore(this.curSelectKey);
+        }
+    }
+    onShow(options) {
+        let cancleFlag = wepy.getStorageSync('cancleFlag');
+        let refundLink = wepy.getStorageSync('refundLink');
+        let refundFlag = wepy.getStorageSync('refundFlag');
+        if (cancleFlag || refundLink || refundFlag) {
+            //判断进入参数 全部0，待付款1，待发货2，待收货3，交易成功4
+            let key;
+            wepy.showLoading();
+            if (key) {
+                key = options.key;
+                this.curSelectKey = key;
+                this.loadMoreAgain(this.curSelectKey);
+            } else {
+                this.loadMoreAgain(this.curSelectKey);
+            }
+
+            //取消标志
+            if (cancleFlag) {
+                wepy.removeStorageSync('cancleFlag'); //删除 取消订单按钮标志
+            }
+            if (refundLink) {
+                wepy.removeStorageSync('refundLink');
+            }
+            if (refundFlag) {
+                wepy.removeStorageSync('refundFlag');
+            }
+        }
+        //end
+    }
+}
+</script>

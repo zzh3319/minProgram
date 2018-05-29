@@ -1,0 +1,94 @@
+<style lang="less">
+.fixed-box {
+    position: fixed;
+    z-index: 99;
+    top: 45%;
+    right: 5%;
+    &.b-edit {
+        top: auto;
+        bottom: 224rpx;
+    }
+    &.goto-home {
+        top: 20rpx;
+        .btn-fixed {
+            width: 68rpx;
+            height: 68rpx;
+            background-color: rgba(255, 255, 255, 0.75);
+            > .iconfont {
+                font-size: 33rpx;
+                line-height: 68rpx;
+            }
+        }
+    }
+    &.goto-back {
+        top: 20rpx;
+        left: 34rpx;
+        width: 88rpx;
+        .btn-fixed {
+            width: 68rpx;
+            height: 68rpx;
+            background-color: rgba(255, 255, 255, 0.75);
+            > .iconfont {
+                font-size: 33rpx;
+                line-height: 68rpx;
+            }
+        }
+    }
+}
+.btn-fixed {
+    display: block;
+    margin-bottom: 20rpx;
+    padding: 0;
+    width: 88rpx;
+    height: 88rpx;
+    line-height: 88rpx;
+    text-align: center;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    border-radius: 50%;
+    -webkit-box-shadow: 1rpx 1rpx 10rpx rgba(130, 130, 130, 0.5);
+    -moz-box-shadow: 1rpx 1rpx 10rpx rgba(130, 130, 130, 0.5);
+    box-shadow: 1rpx 1rpx 10rpx rgba(130, 130, 130, 0.5);
+    background-color: #fff;
+    &:last-child {
+        margin-bottom: 0;
+    }
+    &:before,
+    &:after {
+        display: none;
+    }
+    &.blue {
+        color: #4da0d9;
+    }
+    > .iconfont {
+        font-size: 44rpx;
+        line-height: 88rpx;
+    }
+}
+</style>
+<template>
+  <view class="fixed-box">
+    <Forword ctype="forword"/>
+    <Share ctype="share" :shareData.sync="bConfig"/>
+    <slot />
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+import fixedButton from '@/components/fixedButton';
+export default class fixedBox extends wepy.component {
+    components = {
+        Forword: fixedButton,
+        Share: fixedButton
+    };
+    props = {
+        bConfig: {
+            type: Object,
+            default: {}
+        }
+    };
+    data = {};
+    methods = {};
+    onLoad() {}
+}
+</script>

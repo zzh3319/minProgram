@@ -1,0 +1,98 @@
+<style>
+page {
+    background: #f4f4f4;
+}
+.container {
+    width: 100%;
+    position: relative;
+    padding: 0 0 0;
+    color: #777;
+}
+.view,
+.payPrice,
+.payWay {
+    display: block;
+    width: 100%;
+}
+.orderstatus {
+    padding: 35px 0;
+    width: 100%;
+    text-align: center;
+    background: #fff;
+    margin-bottom: 20px;
+}
+.orderstatus text {
+    display: block;
+    padding: 10px 0 0;
+    color: #e83b37;
+}
+.payCon {
+    width: 100%;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+.payBtn {
+    margin-top: 20px;
+    width: 40%;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    border-radius: 5px;
+}
+.goToOrder {
+    background: #ff6563;
+    border: 1px solid #ff6563;
+    color: #fff;
+    margin: 0 auto;
+    width: 60%;
+    font-size: 14px;
+}
+.goOnBuy {
+    float: right;
+    background: #f4f4f4;
+    border: 1px solid #777;
+    color: #777;
+}
+.payPrice {
+    font-size: 12px;
+    margin-bottom: 50px;
+}
+</style>
+<template>
+  <view class='container'>
+    <view class="orderstatus">
+      <icon type="warn" size="50"></icon>
+      <text>抱歉，订单提交失败!</text>
+    </view>
+    <view class="payCon">
+      <view class='payPrice'><!-- 因某种原因，导致您的订单无法成功提交， -->
+        {{errorMsg}}请返回上一页重新下单，如果多次失败请稍后再试。
+       </view>
+      <view @tap="goBack" class="payBtn goToOrder">返回上一页</view>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+export default class payfail extends wepy.page {
+    config = {
+        navigationBarTitleText: '订单提交失败'
+    };
+    data = {
+        errorMsg: ''
+    };
+    methods = {
+        goBack() {
+            wepy.navigateBack({
+                delta: 1
+            });
+        }
+    };
+    onLoad(options) {
+        console.log(options);
+        let errorMsg = options.errorMsg;
+        errorMsg && (this.errorMsg = errorMsg);
+        this.$apply();
+    }
+}
+</script>

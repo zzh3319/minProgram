@@ -1,0 +1,130 @@
+<style type="less">
+.goods_item {
+    box-sizing: border-box;
+    background-color: #ffffff;
+    overflow: hidden;
+    margin: 20rpx 0;
+    float: left;
+    width: e('calc(50% - 10rpx)');
+    position: relative;
+    .goods_pic {
+        width: 100%;
+        height: 355rpx;
+        display: block;
+    }
+    .booking-image {
+        @height: 80rpx;
+        width: @height;
+        height: @height;
+        line-height: @height;
+        position: absolute;
+        left: 8rpx;
+        top: 8rpx;
+        background: url(https://i2.ygimg.cn/cmp/mp/booking-label.png) no-repeat;
+        background-size: 100% auto;
+        font-size: 30rpx;
+        color: #fff;
+        text-align: center;
+    }
+    .discount-tip{
+        position: absolute;
+        top: 300rpx;
+        width: 100%;
+        background-color:rgba(255,66,77,.5);
+        z-index: 1;
+        color: #FFFFFF;
+        text-align: center;
+        font-size: 26rpx;
+        font-weight: 300;
+        padding: 10rpx 0rpx;
+    }
+    .desc {
+        font-size: 24rpx;
+        width: 90%;
+        color: #3a3a3a;
+        margin: 0 auto;
+        text-align: center;
+        margin-top: 12rpx;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+    .goods_price {
+        text-align: center;
+        font-size: 30rpx;
+        line-height: 35rpx;
+        padding: 10rpx 0 30rpx;
+        .discount_group{
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+        .discount_fee {
+            color: #ff4343;
+        }
+        .discount_type{
+            color: #ff4343;
+            font-size:20rpx;
+            border:1px solid #ff4343;
+            border-radius:20rpx;
+            font-weight:200;
+            padding:6rpx 10rpx;
+            line-height:20rpx;
+            margin-left:10rpx;
+        }
+        .sale_fee {
+            color: #8b8b8b;
+            text-decoration: line-through;
+        }
+    }
+}
+</style>
+<template>
+    <view @tap="goodsClickHandler({{item.no}})"  id="{{itme.id}}" class="goods_item">
+        <view class="booking-image" wx:if="{{item.isPreSell}}"></view>
+        <view class="discount-tip" wx:if="{{item['ruleDesc'].length>0}}">{{item['ruleDesc'][0]}}</view>
+        <image class="goods_pic"  src="{{item.pictureMb}}" alt=""></image>
+        <view class="desc">
+            {{item.commodityName}}
+        </view>
+        <view class="goods_price">
+            <view class="discount_group">
+                <view class="discount_fee">￥{{item.wfxPrice}}</view>
+                <!-- <view class="discount_type" wx:if="{{item.activityType}}">{{activityType[item.activityType]}}</view> -->
+            </view>
+            <view class="sale_fee">￥{{item.publicPrice}}</view>
+        </view>
+    </view>
+</template>
+<script>
+import wepy from 'wepy';
+import activityType from '@/mixins/activityType.js';
+export default class Group extends wepy.component {
+    props = {
+        item: {
+            type: Object,
+            default: {}
+        }
+    };
+    onLoad(){
+        this.activityType = activityType;
+    };
+    data = {
+        activityType: {}
+    };
+    components = {};
+    methods = {
+        goodsClickHandler(id) {
+            let shopId = wepy.getStorageSync('shopId');
+            let commodityNo = id;
+            console.log(commodityNo)
+            console.log(shopId)
+            wepy.navigateTo({
+                url: `/pages/goodsDetail?commodityNo=${commodityNo}&shopId=${shopId}`
+            });
+        }
+    };
+}
+</script>

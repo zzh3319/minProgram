@@ -1,0 +1,45 @@
+<template>
+  <web-view src='{{webViewUrl}}'></web-view>
+</template>
+
+<script>
+import wepy from 'wepy';
+export default class customService extends wepy.page {
+    shareType = {};
+    shareUrl = {};
+    config = {};
+    components = {};
+    mixins = [];
+    data = {
+        webViewUrl: '',
+        userInfo: {},
+        hasUserInfo: false,
+        merchantNo: '{$merchantNo}'
+    };
+    computed = {};
+    methods = {};
+    events = {};
+    onLoad(options) {
+        if (!wepy.canIUse('web-view')) {
+            this.$parent.webviewNoCanUsewx();
+            return false;
+        }
+        let openId = wepy.getStorageSync('openid');
+        const { title, commodityUrl, price, imageUrl } = options;
+        debugger;
+        const param = `title=${encodeURIComponent(
+            title
+        )}&price=${price}&commodityUrl=${commodityUrl}&imageUrl=${imageUrl}&openId=${openId}&merchantNo=${this.merchantNo}`;
+        console.log(
+            `${this.$parent.globalData.apiBaseUrl}/api/v2/easemob/goods?${param}`
+        );
+        // wepy.showLoading();
+        this.webViewUrl = `${
+            this.$parent.globalData.apiBaseUrl
+        }/api/v2/easemob/goods?${param}`;
+        this.$apply();
+    }
+    onReady() {}
+    onShow() {}
+}
+</script>

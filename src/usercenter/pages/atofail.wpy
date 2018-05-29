@@ -1,0 +1,72 @@
+<style lang="less">
+.war {
+    width: 100%;
+    height: 100%;
+    background-color: #f4f4f4;
+}
+.atoSuccess {
+    width: 85%;
+    margin: 0 auto;
+    margin-top: 10%;
+}
+.atoImg {
+    width: 45%;
+    margin: 0 auto;
+}
+.determineImage {
+    width: 150px;
+    height: 150px;
+}
+.atoSuccess-p {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 14px;
+}
+.atoSuccess-p p {
+    margin-top: 5px;
+}
+.atoGo {
+    background-color: #ff414b;
+    margin-top: 10px;
+    border-radius: 10px;
+    color: #fff;
+}
+.atoGoB {
+    background-color: #ff414b;
+    color: #fff;
+}
+</style>
+<template>
+  <view class='war'>
+    <view class="atoSuccess">
+      <view class='atoImg'>
+        <image class="determineImage" src="https://i2.ygimg.cn/cmp/mp/failure.png" mode="aspectFill"></image>
+      </view>
+      <view class='atoSuccess-p'>
+        <p>请您联络相关业务同事处理;</p>
+      </view>
+      <view class='atoSuccess-p'>
+        <p>如果您是一位顾客,欢迎进入商城看看</p>
+      </view>
+      <view @tap="toast" class="atoGo">
+        <button class="atoGoB">进入商城</button>
+      </view>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+export default class atofail extends wepy.page {
+    config = {
+        navigationBarTitleText: '导购升级'
+    };
+    data = {};
+    methods = {
+        toast() {
+            wepy.switchTab({
+                url: '/pages/index'
+            });
+        }
+    };
+}
+</script>

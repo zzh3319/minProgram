@@ -1,0 +1,50 @@
+<template>
+  <web-view src='{{webViewUrl}}'></web-view>
+</template>
+
+<script>
+import wepy from 'wepy';
+export default class myIncome extends wepy.page {
+    shareType = {};
+    shareUrl = {};
+    config = {};
+    components = {};
+    mixins = [];
+    data = {
+        webViewUrl: '',
+        userInfo: {},
+        hasUserInfo: false
+    };
+    computed = {};
+    methods = {};
+    events = {};
+    onLoad(options) {
+        if (!wepy.canIUse('web-view')) {
+            this.$parent.webviewNoCanUsewx();
+            return false;
+        }
+        // wepy.showLoading();
+        let returnUrl = options.return_url;
+        if (returnUrl !== undefined) {
+            let decodeURL = decodeURIComponent(returnUrl);
+            if (decodeURL.indexOf('|') > 0) {
+                decodeURL = decodeURL.split('|').join('%7C');
+            }
+            this.url = decodeURL;
+        } else {
+            this.url = decodeURIComponent(options.url);
+        }
+    }
+    onReady() {
+        this.webViewUrl = this.appendWxpageParam(this.url);
+    }
+    onShow() {}
+    appendWxpageParam(url) {
+        if (!/(^|&|\?)wxpage=([^&]*)(&|$)/i.test(url)) {
+            let connectFlag = url.indexOf('?') !== -1 ? '&' : '?';
+            return url + connectFlag + 'wxpage=myIncome';
+        }
+        return url;
+    }
+}
+</script>

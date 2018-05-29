@@ -1,0 +1,60 @@
+<template>
+  <view class="swiper-container">
+    <swiper 
+      indicator-dots="{{indicatorDots}}"
+      indicator-color="{{indicatorColor}}"
+      indicator-active-color="{{indicatorActiveColor}}"
+      autoplay="{{autoplay}}"
+      interval="{{interval}}" 
+      duration="{{duration}}"
+      style="height:{{imgHeight}}rpx;"
+    >
+        <repeat for="{{item.widgetsContent.list}}" key="index" index="index" item="subItem">
+          <swiper-item> 
+            <image src="{{subItem.imgUrl}}" @tap="link({{subItem.linkType}},{{subItem.linkValue}})" lazy-load='{{true}}' data-index="{{ index }}"   mode="widthFix" class="swiper-image" @load="loadimage"/>
+          </swiper-item>
+        </repeat>
+    </swiper> 
+  </view> 
+</template>
+<script>
+import wepy from 'wepy';
+export default class decorateSwiper extends wepy.component {
+    data = {
+        indicatorDots: true,
+        indicatorColor: 'rgba(0, 0, 0, .3)',
+        indicatorActiveColor: '#f1f1f1',
+        autoplay: true,
+        interval: 5000,
+        duration: 300,
+        imgHeight: 440
+    };
+    props = {
+        item: {
+            type: Object,
+            default: {}
+        }
+    };
+    methods = {
+        loadimage(e) {
+            let { height } = e.detail;
+            console.log(height);
+            if (this.imgHeight === height) return;
+            this.imgHeight = height;
+            this.$apply();
+        },
+        link(linkType, linkUrl) {
+            this.$emit('link-Handle', linkType, linkUrl);
+        }
+    };
+}
+</script>
+
+<style lang="less">
+.swiper-image {
+    background: #fff;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+</style>

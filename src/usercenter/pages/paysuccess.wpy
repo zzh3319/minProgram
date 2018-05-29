@@ -1,0 +1,153 @@
+<style>
+page {
+    background: #f4f4f4;
+}
+
+.container {
+    width: 100%;
+    position: relative;
+    padding: 0 0 0;
+    color: #777;
+}
+
+.view,
+.payPrice,
+.payWay {
+    display: block;
+    width: 100%;
+}
+
+.orderstatus {
+    padding: 35px 0;
+    width: 100%;
+    text-align: center;
+    background: #fff;
+    margin-bottom: 20px;
+}
+
+.orderstatus text {
+    display: block;
+    padding: 10px 0 0;
+    color: #4fbb2a;
+}
+
+.payCon {
+    width: 100%;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+.payBtn {
+    margin-top: 50px;
+    width: 40%;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.goToOrder {
+    float: left;
+    background: #ff434d;
+    border: 1px solid #ff434d;
+    color: #fff;
+}
+
+.goOnBuy {
+    float: right;
+    background: #f4f4f4;
+    border: 1px solid #777;
+    color: #777;
+}
+
+.payPrice text {
+    color: #ff434d;
+}
+
+.payPrice,
+.payWay {
+    font-size: 12px;
+}
+</style>
+<template>
+    <view>
+        <ShareCard wx:if="{{hasShareCard}}" />
+        <view class='container'>
+            <view class="orderstatus">
+                <icon type="success" size="50"></icon>
+                <text>订单支付成功!</text>
+            </view>
+            <view class="payCon">
+                <view class='payPrice'>支付金额：
+                    <text>{{orderPrice}}</text>
+                </view>
+                <view class='payWay'>支付方式：在线支付(微信支付)</view>
+                <view bindtap="goToOrder" class="payBtn goToOrder">查看订单</view>
+                <view bindtap="goOnBuy" class="payBtn goOnBuy">继续购买</view>
+            </view>
+        </view>
+    </view>
+</template>
+<script>
+import wepy from 'wepy';
+import ShareCard from '@/components/shareCard';
+export default class paysuccess extends wepy.page {
+    getOrderId = '';
+    config = {
+        navigationBarTitleText: '支付成功',
+        usingComponents: {
+            'wxc-mask': '../../../packages/@minui/wxc-mask/dist/index'
+        }
+    };
+    data = {
+        orderPrice: '',
+        hasShareCard: false
+    };
+    components = {
+        ShareCard
+    };
+    methods = {
+        goToOrder() {
+            // var getOrderId=this.getOrderId;
+            // wepy.reLaunch({
+            //   url: '/pages/index?return_url='+this.$parent.globalData.h5BaseUrl+'/order/'+getOrderId+'.sc'
+            // })
+            // var getOrderId = this.getOrderId;
+            // this.$parent.globalData.paySuccessBack = this.$parent.globalData.h5BaseUrl + '/order/' + getOrderId + '.sc';
+            // wepy.navigateBack({
+            //   delta: 1
+            // })
+            wepy.redirectTo({
+                url: `/usercenter/pages/orderDetail?orderNo=${this.getOrderId}`
+            });
+        },
+        goOnBuy() {
+            // var timestamp = Date.parse(new Date());
+            // this.$parent.globalData.paySuccessBack = this.$parent.globalData.h5BaseUrl + this.$parent.globalData.getIndexHttps + '&time=' + timestamp;
+            // wepy.navigateBack({
+            //   delta: 1
+            // })
+            wepy.switchTab({
+                url: '/pages/index'
+            });
+            // wepy.reLaunch({
+            //   url: '/pages/index?return_url='+this.$parent.globalData.h5BaseUrl+this.$parent.globalData.getIndexHttps+'?time='+timestamp;
+            // })
+        }
+    };
+    onLoad(options) {
+        console.log(options);
+        this.getOrderId = options.orderNo;
+        //return false;
+        this.orderPrice = options.order_price;
+        let dataObj;
+        if (options.data) {
+            this.hasShareCard = true;
+            dataObj = JSON.parse(options.data) || {};
+            this.$broadcast('shareCard:show', dataObj, 'white_bg');
+        }
+        this.$apply();
+    }
+}
+</script>

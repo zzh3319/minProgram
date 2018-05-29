@@ -1,0 +1,36 @@
+<style lang="less">
+.empty-box {
+    width: 100%;
+    padding: 0 10px;
+    .icon {
+        width: 220rpx;
+        height: 220rpx;
+        display: block;
+        margin: 0 auto;
+    }
+}
+</style>
+
+<template>
+  <view class="empty-box bg-transparent t-center">
+      <image src="{{info.imgUrl}}" class="icon"></image>
+      <text class="Gray">{{info.desc}}</text>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+export default class empty extends wepy.component {
+    props = {
+        info: {
+            type: Object,
+            default: {
+                desc: '没有内容了哦~',
+                imgUrl: 'https://i2.ygimg.cn/cmp/mp/shopping_no.png'
+            }
+        }
+    };
+    data = {};
+    methods = {};
+}
+</script>

@@ -1,0 +1,54 @@
+<template>
+  <view class="decorate-column-item" @tap="link({{subItem.url}})" >
+      <image class="decorate-item-image" src="{{subItem.picCover}}" mode="widthFix" />
+      <view class="decorate-item-text" >
+        <view>
+          <wxc-elip>
+            {{subItem.title}}
+          </wxc-elip>
+        </view>
+        <view>
+          <wxc-elip line="2">
+            {{subItem.content}}
+          </wxc-elip>
+        </view>
+      </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+export default class decorateColumn extends wepy.component {
+    props = {
+        subItem: {
+            type: Object,
+            default: {}
+        }
+    };
+    methods = {
+        link(linkUrl) {
+            this.$emit('link-Handle', 2, linkUrl);
+        }
+    };
+}
+</script>
+<style lang="less">
+.decorate-column-item {
+    display: flex;
+    padding: 8rpx;
+    width: 100%;
+    background: #fff;
+    box-sizing: border-box;
+    .decorate-item-image {
+        width: 230rpx;
+    }
+    .decorate-item-text {
+        display: flex;
+        justify-content: space-between;
+        flex-direction: column;
+        width: 500rpx;
+        padding: 16rpx 20rpx;
+        box-sizing: border-box;
+        background: #fff;
+    }
+}
+</style>

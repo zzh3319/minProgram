@@ -1,0 +1,113 @@
+<template>
+  <view class="goods-list-swiper">
+    <swiper indicator-dots="{{indicatorDots}}" next-margin="{{nextMargin}}" indicator-color="{{indicatorColor}}" indicator-active-color="{{indicatorActiveColor}}" autoplay="{{autoplay}}" interval="{{interval}}" duration="{{duration}}" display-multiple-items="{{displayMultiple}}">
+      <repeat for="{{item.widgetsContent.list}}" key="index" index="index" item="subItem">
+        <swiper-item class="swpier-item" wx:if="{{item.widgetsContent.maxCount>index}}">
+          <view class="booking-image" wx:if="{{subItem.isPreSell&&subItem.isOnsale==1&&subItem.stock>0}}"></view>
+          <view class="empty-image-box">
+            <image class="empty-image" wx:if="{{subItem.isOnsale!==1}}" src="https://i2.ygimg.cn/cmp/mp/soldout-n.png" mode="widthFix" />
+            <image class="empty-image" wx:elif="{{subItem.stock<1}}" src="https://i2.ygimg.cn/cmp/mp/soldout-2-n.png" mode="widthFix" />
+          </view>
+          <image src="{{subItem.picBig}}" @tap="link({{subItem.no}},{{subItem.isOnsale}},{{subItem.stock}})" lazy-load='{{true}}' data-index="{{ index }}" mode="widthFix" class="swiper-image" bindload="loadimage" />
+          <view class="price-item">
+            <wxc-price class="sale-price" value="{{subItem.wfxPrice}}"></wxc-price>
+          </view>
+          <view class="price-item">
+            <wxc-price class="del-price" value="{{subItem.publicPrice}}" status="del" del-color="#666"></wxc-price>
+          </view>
+        </swiper-item>
+      </repeat>
+    </swiper>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+export default class decorateListGoodsSwiper extends wepy.component {
+    data = {
+        indicatorDots: false,
+        indicatorColor: 'rgba(0, 0, 0, .3)',
+        indicatorActiveColor: '#f1f1f1',
+        displayMultiple: 3,
+        autoplay: false,
+        interval: 5000,
+        duration: 300,
+        imgHeight: 440,
+        nextMargin: '100rpx'
+    };
+    props = {
+        item: {
+            type: Object,
+            default: {}
+        }
+    };
+    methods = {
+        loadimage(e) {
+            let height = e.height;
+            if (this.imgHeight === height) return;
+            this.imgHeight = height;
+            this.$apply();
+        },
+        link(linkNo, isOnsale, stock) {
+            if (isOnsale !== 1 || stock < 1) {
+                return;
+            }
+            this.$emit('good-link', linkNo);
+        }
+    };
+}
+</script>
+
+<style lang="less">
+.goods-list-swiper {
+    swiper {
+        padding: 16rpx 0;
+        background-color: #fff;
+    }
+    .swiper-image {
+        border: 1px solid #ccc;
+        width: 100%;
+        display: block;
+        height: 222rpx;
+    }
+}
+.swpier-item {
+    padding: 0 16rpx;
+    display: block;
+    box-sizing: border-box;
+    position: relative;
+    .empty-image-box {
+        position: absolute;
+        top: -16rpx;
+        left: 1rpx;
+        width: 100%;
+        .empty-image {
+            width: 100%;
+        }
+    }
+    .booking-image {
+      @height: 54rpx;
+      width: @height;
+      height: @height;
+      line-height: @height;
+      position: absolute;
+      left: 20rpx;
+      top: 8rpx;
+      background: url(https://i2.ygimg.cn/cmp/mp/booking-label.png) no-repeat;
+      background-size: 100% auto;
+      font-size: 26rpx;
+      color: #fff;
+      text-align: center;
+    }
+}
+.price-item {
+    text-align: center;
+    .sale-price {
+        color: #b00a11;
+        font-size: 28rpx;
+    }
+    .del-price {
+        font-size: 22rpx;
+        color: #b8b8b8;
+    }
+}
+</style>

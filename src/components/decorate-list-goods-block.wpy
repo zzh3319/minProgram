@@ -1,0 +1,198 @@
+<template>
+  <view class="decorate-item" @tap="link({{subItem.no}})">
+    <view class="empty-image-box">
+      <image class="empty-image" wx:if="{{subItem.isOnsale!==1}}" src="https://i2.ygimg.cn/cmp/mp/soldout-n.png" mode="widthFix" />
+      <image class="empty-image" wx:elif="{{subItem.stock<1}}" src="https://i2.ygimg.cn/cmp/mp/soldout-2-n.png" mode="widthFix" />
+    </view>
+    <view class="booking-image" wx:if="{{subItem.isPreSell&&subItem.isOnsale==1&&subItem.stock>0}}"></view>
+    <view class="decorate-discountTip" wx:if="{{subItem.rules.length>0}}">{{subItem.rules[0]}}</view>
+    <image class="decorate-item-image" src="{{subItem.picBig}}" mode="widthFix" />
+    <!-- <image class="decorate-item-image {{loadingPic[subItem.defaultPic]?'show':'hide '}}" src="{{subItem.defaultPic}}" bindload="bindload({{subItem.defaultPic}})"  mode="widthFix" /> -->
+    <!-- <image class="decorate-item-image {{loadingPic[subItem.defaultPic]?'hide':'show'}}" src="{{subItem.picSmall}}" mode="widthFix"/> -->
+    <view class="decorate-item-title">
+      <wxc-elip line="2" class="goods-title">
+        {{subItem.commodityName}}
+      </wxc-elip>
+    </view>
+    <view class="decorate-item-price">
+      <wxc-flex main="between" cross="center">
+          <wxc-flex main="between" cross="center">
+              <wxc-price class="sale-price" value="{{subItem.wfxPrice}}"></wxc-price>
+              <wxc-elip wx:if="{{subItem['activityType']!=='7'&&subItem['activityType']}}" class="sale-type">{{activityType[subItem['activityType']]}}</wxc-elip>
+          </wxc-flex>
+        <wxc-price class="del-price" value="{{subItem.publicPrice}}" status="del" del-color="#666"></wxc-price>
+      </wxc-flex>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+import activityType from '@/mixins/activityType.js';
+export default class decorateColGoodsBlock extends wepy.component {
+    onLoad(){
+        this.activityType = activityType;
+    };
+    props = {
+        subItem: {
+            type: Object,
+            default: {}
+        }
+    };
+    data = {
+        activityType: {
+        }
+    };
+
+    methods = {
+        link(linkNo) {
+            if (this.subItem.isOnsale !== 1 || this.subItem.stock < 1) {
+                return;
+            }
+            this.$emit('good-link', linkNo);
+        }
+    };
+}
+</script>
+
+<style lang="less">
+.image() {
+    background: #fff;
+    .goods-title {
+        font-size: 28rpx;
+    }
+    .decorate-item {
+        padding: 24rpx;
+        position: relative;
+        .booking-image {
+            background: url(https://i2.ygimg.cn/cmp/mp/booking-label.png)
+                no-repeat;
+            background-size: 100% auto;
+            color: #fff;
+            text-align: center;
+        }
+        .sale-price {
+            color: #b00a11;
+            font-size: 28rpx;
+        }
+        .sale-type{
+            font-size:20rpx;
+            color:#B00910;
+            margin-left:10rpx;
+            border:1px solid #B00910;
+            padding:2rpx 10rpx;
+            line-height:24rpx;
+            height:24rpx;
+            border-radius:20rpx;
+        }
+        .decorate-discountTip{
+            position: absolute;
+            top: 320rpx;
+            font-size: 22rpx;
+            background-color: rgba(255,66,77,.5);
+            // opacity: 0.5;
+            color: #ffffff;
+            text-align: center;
+            padding: 10rpx 0rpx;
+            width: 100%;
+            z-index: 1;
+        }
+        .del-price {
+            font-size: 22rpx;
+            color: #b8b8b8;
+        }
+        .decorate-item-title {
+            border-bottom: 0;
+            margin-bottom: 16rpx;
+        }
+        .decorate-item-price {
+            padding-left: 16rpx;
+            padding-right: 16rpx;
+        }
+        .empty-image-box {
+            position: absolute;
+            top: 24rpx;
+            left: 0;
+            width: 100%;
+            .empty-image {
+                width: 100%;
+            }
+        }
+    }
+}
+.cms-column-goods1-floor {
+    .image();
+    .decorate-item:nth-child(odd) {
+        padding-left: 0;
+        .decorate-item-title {
+            padding-left: 16rpx;
+        }
+    }
+    .decorate-item:nth-child(even) {
+        padding-right: 0;
+        .decorate-item-price {
+            padding-right: 16rpx;
+        }
+    }
+    .decorate-item {
+        .booking-image {
+            @height: 80rpx;
+            width: @height;
+            height: @height;
+            line-height: @height;
+            font-size: 30rpx;
+            position: absolute;
+            left: 18rpx;
+            top: 18rpx;
+        }
+    }
+}
+.cms-column-goods2-floor {
+    .image();
+    .decorate-item-image {
+        max-height: 250rpx;
+    }
+    .decorate-item {
+        padding-left: 0;
+        padding-right: 0;
+        position: relative;
+        .sale-price {
+            font-size: 24rpx;
+        }
+        .sale-type{
+            font-size:20rpx;
+            color:#B00910;
+            margin-left:5rpx;
+            border:1px solid #B00910;
+            padding:0rpx 10rpx;
+            border-radius:5rpx;
+        }
+        .decorate-discountTip{
+            position: absolute;
+            top: 320rpx;
+            background-color: rgba(255,66,77,.5);
+            color: #FFFFFF;
+            text-align: center;
+            padding: 10rpx 0rpx;
+            width: 100%;
+            z-index: 1;
+            font-size: 22rpx;
+        }
+        .del-price {
+            font-size: 22rpx;
+        }
+    }
+    .decorate-item {
+        .booking-image {
+            @height: 54rpx;
+            width: @height;
+            height: @height;
+            line-height: @height;
+            font-size: 26rpx;
+            position: absolute;
+            left: 18rpx;
+            top: 18rpx;
+        }
+    }
+}
+
+</style>

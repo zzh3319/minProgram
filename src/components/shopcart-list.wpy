@@ -1,0 +1,295 @@
+<template>
+  <view class="shopcart-list">
+      <repeat for="{{goodsListforActivityType}}" key="index" index="index" item="item">
+        <view class="shopcart-all">
+            <view @tap="jumpMoreDiscount({{item.activityNo}})" class="shopcartDis-item" wx:if="{{item.activityType=='7'}}">
+                <view class="shopDis-group">
+                    <view class="shopDis-type">{{activityType[item.activityType]}}</view>
+                    <view class="shopDis-rule">{{item.remark}}</view>
+                </view>
+                <view class="shopDis-collect" wx:if="{{!edit}}"><text>{{goodsListforActivityType[index]['goAddGoods']?'去凑单':'省:'+goodsListforActivityType[index]['discountFee']+''}}</text><wxc-icon size="24" type="arrow-right" color="#FF424D"></wxc-icon></view>
+            </view>
+            <repeat for="{{item.commosityList}}" index="indexs" item="items" key="indexs">
+                <view class="shopcart-item" wx:if="{{items}}">
+                    <view style="padding:20rpx 0rpx 5rpx 0rpx;">
+                        <wxc-flex cross="center">
+                            <label @tap="checkHandle({{items}},{{items.id}},{{items.checked}})" class="radio">
+                                <radio wx:if="{{edit}}" checked="{{items.deleteStatus}}" color="#000" />
+                                <radio wx:else checked="{{items.checked}}" color="#000" disabled="{{items.isOnsale!==1||items.stock==0||items.stock<0}}"/>
+                            </label>
+                            <view class="goods-img" @tap="jumpDetail({{items.commodityNo}})">
+                                <view class="barredBuy" wx:if="{{items.isOnsale!==1||items.stock<1}}">
+                                <text wx:if="{{items.isOnsale!==1}}">已下架</text>
+                                <text wx:elif="{{items.stock<1}}">已售罄</text>
+                                </view>
+                                <view class="booking-image" wx:if="{{items.isPreSell&&items.isOnsale==1&&items.stock>0}}"></view>
+                                <image src="{{items.imageUrl}}" />
+                            </view>
+                        
+                            <view class="goods-info">
+                                <wxc-flex dir="top" main="start">
+                                <wxc-elip line="2"  @tap="jumpDetail({{items.commodityNo}})">
+                                    {{items.name}}
+                                </wxc-elip>
+                                <view class="goods-size"  @tap="jumpDetail({{items.commodityNo}})">
+                                    {{items.specName}} {{items.size}}
+                                </view>
+                                <view class="goods-price"  @tap="jumpDetail({{items.commodityNo}})">
+                                    <wxc-flex main="between">
+                                        <wxc-flex >
+                                            <wxc-price>{{items.wfxPrice}}</wxc-price>
+                                            <view class="goods-num">
+                                            X {{items.count}}
+                                            </view>
+                                        </wxc-flex>
+                                        <view class="goods-count">
+                                            <yh-counter wx:if="{{edit}}" number="{{items.count}}" max="{{items.limitBuyNumPerOrder}}" min="1" cartSkusCount="{{cartSkusCount}}" curCountValue="{{curCount}}" @changenumber="onChangeNumber({{items.id}},{{curCount}})" @addHandle="addHandle" @addHandleTost="addHandleTost" disabled="{{items.isOnsale!==1||items.stock<1 }}"/>
+                                            <text class="nosupport-coupons" wx:if="{{!edit}}">{{items.supportCoupon?'':'不支持使用优惠券'}}</text>
+                                        </view>
+                                    </wxc-flex>
+                                </view>
+                                </wxc-flex>
+                            </view>
+                        </wxc-flex>
+                    </view>
+                </view>
+            </repeat>
+        </view>
+    </repeat>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+
+import activityType from '@/mixins/activityType.js';
+import GTools from '@/mixins/g-tools';
+export default class ShopcartList extends wepy.component {
+    mixins = [GTools];
+    props = {
+        edit: {
+            type: [Boolean, String],
+            default: false
+        },
+        goodsListforActivityType: {
+            type: Array,
+            default: [],
+            twoWay: true
+        },
+        skuMaxCount: {
+            type: [Boolean, String],
+            default: 1
+        },
+        curCount: {
+            type: [String, Number],
+            default: 1
+        },
+        cartSkusCount: {
+            type: [Boolean, String],
+            default: 1
+        }
+    };
+    data = {
+        activityType: {}
+    };
+    events = {
+      async 'cart:cartSkusCount'(curCount) {
+          this.$emit('cart:cartSkusCount', curCount);
+      }
+    }
+    onLoad(option) {
+        this.activityType = activityType;
+    };
+    methods = {
+        jumpMoreDiscount(activityNo){
+            if (!this.edit){
+                wepy.navigateTo({
+                    url: `/mphome/pages/goodsListForDiscount?activityId=${activityNo}`
+                })
+            }
+        },
+        checkHandle(obj, id, checkState, e) {
+            // 如果是编辑状态,则根据deleteStatus改变
+            let list = this.goodsListforActivityType;
+            if (this.edit) {
+                for (let i = 0; i < list.length; i++){
+                    for (let j = 0; j < list[i]['commosityList'].length; j++){
+                        if (id === list[i]['commosityList'][j]['id']){
+                            list[i]['commosityList'][j]['deleteStatus'] = !list[i]['commosityList'][j]['deleteStatus'];
+                            break;
+                        }
+                    }
+                }
+                // obj = Object.assign(obj, {
+                //     deleteStatus: !obj.deleteStatus
+                // });
+                this.$emit('shopcart:editSelect');
+            } else {
+                // 如果是非编辑状态
+                this.$emit('shopcart:editSelect', id, !checkState);
+            }
+        },
+        onChangeNumber(id, curCount, evt) {
+            console.log('asdfadsf',this.skuMaxCount)
+            // 如果已编辑则加入edited状态
+            if (evt === '' || evt === undefined || evt === null) {
+                console.log('无');
+            } else {
+                let list = this.goodsListforActivityType;
+                this.$emit('carCount', evt.detail.curCount);
+                this.curCount = evt.detail.curCount;
+                // console.log('目前数量',  this.curCount);
+                for (let i = 0; i < list.length; i++){
+                    for (let j = 0; j < list[i]['commosityList'].length; j++){
+                        if (id === list[i]['commosityList'][j]['id']){
+                            list[i]['commosityList'][j]['edited'] = true;
+                            list[i]['commosityList'][j]['count'] = evt.detail.number;
+                            break;
+                        }
+                    }
+                }
+                // Object.assign(
+                //     this.itemValue,
+                //     {
+                //         edited: true
+                //     },
+                //     {
+                //         count: evt.detail.number
+                //     }
+                // );
+                // console.log(this.daitemValue)
+            }
+            //   this.customFunction.toast(`只能买这么多了`);
+            this.$apply();
+        },
+        addHandle(evt) {
+            const max = evt.detail.max;
+            this.customFunction.toast(`该商品单次最多购买${max}件`);
+        },
+        addHandleTost(evt) {
+            this.customFunction.toast('只能买这么多了');
+        },
+        jumpDetail(goodsID, currentTarget) {
+            this.$emit('shopcart:junpGoodDetail', goodsID);
+        }
+    }
+}
+</script>
+<style lang="less">
+.shopcart-list {
+    padding-bottom: 140rpx;
+    .shopcart-all{
+        margin-bottom: 20rpx;
+    }
+}
+.shopcartDis-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-size:20rpx;
+    padding:25rpx 20rpx;
+    border-bottom:1px solid #e5e5e5;
+    background-color:#FFFFFF;
+    .shopDis-group{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+    }
+    .shopDis-type{
+        color:#FFFFFF;
+        font-size:18rpx;
+        background-color:#FF424D;
+        border-radius:20rpx;
+        font-weight:600;
+        padding:6rpx 16rpx;
+        line-height:20rpx;
+        margin-right:15rpx;
+    }
+    .shopDis-collect{
+        color:#FF424D;
+        display:flex;
+        align-items:center;
+        text{
+            font-size:22rpx;
+            font-weight:400;
+            margin-right:10rpx;
+			}
+	}
+}
+.shopcart-item {
+    background: #fff;
+    // height: 200rpx;
+    padding: 20rpx;
+    // margin-bottom: 20rpx;
+    .goods-img {
+        width: 160rpx;
+        height: 160rpx;
+        border: 1px solid #cfcfcf;
+        margin-left: 20rpx;
+        position: relative;
+        image {
+            width: 100%;
+            height: 100%;
+        }
+        .booking-image {
+            @height: 54rpx;
+            width: @height;
+            height: @height;
+            line-height: @height;
+            position: absolute;
+            left: 4rpx;
+            top: 4rpx;
+            background: url(https://i2.ygimg.cn/cmp/mp/booking-label.png)
+                no-repeat;
+            background-size: 100% auto;
+            font-size: 26rpx;
+            color: #fff;
+            text-align: center;
+        }
+        .barredBuy {
+            @height: 80rpx;
+            width: @height;
+            height: @height;
+            border-radius: 50%;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            margin-left: -@height / 2;
+            margin-top: -@height / 2;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            line-height: @height;
+            text-align: center;
+            font-size: 22rpx;
+        }
+    }
+    .goods-info {
+        width: 450rpx;
+        height: 162rpx;
+        margin-left: 20rpx;
+        display: block;
+        padding-top: 20rpx;
+        font-size: 24rpx;
+        position:relative;
+    }
+    .goods-price {
+        margin-top: 5rpx;
+        position: relative;
+    }
+    .goods-num {
+        color: #848484;
+        margin-left: 5rpx;
+    }
+    .goods-size {
+        color: #848484;
+        margin-top: 5rpx;
+    }
+    .goods-count {
+        position: absolute;
+        right: 0;
+        .nosupport-coupons{
+            color: #848484;
+        }
+    }
+}
+</style>

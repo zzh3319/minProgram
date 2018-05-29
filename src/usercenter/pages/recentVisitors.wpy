@@ -1,0 +1,237 @@
+<style lang="less">
+.container {
+    background: #fff;
+}
+.content {
+    width: 100%;
+    background: #fff;
+    margin-top: 19rpx;
+}
+.titel {
+    width: 100%;
+    height: 100rpx;
+    border-bottom: 1px solid #e9e9e9;
+    line-height: 100rpx;
+    font-size: 32rpx;
+    color: #333333;
+    padding: 0 70rpx 0 88rpx;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+.titel-left {
+    float: left;
+}
+.titel-right {
+    float: right;
+}
+.details {
+    width: 100%;
+    box-sizing: border-box;
+    height: 118rpx;
+    line-height: 118rpx;
+    padding: 0 38rpx 0 30rpx;
+    font-size: 32rpx;
+    color: #333333;
+    overflow: hidden;
+    border-bottom: 1px solid #e9e9e9;
+}
+.details-left {
+    float: left;
+    overflow: hidden;
+}
+.details-right {
+    float: right;
+}
+.wx {
+    color: #119444;
+    font-size: 74rpx;
+    margin-right: 42rpx;
+}
+.txt {
+    float: left;
+}
+.jt {
+    color: #c1c1c1;
+}
+.canvas {
+    width: 750rpx;
+    height: 400rpx;
+}
+</style>
+
+<template>
+  <view>
+    <view class="container">
+      <canvas canvas-id="lineCanvas" disable-scroll="true" class="canvas" bindtouchstart="touchHandler"></canvas>
+    </view>
+    <view class="content">
+      <view class="titel">
+        <text class="titel-left">访客来源</text>
+        <text class="titel-right">数量</text>
+      </view>
+      <navigator class="details" url="/usercenter/pages/visitorsDetails?date={{timeUrl}}&sumPage={{peopleNo}}">
+        <view class="details-left">
+          <i class="iconfont wx">&#xe65c;</i>          
+        </view>
+        <view class="txt">微信</view>
+        <view class="details-right">
+          <text>{{peopleNo}}</text>
+          <i class="iconfont jt">&#xe620;</i>
+        </view>
+      </navigator>
+    </view>
+  </view>
+</template>
+<script>
+var lineChart = null;
+import wepy from 'wepy';
+import WxCharts from '@/mixins/wxcharts';
+export default class recentVisitors extends wepy.page {
+    config = {
+        navigationBarTitleText: '最近访客'
+    };
+    data = {
+        peopleNo: 0,
+        dateUrl: [], //7天时间的数组
+        list: {}, //返回值储存
+        categories: [], //日期
+        people: [], //人数
+        month: [], //7天月份时间
+        timeUrl: '' //timeUrl路由传递的时间参数
+    };
+    components = {};
+    methods = {};
+
+    //wxcharts的逻辑方法
+    testFun() {
+        //测试 wxCharts
+        var windowWidth = 320;
+        try {
+            var res = wepy.getSystemInfoSync();
+            windowWidth = res.windowWidth;
+        } catch (e) {
+            console.error('getSystemInfoSync failed!');
+        }
+
+        var simulationData = this.createSimulationData();
+        lineChart = new WxCharts({
+            canvasId: 'lineCanvas',
+            type: 'line',
+            categories: simulationData.categories,
+            animation: true,
+            // background: '#f5f5f5',
+            series: [
+                {
+                    name: '',
+                    data: simulationData.data
+                }
+            ],
+            xAxis: {
+                disableGrid: false,
+                gridColor: '#7cb5ec',
+                type: 'calibration'
+            },
+            yAxis: {
+                disabled: true,
+                min: 0
+                // disabled:true,     //取消y轴上面的数值
+            },
+            width: windowWidth,
+            height: 200,
+            dataLabel: false,
+            dataPointShape: true,
+            legend: false,
+            extra: {
+                lineStyle: 'straight'
+            }
+        });
+    }
+    //wxcharts的使用
+    touchHandler(e) {
+        var that = this;
+
+        var index = lineChart.getCurrentDataIndex(e);
+
+        lineChart.showToolTip(e, {
+            // background: '#7cb5ec',
+            format(item, category) {
+                that.peopleNo = item.data; //传递数据到下方数据入口人数
+                that.date = category; //储存点击时间日期，等待跳转页面添加进url
+                if (index === -1) {
+                } else {
+                    var time = that.month[index];
+                    console.log(time + '时间');
+                    that.timeUrl = that.dateUrl[index];
+                    console.log(that.timeUrl + '传递时间');
+                }
+                console.log(index);
+
+                return time + ' ' + item.data + '人';
+            }
+        });
+        this.$apply();
+    }
+
+    //图表的数据处理函数
+    createSimulationData() {
+        var categories = this.categories;
+        var data = this.people;
+        return {
+            categories: categories,
+            data: data
+        };
+    }
+
+    updata() {
+        this.categories = this.list.categories;
+        console.log(this.categories + '访问时间');
+        var num = this.list.data;
+        console.log(num);
+        console.log(typeof num);
+        for (var i = 0; i < num.length; i++) {
+            this.people.push(parseInt(num[i].y)); //y轴的数组
+            this.dateUrl.push(num[i].date); //"2018-3-23"7天时间的数组
+            this.month.push(num[i].name); //"03月22日" 月份时间
+            this.timeUrl = num[6].date;
+        }
+        console.log(this.people + 'y轴的值');
+        console.log(this.date + '时间的值');
+        console.log(this.month + '月份时间的值');
+        console.log(this.timeUrl + '传递的默认时间');
+        console.log(this.list);
+        this.testFun();
+        this.$apply();
+    }
+
+    onLoad(e) {
+        wepy
+            .request({
+                url:
+                    this.$parent.globalData.apiBaseUrl +
+                    '/api/v2/visitor7DaysRecords',
+                data: {
+                    // openId:wepy.getStorageSync('openid')
+                    openId: 'oBPQT0Wr_3kH_IesJJtRnRqvbZ7k'
+                }
+            })
+            .then(data => {
+                var store = data.data;
+                if (store.code === 20000) {
+                    this.peopleNo = store.data.weixinCount;
+                    console.log(this.peopleNo + '默认值');
+                    let listData = store.data;
+                    this.list = listData;
+                    this.updata();
+                } else {
+                    wepy.showToast({
+                        title: store.errorMsg,
+                        icon: 'none',
+                        duration: 2000
+                    });
+                }
+                console.log(data.data);
+                this.$apply();
+            });
+    }
+}
+</script>

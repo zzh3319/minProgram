@@ -1,0 +1,135 @@
+<style lang="less">
+.order_list {
+    width: 100%;
+    height: 180rpx;
+    background: #ffffff;
+    border-bottom: 1rpx solid #f4f4f4;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    .goods_img {
+        margin: 20rpx;
+        background: white;
+        border: 1rpx solid #cfcfcf;
+        width: 115rpx;
+        height: 115rpx;
+        position: relative;
+        .booking-image {
+            @height: 54rpx;
+            width: @height;
+            height: @height;
+            line-height: @height;
+            position: absolute;
+            left: 4rpx;
+            top: 4rpx;
+            background: url(https://i2.ygimg.cn/cmp/mp/booking-label.png)
+                no-repeat;
+            background-size: 100% auto;
+            font-size: 20rpx;
+            color: #fff;
+            text-align: center;
+        }
+        image {
+            width: 100%;
+            height: 100%;
+        }
+    }
+    .goods_describe {
+        height: 119rpx;
+        width: 560rpx;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        font-size: 22rpx;
+        .describe_title {
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            min-height: 61rpx;
+        }
+        .describe_size {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            color: #999999;
+            .goods_color {
+                margin-right: 15rpx;
+            }
+        }
+        .describe_money {
+            display:flex;
+            align-items: center;
+            justify-content: space-between;
+            .icon_num {
+                margin: 0 12rpx;
+            }
+            .gray {
+                color: #999999;
+            }
+        }
+    }
+}
+</style>
+<template>
+  <view class="order_list">
+    <view class="goods_img">
+      <view class="booking-image" wx:if="{{goodsMsg.preSell}}"></view>
+      <image src="{{goodsMsg.imageUrl}}"></image>
+    </view>
+    <view class="goods_describe">
+      <view class="describe_title">{{goodsMsg.name}}</view>
+      <view class="describe_size">
+        <view>
+          <text class="goods_color">{{goodsMsg.specName}}</text>
+          <text>{{goodsMsg.size}}</text>
+        </view>
+        <!-- <view >
+          
+          <text>不支持用券</text>
+        </view> -->
+      </view>
+      <view class="describe_money">
+          <view>
+                <text>￥</text>
+                <text>{{goodsMsg.actualPrice}}</text>
+                <text class="icon_num gray">x</text>
+                <text class="gray">{{goodsMsg.count}}</text>
+          </view>
+          <!-- couponFlag==1 支持用卷   couponFlag=2 不支持用卷-->
+          <view class="gray" style="display:{{goodsMsg.couponFlag===2?'block':'none'}}">
+              不支持用券
+          </view>
+        
+      </view>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+export default class Counter extends wepy.component {
+    props = {
+        goodsMsg: {
+            type: Object,
+            default: {}
+        }
+    };
+    data = {};
+    events = {};
+    watch = {};
+    onLoad(option) {}
+    methods = {
+        plus() {
+            this.num = this.num + 1;
+            console.log(this.$name + ' plus tap');
+            this.$emit('index-emit', 1, 2, 3);
+        },
+        minus() {
+            this.num = this.num - 1;
+            console.log(this.$name + ' minus tap');
+        }
+    };
+}
+</script>

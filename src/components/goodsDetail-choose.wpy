@@ -1,0 +1,279 @@
+<template>
+  <GoodsDetailPopup animationMode="bottom" align="bottom" :status.sync="choosing" locked="true">
+      <view class="popup__content" >
+        <view>
+          <wxc-flex>
+            <image class="img-goods" mode="scaleToFill" src="{{commodity.defaultPic}}" @tap="imageHandle({{commodity.defaultPic}})"/>
+            <wxc-flex main="around" dir="top" class="choose-price">
+              <wxc-price class="price" value="{{commodityPrice}}"></wxc-price>
+              <wxc-elip line="1" class="choose-info">
+                <label class="choose-label">已选</label>
+                <text class="choose-item">{{chooseColor}}</text>
+                <text class="choose-item" wx:if="{{chooseSize}}">{{chooseSize}}</text>
+                <text class="choose-item">{{chooseNum}}件</text>
+                <view class="iconfont close-icon" @tap="closeChoose">&#xe602;</view>
+              </wxc-elip>
+            </wxc-flex>
+          </wxc-flex>
+        </view>
+        <view class="choose-item">
+          <wxc-flex cross="start">
+            <view class="item-title">颜色</view>
+            <view class="item-main">
+              <wxc-flex cross="center" wrap="wrap">
+                <repeat for="{{styleCommoditys}}" key="index" index="index" item="item">
+                  <view class="size-item {{item.specName===chooseColor?'active':''}}" @tap="colorHandle({{item.specName}},{{item.no}})">
+                    {{item.specName}}
+                  </view>
+                </repeat>
+              </wxc-flex>
+            </view>
+          </wxc-flex>
+        </view>
+        <view class="choose-item">
+          <wxc-flex cross="start">
+            <view class="item-title">尺寸</view>
+            <view class="item-main">
+              <wxc-flex cross="center" wrap="wrap">
+                <repeat for="{{commodity.products}}" key="index" index="index" item="item">
+                  <view class="size-item {{chooseSize===item.sizeName?'active':''}}" @tap="sizeHandle({{item.sizeName}},{{item.productNo}})" wx:if="{{commodity.isOnsale==1&&item.inventoryNum>0}}">
+                    {{item.sizeName}}
+                  </view>
+                </repeat>
+              </wxc-flex>
+            </view>
+          </wxc-flex>
+        </view>
+        <view class="choose-item">
+          <wxc-flex cross="start">
+            <text class="item-title">数量</text>
+            <yh-counter wx:if="{{skuMaxCount}}" number="{{chooseNum}}" max="{{skuMaxCount}}" min="1" bind:changenumber="onChangeNumber" cartSkusCount="{{cartSkusCount}}" curCountValue="{{chooseNum}}" bind:addHandle="addHandle" />
+          </wxc-flex>
+        </view>
+        <view class="bottom-tool-bar" @tap="vilidateToCar">确定</view>
+      </view>
+    <view class="popup_bg" @tap="test"  catchtouchmove="preventD"></view>
+  </GoodsDetailPopup>
+</template>
+<script>
+import wepy from 'wepy';
+import GoodsDetailPopup from '@/components/goodsDetail-popup';
+import GTools from '@/mixins/g-tools';
+export default class GoodsDetailChoose extends wepy.component {
+    mixins = [GTools];
+    components = {
+        GoodsDetailPopup
+    };
+    props = {
+        choosing: {
+            type: String,
+            default: 'hide'
+        },
+        commodity: {
+            type: Object,
+            default: {}
+        },
+        styleCommoditys: {
+            type: Array,
+            default: []
+        },
+        skuMaxCount: {
+            type: [String, Number],
+            default: 1
+        },
+        chooseSize: {
+            type: Number,
+            default: 0,
+            twoWay: true
+        },
+        chooseNum: {
+            type: Number,
+            default: 1,
+            twoWay: true
+        },
+        chooseColor: {
+            type: String,
+            default: '',
+            twoWay: true
+        },
+        chooseSizeId: {
+            type: String,
+            default: '',
+            twoWay: true
+        },
+        chooseColorId: {
+            type: String,
+            default: '',
+            twoWay: true
+        }
+    };
+    data = {
+      cartSkusCount: 9999 //假值。便于商品详情页加减号显示，后端已做判断
+    }
+    methods = {
+        preventD() {},
+        vilidateToCar(e) {
+            this.$emit('shopBar:goShopCart');
+        },
+        closeChoose() {
+            this.$emit('goodsDetailChoose:hide');
+        },
+        onChangeNumber(evt) {
+            this.chooseNum = evt.detail.number;
+        },
+        addHandle(evt) {
+            const { detail: { number, max } } = evt;
+            console.log(number); //要么eslint报错
+            this.customFunction.toast(`该商品单次最多购买${max}件`);
+        },
+        sizeHandle(goodsSize, goodsSizeId) {
+            if (this.goodsSizeId === goodsSizeId) return;
+            this.chooseSizeId = goodsSizeId;
+            this.chooseSize = goodsSize;
+        },
+        colorHandle(goodsColor, goodsColorId) {
+            if (this.chooseColorId === goodsColorId) return;
+            this.chooseColorId = goodsColorId;
+            this.chooseColor = goodsColor;
+            this.chooseSize = '';
+            this.chooseSizeId = '';
+            this.$emit('goodsDetailChoose:selectSize', goodsColorId);
+        },
+        test() {
+            this.$emit('goodsDetailChoose:hide');
+        },
+        imageHandle(imageUrl) {
+            const urlNum = imageUrl.toString().lastIndexOf('s');
+            const urlArr = imageUrl.split('');
+            urlArr.splice(urlNum, 1, 'l');
+            const url = urlArr.join('');
+            const opt = {
+                current: url, // 当前显示图片的http链接
+                urls: [url]
+            };
+            wepy.previewImage(opt);
+        }
+    };
+    computed = {
+        commodityPrice() {
+            let ret = 0;
+            const commodity = this.commodity;
+            if (commodity.wfxPrice) {
+                ret = commodity.wfxPrice.toFixed(2);
+            }
+            return ret;
+        }
+    };
+}
+</script>
+<style lang="less">
+.popup__content {
+    width: 100%;
+    padding: 20rpx 20rpx 120rpx 20rpx;
+    background: #ffffff;
+    z-index: 1005;
+    position: relative;
+    .img-goods {
+        @size: 180rpx;
+        border: 1px solid #cccccc;
+        height: @size;
+        width: @size;
+        margin-right: 10px;
+    }
+    .price {
+        display: inline-block;
+        font-size: 42rpx;
+        color: #ff434d;
+        margin-right: 10rpx;
+    }
+    .choose-label {
+        font-size: 22rpx;
+        margin-right: 20rpx;
+    }
+    .choose-price {
+        padding: 40rpx 0;
+    }
+    .choose-info {
+        font-size: 24rpx;
+        .choose-item {
+            color: #000000;
+            display: inline-block;
+            margin: 0 5rpx;
+        }
+    }
+    .close-icon {
+        position: absolute;
+        right: 0;
+        top: 0;
+        padding: 20rpx 30rpx 20rpx 20rpx;
+    }
+    .margin-b {
+        margin-bottom: 20rpx;
+    }
+    .bottom-tool-bar {
+        line-height: 100rpx;
+        background-color: #ff434d;
+        color: #ffffff;
+        text-align: center;
+    }
+    .item-title {
+        width: 80rpx;
+        color: #b8b8b8;
+        font-size: 22rpx;
+    }
+    .choose-item {
+        padding: 15rpx 0 5rpx 0;
+        border-top: 1rpx solid #e6eae9;
+        &:nth-child(1) {
+            border-top: 0px;
+        }
+        &:nth-child(2) {
+            border-top: 0px;
+        }
+        &:nth-child(3) {
+            min-height: 88rpx;
+        }
+    }
+    .itemStyle() {
+        padding: 8rpx 30rpx;
+        border: 1px solid #bfbfbf;
+        text-align: center;
+        margin-right: 10rpx;
+        margin-bottom: 10rpx;
+        position: relative;
+        &.active {
+            border: 1px solid #ff434d;
+            &::before {
+                display: inline-block;
+                width: 40rpx;
+                height: 40rpx;
+                overflow: hidden;
+                content: '';
+                position: absolute;
+                bottom: -1px;
+                left: -1px;
+                background: url(https://i2.ygimg.cn/cmp/mp/btn-selected.png) 0 0
+                    no-repeat;
+                background-size: 100%;
+            }
+        }
+    }
+    .color-item {
+        .itemStyle();
+    }
+    .size-item {
+        .itemStyle();
+    }
+    .item-main {
+        width: 650rpx;
+    }
+}
+.popup_bg {
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1004;
+}
+</style>

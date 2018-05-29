@@ -1,0 +1,677 @@
+<style lang="less">
+@import '../../static/less/base/fn';
+page {
+    background: #f5f5f5;
+}
+.container {
+    width: 100%;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    .map-wrap {
+        width: 100%;
+        height: 500rpx;
+        z-index: 3;
+        position: relative;
+        &.active-class {
+            height: 100vh;
+        }
+        .map-con {
+            width: 100%;
+            height: 500rpx;
+        }
+    }
+    .empty-box {
+        width: 100%;
+        margin-top: 80rpx;
+        .pruimg {
+            width: 336rpx;
+            height: 248rpx;
+            display: block;
+            margin: 0 auto;
+        }
+        .txt {
+            font-size: 30rpx;
+            color: #b0b0b0;
+            letter-spacing: 0;
+            display: block;
+            text-align: center;
+            margin-top: 36rpx;
+        }
+        .btn {
+            max-width: 244rpx;
+            height: 76rpx;
+            line-height: 76rpx;
+            background: #231815;
+            text-align: center;
+            font-size: 30rpx;
+            color: #ffffff;
+            margin: 140rpx auto 0;
+        }
+    }
+    .list-wrap {
+        width: 100%;
+        // padding-top: 500rpx;
+        padding-bottom: 10rpx;
+        .list-con-box {
+            width: 100%;
+            box-sizing: border-box;
+            .list-item {
+                padding: 30rpx 40rpx;
+                margin-bottom: 20rpx;
+                background: #ffffff;
+                &:last-child {
+                    margin-bottom: 0rpx;
+                }
+                .distance {
+                    font-size: 24rpx;
+                    color: #b0b0b0;
+                    letter-spacing: 0;
+                    text-align: right;
+                }
+                .tit {
+                    width: 500rpx;
+                    font-size: 34rpx;
+                    color: #231815;
+                }
+                .info {
+                    width: 430rpx;
+                    margin-top: 16rpx;
+                    font-size: 24rpx;
+                    color: #b0b0b0;
+                }
+                .type {
+                    padding: 2rpx 12rpx;
+                    display: inline-block;
+                    font-size: 18rpx;
+                    min-height: 28rpx;
+                    line-height: 28rpx;
+                    box-sizing: border-box;
+                    color: #999999;
+                    margin-top: 30rpx;
+                    border: 1rpx solid #999999;
+                }
+                .distance-box {
+                    width: 130rpx;
+                }
+            }
+        }
+        //end
+    }
+    .shop-box {
+        width: 100%;
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        z-index: 5;
+        background: #ffffff;
+        .shop-info-con {
+            padding: 30rpx 40rpx;
+            .tit {
+                width: 310rpx;
+                font-size: 34rpx;
+                color: #231815;
+            }
+            .info {
+                width: 378rpx;
+                margin-top: 16rpx;
+                font-size: 24rpx;
+                color: #b0b0b0;
+            }
+            .distance {
+                font-size: 24rpx;
+                color: #b0b0b0;
+                letter-spacing: 0;
+                text-align: right;
+            }
+            .icon-box {
+                width: 88rpx;
+                height: 88rpx;
+                .zimg {
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 50%;
+                }
+            }
+        }
+        .btn-box {
+            margin: 0 40rpx 40rpx 40rpx;
+            .shop-btn {
+                width: 670rpx;
+                height: 80rpx;
+                line-height: 80rpx;
+                text-align: center;
+                font-size: 34rpx;
+                color: #ffffff;
+                margin: 0 auto;
+                background: #231815;
+                display: block;
+            }
+        }
+    }
+}
+.wrap {
+    display: block;
+}
+.side {
+    flex-grow: 0;
+}
+.main {
+    flex-grow: 1;
+}
+.container .list-wrap {
+    .list-con-box {
+        height: 700rpx;
+    }
+}
+@media (max-width: 374px) and (min-width: 320px) {
+    .container .list-wrap {
+        height: 700rpx;
+        .list-con-box {
+            height: 690rpx;
+        }
+    }
+}
+//兼容iphonex
+@media (max-height: 814px) and (min-height: 670px) {
+    .container .list-wrap {
+        height: 920rpx;
+        .list-con-box {
+            height: 920rpx;
+        }
+    }
+}
+.coverImage {
+    width: 38rpx;
+    height: auto;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+</style>
+<template>
+  <view class='container'>
+    <view class="map-wrap">
+      <map id="map" longitude="{{longitude}}" latitude="{{latitude}}" style="width: 100%; height: {{HeightValue}};" controls="{{controls}}" scale="{{scale}}" bindcontroltap="controltap"  bindcallouttap="callouttap({{curMarkerId}})" bindregionchange="regionchange" markers="{{markers}}"   bindmarkertap="markertap" show-location  >
+         <cover-image src="https://i2.ygimg.cn/cmp/mp/curAddress.png" class="coverImage"></cover-image>
+      </map>
+    </view>
+    <view class="list-wrap" wx:if="{{listShow&&showFlag}}">
+       <scroll-view class="list-con-box" wx:if="{{!isEmpty}}"  scroll-y>
+        <repeat for="{{nearShopList}}" key="index" index="index" item="item">
+          <navigator url="/mphome/pages/shopDetail?markerId={{item.id}}" hover-class="none" class="list-item">
+          <wxc-flex class="wrap">
+            <view class="item main">
+              <text class="tit block slh" wx:if="{{item.fullName}}">{{item.fullName}}</text>
+              <text class="info block slh" wx:if="{{item.address}}">{{item.address}}</text>
+              <text class="type" wx:if="{{item.strMulti}}">{{item.strMulti}}</text>
+            </view>
+            <view class="item side">
+              <view class="distance">
+                距您<text>{{item.strDistance}}</text>
+              </view>
+            </view>
+          </wxc-flex>
+          </navigator>
+        </repeat>
+        <view  class="mb15"  wx:if="{{!isEmpty}}">
+          <view class="weui-loadmore" wx:if="{{isLoading}}">
+            <view class="weui-loading" wx:if="{{loadtxt == '正在加载'}}"></view>
+            <view class="weui-loadmore__tips">{{loadtxt}}</view>
+          </view>
+        </view>
+       </scroll-view>
+      <view class="mt100 mb10" wx:if="{{isEmpty}}">
+            <empty :info="emptyInfo"></empty>
+       </view>
+    </view>
+      <view class="empty-box" wx:if="{{(!hasPower)&&initFlag}}"> 
+          <image src="https://i2.ygimg.cn/cmp/mp/noInfo.png" class="pruimg"></image>
+          <text class="txt">当前未获取到您的位置信息</text>
+          <button class="btn btn-visi" @tap="getPower">重新授权</button>
+      </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+import empty from '@/components/empty';
+export default class map extends wepy.page {
+    config = {
+        navigationBarTitleText: '附近门店',
+        usingComponents: {
+            'wxc-flex': '../../../packages/@minui/wxc-flex/dist/index'
+        }
+    };
+    components = {
+        empty
+    };
+    computed = {};
+    data = {
+        HeightValue: '500rpx', //500rpx 100vh
+        isEmpty: false, //信息为空,ff
+        emptyInfo: {
+            desc: '暂没有相关数据',
+            imgUrl: 'https://i2.ygimg.cn/cmp/mp/shopping_no.png'
+        },
+        listShow: true, //为true,为收起状态
+        hasPower: false, //是否有授权 ff
+        initFlag: false, //初始为false,防止闪现。其他时间均为true
+        markers: [],
+        curMarker: {},
+        curMarkerId: '',
+        scale: 14,
+        controls: [
+            {
+                id: 1,
+                iconPath: '../../static/img/icons/unfold.png',
+                position: {
+                    left: 10,
+                    top: 16,
+                    width: 26,
+                    height: 26
+                },
+                clickable: true
+            }
+        ],
+        longitude: 121.3284, //当事人的所在经纬度
+        latitude: 31.246, //默认为滔搏运动上海江桥店
+        curMarkerLongitude: '', //点击marker的经纬度
+        curMarkerLatitude: '',
+        hasMore: true,
+        isLoading: true,
+        loadtxt: '正在加载',
+        total: 0, //总数量
+        pageNo: 1, //当前页
+        nearShopList: [],
+        storeInfo: {
+            fullName: '加载中...', //店铺名称
+            address: '加载中...', //店铺地址
+            tel: '--',
+            shopNo: '', //店铺编码
+            shopLongitude: '',
+            shopLatitude: '',
+            shortName: '', //店铺简称
+            strMulti: '', //店铺类型文字描述
+            strDistance: '',
+            distance: ''
+        },
+        long: 121.3284, //当事人的所在经纬度-拖动后的值
+        lati: 31.246, //默认为滔搏运动上海江桥店
+        dragFlag: false, //是否是拖动过来的，触发的底部值
+        showFlag: false, //初始为false,防止闪现。其他时间均为true
+        getPowerFlag: false, //点击重新授权标志
+        totalPage: '' //总页数
+    };
+    methods = {};
+    events = {};
+    onLoad(opt) {
+        wepy.showLoading();
+        this.judgePower();
+    }
+    onReady(e) {
+        // 使用 wx.createMapContext 获取 map 上下文
+        this.mapCtx = wx.createMapContext('map');
+    }
+    onShow() {
+        if (this.getPowerFlag) {
+            this.getSelfLocation();
+        }
+    }
+    judgePower() {
+        let _this = this;
+        wepy
+            .getSetting()
+            .then(res => {
+                if (!res.authSetting['scope.userLocation']) {
+                    wepy
+                        .authorize({
+                            scope: 'scope.userLocation'
+                        })
+                        .then(result => {
+                            _this.hasPower = true; //获得授权
+                            _this.listShow = true;
+                            _this.showFlag = true;
+                            // 用户已经同意小程序使用录音功能，后续调用 wepy.startRecord 接口不会弹窗询问
+                            _this.getSelfLocation();
+                        })
+                        .catch(err => {
+                            _this.hasPower = false; //获得授权
+                            _this.initFlag = true; //防止闪现标志值
+                            _this.listShow = false;
+                        });
+                } else {
+                    _this.hasPower = true; //获得授权
+                    _this.listShow = true;
+                    _this.getSelfLocation();
+                }
+            })
+            .catch(e => {
+                console.log('na fail');
+            });
+    }
+    getPower() {
+        let _this = this;
+        wepy
+            .openSetting()
+            .then(res => {
+                if (res.authSetting['scope.userLocation'] === true) {
+                    _this.hasPower = true; //获得授权
+                    _this.listShow = true;
+                    _this.showFlag = true;
+                    _this.getPowerFlag = true;
+                    _this.apply();
+                } else {
+                    //授权失败
+                    _this.hasPower = false; //获得授权
+                    _this.initFlag = true; //防止闪现标志值
+                    _this.listShow = false;
+                    wepy.showToast({
+                        title: '您未授权',
+                        icon: 'none',
+                        duration: 3000
+                    });
+                }
+            })
+            .catch(err => {
+                wepy.showToast({
+                    title: '网络错误',
+                    icon: 'none',
+                    duration: 3000
+                });
+            });
+    }
+    getSelfLocation() {
+        wepy.showLoading();
+        var _this = this;
+        wepy
+            .getLocation({
+                type: 'gcj02' //gcj02返回可以用于wepy.openLocation的经纬度
+            })
+            .then(res => {
+                // var longitude = res.longitude;
+                // var latitude = res.latitude;
+                // let marker = this.createMarker(res);
+                _this.longitude = res.longitude;
+                _this.latitude = res.latitude;
+                _this.nearShopList = [];
+                setTimeout(() => {
+                    _this.getMakersDate(_this.longitude, _this.latitude);
+                    _this.getfindNearByStore(_this.longitude, _this.latitude);
+                }, 700);
+                _this.$apply();
+                wepy.showLoading();
+            })
+            .catch(e => {
+                console.log(e);
+            });
+    }
+    getMakersDate(longitude, latitude) {
+        //获得所有的店铺信息
+        wepy.showLoading();
+        let _this = this;
+        let params = {
+            longitude: longitude,
+            latitude: latitude
+        };
+        wepy
+            .request({
+                url: `${
+                    this.$parent.globalData.apiBaseUrlMock
+                }/api/v2/store/findMarkersData`,
+                data: params
+            })
+            .then(res => {
+                let response = res.data;
+                if (response.code === 20000) {
+                    //请求成功
+                    if (
+                        response.data === undefined ||
+                        response.data === '' ||
+                        response.data === null
+                    ) {
+                        //若无数据
+                        wepy.showToast({
+                            title: '网络错误',
+                            icon: 'none',
+                            duration: 3000
+                        });
+                    } else {
+                        //代码执行
+                        _this.markers = _this.getMarkers(response.data);
+                        _this.$apply();
+                    }
+                    wepy.hideLoading();
+                    //无数据end
+                } else {
+                    //若请求失败，则显示信息
+                    wepy.showToast({
+                        title: response.errorMsg + ' ' || response.msg + ' ',
+                        icon: 'none',
+                        duration: 3000
+                    });
+                    wepy.hideLoading();
+                }
+            });
+    }
+    getMarkers(markersDate) {
+        //ff 优化 --获得makers 数据
+        let mak = [];
+        for (let item of markersDate) {
+            if (item) {
+                let marker = this.createMarker(item);
+                if (marker) {
+                    mak.push(marker);
+                }
+            }
+        }
+        return mak;
+    }
+    getfindNearByStore(longitude, latitude) {
+        //获得店铺信息 ff
+        if (this.listShow) {
+            wepy.showLoading();
+        }
+        let _this = this;
+        let params = {
+            longitude: longitude, //当事人所在经纬度，若拖动地图，则为地图中心的经纬度
+            latitude: latitude
+        };
+        _this.showFlag = true;
+        wepy
+            .request({
+                url: `${
+                    this.$parent.globalData.apiBaseUrlMock
+                }/api/v2/store/findNearByStore`,
+                data: params
+            })
+            .then(res => {
+                let response = res.data;
+                if (response.code === 20000) {
+                    //请求成功
+
+                    _this.nearShopList = response.data;
+                    //代码执行
+                    _this.total = response.data.length;
+                    _this.total
+                        ? (_this.isEmpty = false)
+                        : (_this.isEmpty = true);
+                    _this.loadtxt = '没有更多数据';
+                    _this.$apply();
+                    wepy.hideLoading();
+                    //无数据end
+                } else {
+                    //若请求失败，则显示信息
+                    wepy.showToast({
+                        title: response.errorMsg + ' ' || response.msg + ' ',
+                        icon: 'none',
+                        duration: 3000
+                    });
+                    wepy.hideLoading();
+                }
+            });
+    }
+    goShopDetail() {
+        //进入门店详情页页面
+        let path = '/mphome/pages/shopDetail?markerId=' + this.curMarkerId;
+        wepy.navigateTo({
+            url: path
+        });
+    }
+    //地图事件
+    moveToLocation() {
+        this.mapCtx.moveToLocation();
+    }
+    createMarker(point) {
+        //默认为滔搏运动上海江桥店
+        // let latitude = point.shopLatitude;
+        let longitude = point.shopLongitude;
+        let marker;
+        if (
+            !(longitude === undefined || longitude === null || longitude === '')
+        ) {
+            //无经纬度情况干掉
+            marker = {
+                iconPath: '/static/img/icons/shopCur.png',
+                id: point.id || 0,
+                title: point.fullName || '上海滔博',
+                latitude: point.shopLatitude || this.longitude,
+                longitude: point.shopLongitude || this.latitude,
+                width: 19.2,
+                height: 24,
+                callout: {
+                    content:
+                        (point.fullName || '上海滔博') +
+                        '\n' +
+                        (point.address || ' '),
+                    color: '#999999',
+                    fontSize: 12,
+                    borderRadius: 5,
+                    bgColor: '#ffffff',
+                    padding: 20,
+                    textAlign: 'center',
+                    display: 'BYCLICK'
+                }
+            };
+            return marker;
+        }
+    }
+    callouttap(e) {
+        this.curMarkerId = e.markerId;
+        this.goShopDetail();
+    }
+    //点击缩放按钮动态请求数据,待定
+    controltap(e) {
+        let _this = this;
+        if (e.controlId === 1) {
+            if (_this.controls[0].iconPath.indexOf('unfold') !== -1) {
+                _this.scale = 18; //展开
+                _this.HeightValue = '100vh';
+                _this.listShow = false;
+                _this.controls[0].iconPath = '../../static/img/icons/fold.png';
+                _this.curMarkerId = '';
+                _this.$apply();
+            } else {
+                _this.scale = 14; //收起
+                _this.HeightValue = '500rpx';
+                _this.listShow = true;
+                _this.showFlag = true;
+                _this.controls[0].iconPath =
+                    '../../static/img/icons/unfold.png';
+                _this.curMarkerId = '';
+                _this.$apply();
+            }
+        }
+    }
+    //标注移动
+    translateMarker(idval, longitude, latitude) {
+        var longz = parseFloat(longitude);
+        var latiz = parseFloat(latitude);
+        this.mapCtx.translateMarker({
+            markerId: idval,
+            autoRotate: false,
+            duration: 1,
+            destination: {
+                latitude: latiz,
+                longitude: longz
+            },
+            animationEnd() {
+                console.log('animation end');
+            }
+        });
+    }
+
+    getCenterLo() {
+        let _this = this;
+        let lastLong = _this.long;
+        let lastLati = _this.lati;
+        let rangeLong, rangeLati;
+        this.mapCtx.getCenterLocation({
+            success: function(res) {
+                _this.long = parseFloat(res.longitude);
+                _this.lati = parseFloat(res.latitude);
+                rangeLong = _this.long - lastLong;
+                rangeLati = _this.lati - lastLati;
+                console.log(
+                    '当前位置更新-1-旧的中心点',
+                    lastLong,
+                    lastLati,
+                    '当前值',
+                    _this.long,
+                    '范围',
+                    rangeLong,
+                    rangeLati
+                );
+                _this.$apply();
+            },
+            complete: function(response) {
+                if (
+                    rangeLong > 0.02 ||
+                    rangeLong < -0.02 ||
+                    rangeLati > 0.02 ||
+                    rangeLati < -0.02
+                ) {
+                    //一定范围内才加载数据
+                    _this.resetDate(); //重置数据
+                    _this.getMakersDate(_this.long, _this.lati);
+                    _this.getfindNearByStore(_this.long, _this.lati);
+                }
+            }
+        });
+    }
+
+    resetDate() {
+        var _this = this;
+        _this.nearShopList = []; //滑动时，数据要重新加载
+        _this.isLoading = true; //数据初始化
+        _this.loadtxt = '正在加载'; //数据初始化
+        _this.hasMore = true;
+        _this.dragFlag = false;
+    }
+    //视野发生变化时触发拖动地图触发数据加载，待定
+    regionchange(e) {
+        var _this = this;
+        if (e.type === 'end') {
+            _this.dragFlag = true; //拖动的标志，便于触发拉到底部触发的值
+            if (_this.hasPower) {
+                _this.getCenterLo();
+            } else {
+                _this.isLoading = false; //数据初始化
+                _this.loadtxt = '加载中'; //数据初始化
+                wepy.showToast({
+                    title: '您无地址授权',
+                    icon: 'none',
+                    duration: 3000
+                });
+                _this.hasPower = false;
+                _this.initFlag = true; //防止闪现标志值
+            }
+        }
+    }
+    //maker点击事件
+    markertap(e) {
+        //end
+    }
+}
+</script>

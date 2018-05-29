@@ -1,0 +1,208 @@
+<style lang="less">
+.masterless {
+    height: 128rpx;
+    width: 100%;
+    background: #fff;
+    line-height: 128rpx;
+    font-size: 32rpx;
+    color: #000;
+    box-sizing: border-box;
+    padding-left: 30rpx;
+    border-bottom: 1px solid #e9e9e9;
+}
+.content {
+    width: 100%;
+    height: 100%;
+    padding-top: 7rpx;
+    background: #fff;
+    border-bottom: 1px solid #e9e9e9;
+}
+.c-list {
+    width: 100%;
+    height: 117rpx;
+    line-height: 117rpx;
+    box-sizing: border-box;
+    padding: 0 29rpx;
+    border-bottom: 1px solid #e9e9e9;
+}
+.avatar {
+    display: block;
+    width: 80rpx;
+    height: 80rpx;
+    float: left;
+    margin-top: 18rpx;
+}
+.name {
+    margin-left: 22rpx;
+    width: 320rpx;
+    float: left;
+    color: #333333;
+    overflow: hidden;
+    white-space: nowrap;
+    // box-orient: vertical;
+    text-overflow: ellipsis;
+    word-break: break-all;
+}
+.date,
+.time {
+    float: right;
+    color: #999999;
+}
+.time {
+    margin-left: 9rpx;
+}
+</style>
+
+<template>
+  <view>
+    <view class="masterless" wx:if="{{isEmpty}}">暂无访客记录</view>
+    <scroll-view class="content" wx:else>
+      <view>
+        <view class="c-list" wx:for="{{list}}" wx:key="index">
+          <wxc-avatar class="avatar" src="{{item.headShowImg}}" />
+          <view class="name">{{item.visitorName}}</view>
+          <view class="time">{{item.stringVisitTime}}</view>
+        </view>
+      </view>
+      <view class="weui-loadmore" wx:if="{{isHideLoadMore}}">
+        <view class="weui-loading" wx:if="{{loadtxt === '正在加载'}}"></view>
+        <view class="weui-loadmore__tips">{{loadtxt}}</view>
+      </view>
+    </scroll-view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+export default class visitorsDetails extends wepy.page {
+    config = {
+        navigationBarTitleText: '访客详情',
+        usingComponents: {
+            'wxc-avatar': '../../../packages/@minui/wxc-avatar/dist/index',
+            'wxc-loadmore': '../../../packages/@minui/wxc-loadmore/dist/index'
+        }
+    };
+    data = {
+        isEmpty: false,
+        list: [],
+        date: '',
+        isHideLoadMore: false,
+        loadtxt: '正在加载',
+        // visitorName:"", //访客的昵称
+        // headShowImg:"", //访客头像
+        // visitTime:"", //访问时间
+        sumPage: 0, //分页加载的访问总页数
+        pageNo: 1,
+        switch: false
+    };
+
+    methods = {
+        onReachBottom: function() {
+            if (!this.switch) {
+                this.isHideLoadMore = true;
+                console.log('上拉加载');
+                console.log(this.pageNo);
+                this.hasMore = true;
+                this.loadMore(); //正式数据请求调用的函数
+            } else {
+                return false;
+            }
+        }
+    };
+
+    //上拉刷新页面请求数据
+    loadMore() {
+        wepy
+            .request({
+                url:
+                    this.$parent.globalData.apiBaseUrl +
+                    '/api/v2/visitorvisitorRecordList',
+                data: {
+                    openId: wepy.getStorageSync('openid'), //openId:"oBPQT0Wr_3kH_IesJJtRnRqvbZ7k",
+                    date: this.date, //2018-03-20,
+                    pageNo: this.pageNo,
+                    limit: 20
+                }
+            })
+            .then(data => {
+                if (data.data.code === 20000) {
+                    this.pageNo += 1;
+                    let store = data.data.data;
+                    let dataArr = store.recordList || [];
+                    console.log(dataArr);
+                    this.init(dataArr);
+                } else {
+                    wepy.showToast({
+                        title: data.data.errorMsg || '数据错误',
+                        icon: 'none',
+                        duration: 2000
+                    });
+                }
+                this.$apply();
+            });
+    }
+
+    //页面时候有数据判断
+    init(res) {
+        const { items } = res;
+        const list1 = items || [];
+
+        if (list1.length > 0) {
+            this.isEmpty = false;
+            this.list = this.list.concat(list1);
+        } else {
+            if (this.list === 0) {
+                this.isEmpty = true;
+            } else {
+                this.loadtxt = '没有数据了';
+                this.switch = true;
+            }
+        }
+        this.$apply();
+    }
+
+    //第一次加载页面
+    onLoad(options) {
+        this.date = options.date;
+        console.log(this.date);
+        wepy.showLoading({
+            title: '正在加载中'
+        });
+        wepy
+            .request({
+                url:
+                    this.$parent.globalData.apiBaseUrl +
+                    '/api/v2/visitorvisitorRecordList',
+                data: {
+                    openId: wepy.getStorageSync('openid'),
+                    // openId:"oBPQT0Wr_3kH_IesJJtRnRqvbZ7k",
+                    date: this.date, //this.date
+                    pageNo: this.pageNo,
+                    limit: 20
+                }
+            })
+            .then(data => {
+                console.log(data);
+                wepy.hideLoading();
+                this.pageNo += 1;
+
+                if (data.data.code === 20000) {
+                    let store = data.data.data;
+                    let dataArr = store.recordList || [];
+                    this.init(dataArr);
+                    this.sumPage =
+                        store.count % 20 === 0
+                            ? store.count / 20
+                            : Math.ceil(store.count / 20);
+                    console.log(this.sumPage);
+                } else {
+                    wepy.showToast({
+                        title: data.data.errorMsg || '数据错误',
+                        icon: 'none',
+                        duration: 2000
+                    });
+                    this.$apply();
+                }
+            });
+    }
+}
+</script>

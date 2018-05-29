@@ -1,0 +1,364 @@
+<template>
+  <view>
+    <ShopcartEmpty wx:if="{{isEmpty}}" />
+    <block wx:if="{{hasData}}">
+      <ShopcartList :edit.sync="isEdit" :skuMaxCount.sync="skuMaxCount" :curCount.sync="curCount" :goodsListforActivityType.sync="goodsListforActivityType" :cartSkusCount.sync="cartSkusCount" :carCount="carCount"/>
+      <ShopcartBar :cartResultVo.sync="cartResultVo" :edit.sync="isEdit" :editSelectAll.sync="editSelectAll" />
+      <ShopcartEdit :edit.sync="isEdit" />
+    </block>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+import ShopcartEmpty from '@/components/shopcart-empty';
+import ShopcartList from '@/components/shopcart-list';
+import ShopcartBar from '@/components/shopcart-bar';
+import ShopcartEdit from '@/components/shopcart-edit';
+import GTools from '@/mixins/g-tools';
+export default class Shopcart extends wepy.page {
+    mixins = [GTools];
+    config = {
+        navigationBarTitleText: '购物车',
+        enablePullDownRefresh: true,
+        backgroundTextStyle: 'dark',
+        usingComponents: {
+            'wxc-flex': '../../packages/@minui/wxc-flex/dist/index',
+            'wxc-elip': '../../packages/@minui/wxc-elip/dist/index',
+            'wxc-price': '../../packages/@minui/wxc-price/dist/index',
+            'wxc-counter': '../../packages/@minui/wxc-counter/dist/index',
+            'yh-counter': '../../@minuiChange/yh-count',
+            'wxc-icon': '../../packages/@minui/wxc-icon/dist/index'
+        }
+    };
+    components = {
+        ShopcartEmpty,
+        ShopcartList,
+        ShopcartBar,
+        ShopcartEdit
+    };
+    data = {
+        isEmpty: false,
+        hasData: false,
+        isEdit: false,
+        skuMaxCount: 1,
+        commodityList: [],
+        cartResultVo: {},
+        productIds: [],
+        goodsList: [],
+        goodsListforActivityType: [],
+        cartSkusCount: 1,
+        curCount: 0,
+        noCanSale: 1 //若为0，则能不卖
+    };
+    computed = {
+        editSelectAll() {
+            let isSelectedAll = true;
+            for (let item of this.goodsListforActivityType) {
+                for (let items of item['commosityList']) {
+                    if (items.deleteStatus === true) {
+                        continue;
+                    } else {
+                        isSelectedAll = false;
+                        return isSelectedAll;
+                    }
+                }
+            }
+            return isSelectedAll;
+        }
+    };
+    async getCartNum() {
+        const url = `${
+            this.$parent.globalData.apiBaseUrl
+        }/api/v2/shoppingcart/countCart`;
+        const { data } = await this.customFunction.fetchData(
+            url,
+            {},
+            {},
+            {
+                isShowLoad: false
+            }
+        );
+        wepy.setTabBarBadge({
+            index: 2,
+            text: `${data}`
+        });
+    }
+    async init({ loadingStatus = true } = {}) {
+        const url = `${
+            this.$parent.globalData.apiBaseUrl
+        }/api/v2/shoppingcart/index`;
+        const { data } = await this.customFunction.fetchData(
+            url,
+            {},
+            {},
+            {
+                isShowLoad: loadingStatus
+            }
+        );
+        this.$parent.getCartNum();
+        if (!data) {
+            this.isEmpty = true;
+            this.hasData = false;
+            this.customFunction.showModal('服务端异常, 请稍后再试');
+            this.$apply();
+            return false;
+        }
+        // 取出需要的数据
+        const {
+            commodityList,
+            cartResultVo,
+            skuMaxCount,
+            cartSkusCount
+        } = data;
+        // 如果商品长度为0，则显示empty
+        if (commodityList.length==0) {
+            this.isEmpty = true;
+            this.hasData = false;
+            this.$apply();
+            return false;
+        }
+        this.hasData = true;
+        this.isEmpty = false;
+        this.isEdit = false;
+        //获取商品列表
+        this.commodityList = commodityList;
+        // 获取商品最大选择数
+        this.skuMaxCount = skuMaxCount;
+        //this.curCount = this.commodityList.length;
+ 		//ff0521
+        let _this = this;
+        this.curCount = 0;//初始值置空
+        this.commodityList.forEach(item => {
+          _this.curCount += item.totalSkuNum;
+        })
+        console.log('this.count-total', this.curCount);
+        this.cartSkusCount = cartSkusCount; //购物车最大数量
+        // 保存商品id数组
+        let retProductIds = [];
+        // 保存商品数组
+        let goodsList = [];
+
+        // 由活动状态进行分组的goodsList
+        let goodsListforActivityType = [];
+        this.commodityList.map(item => {
+            goodsListforActivityType.push({
+                activityType: item.activityType,
+                discountFee: item.discountFee,
+                remark: item.remark,
+                goAddGoods: item.goAddGoods,
+                commosityList: item.commosityList,
+                activityNo: item.activityNo || ''
+            });
+            // TO DO
+            item.commosityList.map(items => {
+                items.deleteStatus = false;
+                goodsList.push(items);
+                retProductIds.push(items.id);
+            });
+            // goodsList.push(item.commosityList[0]);
+            // retProductIds.push(item.commosityList[0].id);
+        });
+        this.goodsListforActivityType = goodsListforActivityType;
+        console.log(this.goodsListforActivityType);
+        this.productIds = retProductIds;
+        this.goodsList = goodsList;
+        // 商品总价信息
+        this.cartResultVo = cartResultVo;
+        this.$apply();
+    }
+    onLoad(options) {
+        //初始化默认门店信息
+        this.$parent.initVirtualShop();
+    }
+    onShow() {
+        this.init();
+    }
+    onPullDownRefresh(e) {
+        this.init({ loadingStatus: false });
+        wepy.stopPullDownRefresh();
+    }
+    async selectHandle(ids, isCheck) {
+        const openId = await this.customFunction.getOpenId();
+        // const openId = "oBPQT0Y1DtODbjvJDM5TuFiJ0XAc"; //每次请求都要openId
+        const url = `${
+            this.$parent.globalData.apiBaseUrl
+        }/api/v2/shoppingcart/selectItem?openId=${openId}`;
+        let params = {
+            checked: isCheck,
+            ids
+        };
+        // const { data } = await this.customFunction.fetchData(
+        await this.customFunction.fetchData(
+            url,
+            params,
+            {
+                method: 'POST'
+            },
+            { isShowLoad: false }
+        );
+        await this.init();
+    }
+    editHandle() {
+        let params = [];
+        for (let i of this.goodsListforActivityType) {
+            for (let j = 0; j < i['commosityList'].length; j++) {
+                let item = i['commosityList'][j];
+                if (item.edited) {
+                    const {
+                        activityId,
+                        checked,
+                        id,
+                        isGift,
+                        commodityNo,
+                        shopId,
+                        count,
+                        skuId
+                    } = item;
+                    const paramsFormat = {
+                        activity_id: activityId,
+                        checked,
+                        commodity_no: commodityNo,
+                        id: id,
+                        is_gift: isGift,
+                        merchant_code: '{$merchantNo}',
+                        shop_id: shopId,
+                        sku_count: count,
+                        sku_id: skuId
+                    };
+                    params.push(paramsFormat);
+                }
+            }
+        }
+        console.log(params);
+        if (params.length > 0) {
+            this.changeCart(params);
+        }
+    }
+    async changeCart(params) {
+        const openId = await this.customFunction.getOpenId();
+        // const openId = "oBPQT0Y1DtODbjvJDM5TuFiJ0XAc"; //每次请求都要openId
+        const url = `${
+            this.$parent.globalData.apiBaseUrl
+        }/api/v2/shoppingcart/changeCart?openId=${openId}`;
+        // const { data } = await this.customFunction.fetchData(
+        await this.customFunction.fetchData(
+            url,
+            params,
+            {
+                method: 'POST'
+            },
+            { isShowLoad: false }
+        );
+        this.init();
+    }
+    async deleteHandle(ids) {
+        const url = `${
+            this.$parent.globalData.apiBaseUrl
+        }/api/v2/shoppingcart/removeSku`;
+        const params = {
+            ids
+        };
+        // const { data } = await this.customFunction.fetchData(
+        await this.customFunction.fetchData(
+            url,
+            params,
+            {},
+            { isShowLoad: false }
+        );
+        this.init();
+    }
+    // 寻找编辑时候选中状态的radio
+    formatDeleteGoods() {
+        const ret = [];
+        this.goodsListforActivityType.forEach(element => {
+            for (let i = 0; i < element.commosityList.length; i++) {
+                if (element['commosityList'][i]['deleteStatus']) {
+                    ret.push(element['commosityList'][i]['id']);
+                }
+            }
+        });
+        return ret;
+    }
+    async confirmOrder(data) {
+        if (data.errorMsg === '购物车商品为空') {
+            this.customFunction.toast('请选择结算商品');
+            return;
+        }
+        let { unPassList } = data;
+        if (unPassList && unPassList.length < 1) {
+            wepy.navigateTo({
+                url: '/usercenter/pages/confirmPay'
+            });
+        } else {
+            let str = '';
+            unPassList.forEach(item => {
+                const ret = `${item.commodity_name}的单次最大购买数量为 ${
+                    item.limit_buy_num_per_order
+                } '件!`;
+                str += ret;
+            });
+            this.customFunction.showModal(str);
+        }
+    }
+    events = {
+        'shopcart:edit'() {
+            this.isEdit = !this.isEdit;
+            this.editHandle();
+        },
+        'shopcart:editSelectAll'() {
+            // 如果是编辑状态则改变goodsList的deleteStatus
+            if (this.isEdit) {
+                this.goodsListforActivityType.forEach(item => {
+                    for (let i = 0; i < item.commosityList.length; i++) {
+                        item['commosityList'][i]['deleteStatus'] = !this
+                            .editSelectAll;
+                    }
+                });
+            } else {
+                // 非编辑状态
+                const strProductIdx = this.productIds.join(',');
+                const isCheck = !this.cartResultVo.select_all;
+                this.selectHandle(strProductIdx, isCheck);
+            }
+        },
+        'shopcart:editSelect'(strId, isCheck) {
+            if (!this.isEdit) {
+                this.selectHandle(strId, isCheck);
+            }
+        },
+        carCount(num) {
+            console.log('当前产品数量', num);
+            this.curCount = num;
+        },
+        async 'shopcart:deleteGoods'() {
+            let ids = this.formatDeleteGoods();
+            if (ids && ids.length < 1) {
+                this.customFunction.toast('请选择要删除的商品');
+                return;
+            }
+            const { confirm } = await this.customFunction.showModal(
+                '确认要删除这些商品吗'
+            );
+            if (confirm) {
+                ids = ids.join(',');
+                this.deleteHandle(ids);
+            }
+        },
+        async 'shopcart:confirmOrder'() {
+            const url = `${
+                this.$parent.globalData.apiBaseUrl
+            }/api/v2/shoppingcart/checkCart`;
+            const data = await this.customFunction.fetchData(url);
+            this.confirmOrder(data);
+        },
+        'shopcart:junpGoodDetail'(goodsId) {
+            if (this.isEdit) return;
+            const opt = {
+                url: `/pages/goodsDetail?commodityNo=${goodsId}`
+            };
+            wepy.navigateTo(opt);
+        }
+    };
+}
+</script>

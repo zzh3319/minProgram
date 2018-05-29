@@ -1,0 +1,279 @@
+<template>
+    <view class="order-item">
+        <view class="lists-box">
+          <view class="item-box">
+               <wxc-flex class="wrap">
+                <view class="item side">
+                  <view class="booking-image" wx:if="{{item.activityType==='14'}}"></view>
+                   <navigator url="/pages/goodsDetail?commodityNo={{commodityNos[item.commodityId]}}&shopId={{shopid}}" hover-class="none" >
+                      <image src="{{item.picSmall}}" class="pruimg"></image>
+                   </navigator>
+                </view>
+                <view class="item main pl32 mtf4"> 
+                   <navigator url="/pages/goodsDetail?commodityNo={{commodityNos[item.commodityId]}}&shopId={{shopid}}" hover-class="none" >
+                      <view class="item-line1">
+                        <wxc-flex class="wrap">
+                          <wxc-elip line="2" class="item main minheight">{{item.prodName}}</wxc-elip>
+                          <text class="item side" wx:if="{{item.activityPrice}}">￥{{item.activityPrice}}</text>
+                          <text class="item side" wx:else>￥{{item.wfxPrice}}</text>
+                        </wxc-flex>
+                      </view>
+                      <view class="item-line2">
+                        <wxc-flex class="wrap">
+                          <view class="item main">
+                            <text>{{item.prodSpec}}</text>  
+                          </view>
+                          <view class="item side">
+                              x<text class="num">{{item.num}}</text>
+                          </view>
+                        </wxc-flex>
+                      </view>
+                  </navigator>
+                  <view class="item-line3">
+                    <wxc-flex class="wrap">
+                      <view class="iconfont" wx:if="{{item.canRefund}}">
+                         <button class="btn-grey-line mt12" @tap="refundFun">退款/退货</button>
+                      </view>
+                      <view wx:else>
+                          <view class="main iconfont" wx:if="{{item.refundStatusDesc}}"  @tap="refundDetail({{orderid}},{{item.id}})">&#xe61f;<text class="state">{{item.refundStatusDesc}}</text>
+                          </view>
+                      </view>
+                    </wxc-flex>
+                  </view>
+                </view>
+              </wxc-flex>
+          </view>
+        </view>
+    </view>
+</template>
+<style lang="less">
+.order-item {
+    padding: 0 20rpx;
+    background: #ffffff;
+    .lists-box {
+        border-bottom: 1rpx solid #e9e9e9;
+        .item-box {
+            padding: 36rpx 0;
+            .item-line1 {
+                font-size: 26rpx;
+                color: #333333;
+                vertical-align: text-top;
+                .minheight {
+                    height: 74rpx;
+                }
+                .side {
+                    font-size: 24rpx;
+                }
+            }
+            .item-line2 {
+                font-size: 26rpx;
+                height: 32rpx;
+                vertical-align: text-top;
+                .main {
+                    color: #999999;
+                }
+                .side {
+                    font-size: 24rpx;
+                    color: #b8b8b8;
+                    .num {
+                        margin-left: 10rpx;
+                        display: inline-block;
+                    }
+                }
+            }
+
+            .item-line3 {
+                height: 40rpx;
+                vertical-align: text-top;
+                .main {
+                    color: #f0990f;
+                    .state {
+                        margin-left: 8rpx;
+                        display: inline-block;
+                        font-size: 26rpx;
+                    }
+                }
+                .side {
+                    font-size: 24rpx;
+                    color: #ff6563;
+                }
+            }
+        }
+        .pruimg {
+            width: 138rpx;
+            height: 138rpx;
+            border: 1rpx solid #cfcfcf;
+        }
+    }
+    .userinfo-box {
+        padding: 22rpx 20rpx;
+        background: #ffffff;
+        border-top: 1rpx solid #e9e9e9;
+        .nickName {
+            height: 48rpx;
+            line-height: 48rpx;
+            padding-left: 14rpx;
+            color: #333333;
+            font-size: 32rpx;
+            display: block;
+        }
+        .orderTime {
+            height: 32rpx;
+            line-height: 32rpx;
+            padding-left: 14rpx;
+            color: #777777;
+            font-size: 24rpx;
+            display: block;
+        }
+    }
+    .wrap {
+        .item {
+            position: relative;
+        }
+        .booking-image {
+            @height: 54rpx;
+            width: @height;
+            height: @height;
+            line-height: @height;
+            position: absolute;
+            left: 8rpx;
+            top: 8rpx;
+            background: url(https://i2.ygimg.cn/cmp/mp/booking-label.png)
+                no-repeat;
+            background-size: 100% auto;
+            font-size: 22rpx;
+            color: #fff;
+            text-align: center;
+        }
+    }
+}
+.btn-repay {
+    max-width: 160rpx;
+    height: 60rpx;
+    line-height: 60rpx;
+    text-align: center;
+    padding: 0 26rpx;
+    font-size: 26rpx;
+    color: #fff;
+    background: #ff414b;
+    overflow: visible;
+    cursor: pointer;
+}
+.btn-grey-line {
+    max-width: 160rpx;
+    height: 50rpx;
+    line-height: 50rpx;
+    text-align: center;
+    padding: 0 12rpx;
+    font-size: 26rpx;
+    color: #5a5a5a;
+    background: #ffffff;
+    cursor: pointer;
+    overflow: visible;
+    box-sizing: border-box;
+    &::after {
+        border: 1rpx solid #5a5a5a;
+    }
+}
+.btn-grey {
+    max-width: 160rpx;
+    height: 60rpx;
+    line-height: 60rpx;
+    text-align: center;
+    padding: 0 26rpx;
+    font-size: 26rpx;
+    color: #666666;
+    background: #ffffff;
+    overflow: visible;
+    &::after {
+        border: 1rpx solid #666666;
+    }
+    cursor: pointer;
+    box-sizing: border-box;
+}
+.mt12 {
+    margin-top: 12rpx;
+}
+.fr {
+    float: right;
+}
+.fl {
+    float: float;
+}
+.vmiddle {
+    height: 60rpx;
+    line-height: 60rpx;
+}
+//
+.side {
+    flex-grow: 0;
+}
+.main {
+    flex-grow: 1;
+}
+.avatar {
+    display: block;
+    width: 78rpx;
+    height: 78rpx;
+    border-radius: 50%;
+}
+.red {
+    color: #ff414b;
+}
+</style>
+<script>
+import wepy from 'wepy';
+export default class OrderItemDetail extends wepy.component {
+    computed = {};
+    props = {
+        orderid: String,
+        orderstatus: String,
+        shopid: String,
+        commodityNos: Array,
+        item: {
+            type: Object,
+            default: {
+                id: '--',
+                commodityId: '--',
+                prodName: '--', //-1
+                prodSpec: '--', //产品颜色型号
+                num: 2, //购买数量
+                canRefund: 0, //是否可以退款
+                refundStatusDesc: '', //退款状态说明
+                picSmall: '--', //-1
+                wfxPrice: 0, //分销价，
+                activityPrice: 0, //活动价，如果活动价不为0，则展示分销价
+                commodityNo: ''
+            }
+        }
+    };
+    data = {};
+    methods = {
+        refundDetail(orderId, orderDetailId) {
+            wepy.setStorageSync('refundLink', 'true'); //设置是否点击退款中
+            wepy.navigateTo({
+                url:
+                    '/usercenter/pages/refundDetail?orderId=' +
+                    orderId +
+                    '&orderDetailId=' +
+                    orderDetailId
+            });
+        },
+        refundFun() {
+            wepy.setStorageSync('refundFlag', 'true'); //设置是否点击退款中
+            //退款退货
+            let path =
+                '/usercenter/pages/refundApplicationForm?orderId=' +
+                this.orderid +
+                '&orderDetailId=' +
+                this.item.id +
+                '&orderStatus=' +
+                this.orderstatus;
+            wepy.navigateTo({
+                url: path
+            });
+        }
+    };
+    events = {};
+}
+</script>

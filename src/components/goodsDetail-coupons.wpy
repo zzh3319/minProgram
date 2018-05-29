@@ -1,0 +1,67 @@
+<template>
+  <view class="coupons-choose" @tap="openChoose" wx:if="{{coupons.items.length}}">
+    <view main="between" cross="center" class="coupons-choose-flex">
+      <view  class="choose-info">
+        <label class="choose-label">优惠券</label>
+        <view class="choose-item">
+            <wxc-elip line="1">
+                {{coupons.couponSingle}}
+            </wxc-elip>
+        </view>
+      </view>
+      <view>
+        <wxc-icon size="30" type="arrow-right" color="#848484"></wxc-icon>
+      </view>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+export default class GoodsDetailCoupons extends wepy.component {
+    props = {
+        coupons: {
+            type: Object,
+            default: {}
+        }
+    };
+    computed = {};
+    methods = {
+        openChoose() {
+            this.$emit('GoodsDetailCoupons:show');
+        }
+    };
+    onLoad(options) {}
+}
+</script>
+<style lang="less">
+.coupons-choose {
+    display: block;
+    height: 90rpx;
+    background: #fff;
+    padding: 0 20rpx;
+    margin-bottom: 20rpx;
+    .coupons-choose-flex {
+        display: flex;
+        height: 100%;
+        align-items: center;
+        justify-content: space-between;
+        box-sizing: border-box;
+    }
+    .choose-label {
+        font-size: 22rpx;
+        color: #b8b8b8;
+        margin-right: 20rpx;
+    }
+    .choose-info {
+        font-size: 24rpx;
+        align-items: center;
+        display: flex;
+        .choose-item {
+            width: 500rpx;
+            display: inline-block;
+            margin: 0 10rpx;
+            color: rgba(254, 67, 76, 1);
+        }
+    }
+}
+</style>

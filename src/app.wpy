@@ -1,0 +1,526 @@
+<style lang='less'>
+@import 'static/less/weui';
+</style>
+
+<script>
+import wepy from 'wepy';
+import 'wepy-async-function';
+export default class extends wepy.app {
+    config = {
+        pages: [
+            'pages/index',
+            'pages/find',
+            'pages/shopcart',
+            'pages/mine',
+            'pages/goodsDetail',
+            'pages/associate',
+            'pages/wxxlogin'
+        ],
+        subPackages: [
+            {
+                root: 'mphome',
+                pages: [
+                    'pages/findDetail',
+                    'pages/topic',
+                    'pages/search',
+                    'pages/goodsList',
+                    'pages/goodsShare',
+                    'pages/articleShare',
+                    'pages/category',
+                    'pages/goodsFilter',
+                    'pages/hotSaleList',
+                    'pages/map',
+                    'pages/shopDetail',
+                    'pages/specialPage',
+                    'pages/getCouponResult',
+                    'pages/goodsListForDiscount'
+                ]
+            },
+            {
+                root: 'usercenter',
+                pages: [
+                    'pages/incomeMoney',
+                    'pages/goodsCardPage',
+                    'pages/expenditure',
+                    'pages/accountBalance',
+                    'pages/customerList',
+                    'pages/confirmPay',
+                    'pages/addressList',
+                    'pages/customService',
+                    'pages/commissionDetail',
+                    'pages/coupons',
+                    'pages/guideQrcode',
+                    'pages/atofail',
+                    'pages/atoPhone',
+                    'pages/payfail',
+                    'pages/empty',
+                    'pages/authorize',
+                    'pages/preferential',
+                    'pages/addressNew',
+                    'pages/paysuccess',
+                    'pages/gopay',
+                    'pages/gopayH5',
+                    'pages/repayment',
+                    'pages/atoPhoneTwo',
+                    'pages/couponsEffective',
+                    'pages/myrefunds',
+                    'pages/myIncome',
+                    'pages/ufansOrderList',
+                    'pages/couponList',
+                    'pages/orderlist',
+                    'pages/orderDetail',
+                    'pages/refundDetail',
+                    'pages/refund',
+                    'pages/afterInstructions',
+                    'pages/myCoupon',
+                    'pages/invalidCoupon',
+                    'pages/recentVisitors',
+                    'pages/visitorsDetails',
+                    'pages/logisticTrack',
+                    'pages/profitDetail',
+                    'pages/profit',
+                    'pages/refundApplicationForm',
+                    'pages/points',
+                    'pages/integralDetail',
+                    'pages/buyerOrderList',
+                    'pages/demo',
+                    'pages/editRefundApplicationForm',
+                    'pages/contact',
+                    'pages/scanCode'
+                ]
+            }
+        ],
+        window: {
+            backgroundTextStyle: 'light',
+            navigationBarBackgroundColor: '{$navigationBarBackgroundColor}',
+            navigationBarTitleText: '{$defaultTitle}',
+            navigationBarTextStyle: '{$navigationBarTextStyle}',
+            backgroundColor: '#f4f4f4'
+        },
+        tabBar: {
+            color: '#858585',
+            selectedColor: '#ff434d',
+            borderStyle: '#ffffff',
+            backgroundColor: '#f8f8f8',
+            list: [
+                {
+                    text: '商城',
+                    pagePath: 'pages/index',
+                    iconPath: 'static/img/icons/shop.png',
+                    selectedIconPath: 'static/img/icons/shop-active.png'
+                },
+                {
+                    text: '发现',
+                    pagePath: 'pages/find',
+                    iconPath: 'static/img/icons/find.png',
+                    selectedIconPath: 'static/img/icons/find-active.png'
+                },
+                {
+                    text: '购物车',
+                    pagePath: 'pages/shopcart',
+                    iconPath: 'static/img/icons/shopcart.png',
+                    selectedIconPath: 'static/img/icons/shopcart-active.png'
+                },
+                {
+                    text: '我的',
+                    pagePath: 'pages/mine',
+                    iconPath: 'static/img/icons/mine.png',
+                    selectedIconPath: 'static/img/icons/mine-active.png'
+                }
+            ]
+        }
+    };
+    globalData = {
+        userInfo: null,
+        openId: '',
+        h5BaseUrl: '{$h5BaseUrl}', // h5域名devcmp
+        apiBaseUrl: '{$apiBaseUrl}', // api域名
+        apiBaseUrlMock: '{$apiBaseUrl}', //api Mock
+        getIndexHttps: '{$getIndexHttps}', // 首页地址
+        paySuccessBack: null,
+        returnShopInfo: null,
+        returnTopStatus: false,
+        loginCount: 0,
+        fromUrl: {
+          url: ''
+        },
+        topicList: []
+    };
+    constructor() {
+        super();
+        this.use('requestfix');
+        this.use('promisify');
+        this.intercept('request', {
+            config(p) {
+                if (!p.data) {
+                    p.data = {};
+                }
+                p.data.merchantNo = '{$merchantNo}';
+                p.data.openId = this.getOpenId();
+                p.data.vStoreNo = wepy.getStorageSync('vStoreNo');
+                p.data.vstore_no = wepy.getStorageSync('vStoreNo');
+                // p.data.openId ="oBPQT0Wr_3kH_IesJJtRnRqvbZ7k" ||this.getOpenId();
+                //p.data.openId ="oBPQT0fQYXMPthG0TCFYc_-DNnes" ||this.getOpenId();//没有提成
+                return p;
+            }
+        });
+        // this.intercept('request', {
+        //   config(p) {
+        //     p.timestamp = +new Date();
+        //     return p;
+        //   },
+        //   success(p) {
+        //     if (p.data.code !== 20000 && p.data.code !== 200&&!p.resultCode) {
+        //       wepy.showModal({
+        //         content: p.data.errorMsg || p.data.message
+        //       })
+        //       return false;
+        //     } else {
+        //       return p;
+        //     }
+        //   },
+        //   fail(p) {
+        //     wepy.showModal({
+        //       content: '请求失败，请重试！'
+        //     })
+        //     return p;
+        //   }
+        // });
+    }
+    async onLaunch() {
+        await this.wxxlogin();
+        await this.checkUserByOpenId();
+        await this.getCartNum();
+        if (wepy.getStorageSync('shopId').length > 15) {
+            await this.initShopId();
+        }
+    }
+    webviewNoCanUsewx() {
+        wepy
+            .showModal({
+                title: '温馨提示',
+                content:
+                    '当前微信版本过低，无法使用该功能，请升级到最新微信版本后重试。',
+                showCancel: false
+            })
+            .then(res => {
+                if (res.confirm) {
+                    wepy.navigateBack();
+                }
+            });
+    }
+    /**
+     * 微信授权成功后的request请求
+     */
+    async wxxlogin(pageData, args = {}) {
+        if (
+            pageData === 'associate' ||
+            pageData === 'customer' ||
+            pageData === 'getAccredit' ||
+            pageData === 'redEnvelope'
+        ) {
+            await this.wxLoginAndAPILogin(pageData, args); //针对导购的只获取用户信息
+        } else {
+            if (
+                wepy.getStorageSync('code') === '' ||
+                wepy.getStorageSync('encryptedData') === '' ||
+                wepy.getStorageSync('iv') === '' ||
+                this.getOpenId() === ''
+            ) {
+                await this.wxLoginAndAPILogin('', args);
+            } else {
+                console.log('ee');
+            }
+        }
+        this.globalData.returnShopInfo = {};
+    }
+    /**
+     * 判断登录，加入session判断
+     */
+    async wxLoginAndAPILogin(pageData, args = {}) {
+        let openId = this.getOpenId();
+        // let avatarUrl = wepy.getStorageSync('avatarUrl')
+        // let nickName = wepy.getStorageSync('nickName')
+        // let unionId = wepy.getStorageSync('unionId')
+        // let gender = wepy.getStorageSync('gender')
+        try {
+            /*let _checklogin = */
+            await wepy.checkSession();
+            if (!openId) {
+                await this.toLogin(pageData, args);
+            } else {
+                //导购跳到确认导购身份页面
+                if (pageData === 'associate') {
+                    wepy.navigateTo({
+                        url: '/usercenter/pages/atoPhone'
+                    });
+                };
+            }
+        } catch (e) {
+            await this.toLogin(pageData, args);
+        }
+    }
+    /**
+     * 调用微信登录
+     */
+    async toLogin(pageData, args = {}) {
+        let _login = await wepy.login();
+        if (_login.code) {
+            try {
+                // 获取用户信息
+                let userInfo = await wepy.getUserInfo();
+                this.globalData.userInfo = userInfo.userInfo;
+                console.log('---wepy中的url----')
+                console.log(this.globalData.fromUrl.url)
+                wepy.setStorageSync('code', _login.code);
+                wepy.setStorageSync('encryptedData', userInfo.encryptedData);
+                wepy.setStorageSync('iv', userInfo.iv);
+                //导购跳到确认导购身份页面
+                if (pageData === 'associate') {
+                    wepy.navigateTo({
+                        url: '/usercenter/pages/atoPhone'
+                    });
+                }
+                console.log('开始解密');
+                await this.encryptData(
+                    _login.code,
+                    userInfo.encryptedData,
+                    userInfo.iv,
+                    pageData
+                );
+                console.log('解密成功');               
+                let route = getCurrentPages()[0].route  //获取第一次进入页面的route
+                //判断是否是从红包页面调起的授权弹窗
+                if (route !== '' && route === 'mphome/pages/getCouponResult'){
+                    //未授权进入红包页调起授权弹窗，用户点击允许，拿到授权重新进入红包页
+                    wepy.reLaunch({
+                         url: '/' + this.globalData.fromUrl.url
+                    }).then(res => {
+                        this.globalData.fromUrl.url = '';
+                    });
+                }
+                if (args.success) {
+                    args.success(_login);
+                }
+            } catch (error) {
+                if (
+                    error.code &&
+                    error.code !== 20000 &&
+                    this.globalData.loginCount < 2
+                ) {
+                    this.globalData.loginCount++;
+                    this.reLogin();
+                    return false;
+                }
+                let returnUrl = '/usercenter/pages/authorize';
+                if (
+                    pageData === 'associate' ||
+                    pageData === 'customer' ||
+                    pageData === 'getAccredit'
+                ) {
+                    returnUrl = returnUrl + '?associate=' + pageData;
+                }
+                if (!pageData && args.payneedlogin) {
+                    returnUrl = `${returnUrl}?payneedlogin=${
+                        args.payneedlogin
+                    }`;
+                }
+                if (args.error) {
+                    args.error(_login);
+                } else {
+                    wepy.redirectTo({
+                        url: returnUrl
+                    });
+                }
+            }
+        } else {
+            console.log(`用户登录态失败！${_login.errMsg}`);
+        }
+    }
+    /**
+     * 解密登录需要的信息
+     */
+    async encryptData(code, encryptedData, iv, associate) {
+        try {
+            let res = await wepy.request({
+                url: `${this.globalData.apiBaseUrl}/api/v2/user/encryptData`,
+                data: {
+                    code: code,
+                    encryptData: encryptedData,
+                    iv: iv
+                }
+            });
+            if (res.data.code === 20000) {
+                let getRes = res.data.data;
+                wepy.setStorageSync('openid', getRes.openId);
+                this.globalData.openId = getRes.openId;
+                wepy.setStorageSync('avatarUrl', getRes.avatarUrl);
+                wepy.setStorageSync('nickName', getRes.nickName);
+                wepy.setStorageSync('unionId', getRes.unionId);
+                wepy.setStorageSync('gender', getRes.gender);
+                // 获取并设置ShopId
+                await this.initShopId();
+            } else {
+                throw res.data.errMsg;
+            }
+        } catch (error) {
+            throw error;
+        }
+    }
+    async reLogin() {
+        wepy.clearStorageSync();
+        await this.wxxlogin();
+    }
+    async clearLogin() {
+        this.globalData.openId = '';
+        this.globalData.loginCount = 0;
+        wepy.clearStorageSync();
+    }
+    getUserInfo(cb) {
+        if (this.globalData.userInfo) {
+            cb(this.globalData.userInfo);
+            return false;
+        } else {
+            wepy
+                .getUserInfo()
+                .then(res => {
+                    this.globalData.userInfo = res.userInfo;
+                    cb && cb(res.userInfo);
+                })
+                .catch(e => {
+                    console.log(e.errorMsg);
+                });
+        }
+    }
+    async initShopId() {
+        try {
+            // 获取ShopId
+            let res = await wepy.request({
+                url: this.globalData.apiBaseUrl + '/api/v2/shop/getShopId',
+                method: 'GET',
+                data: {}
+            });
+            let shopId = res.data.data;
+            wepy.setStorageSync('shopId', shopId);
+            this.shopId = shopId;
+            return shopId;
+        } catch (e) {
+            console.log(e);
+            return '';
+        }
+    }
+    //请求默认门店信息
+    async initVirtualShop(){
+      try {
+        let {data} = await wepy.request({
+          url: this.globalData.apiBaseUrl + '/api/v2/store/defaultVirtualShop',
+          data: {}
+        });
+        if (data.code == 20000){
+          wepy.setStorageSync('vStoreNo', data.data.vStoreNo);
+        } else {
+          console.log(data.msg || data.errorMsg)
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    async getCartNum() {
+        const url = `${
+            this.globalData.apiBaseUrl
+        }/api/v2/shoppingcart/countCart`;
+        const { data: { data = 0 } } = await wepy.request({
+            url,
+            data: {}
+        });
+        try {
+            wepy.setTabBarBadge({
+                index: 2,
+                text: `${data}` || 0
+            });
+        } catch (e) {
+            throw Error(`Failed to setTabBarBadge!  app.wpy-->getCartNum:error!
+        message:${e}`);
+        }
+    }
+    /**
+     * 锁粉
+     */
+    lockFans(shopId, visitType) {
+        console.log({
+            content: `id: ${shopId}  type:${visitType}`
+        });
+        console.log('开始锁粉！');
+        let count = 0;
+        // 锁粉
+        if (shopId && shopId !== 'mpshop') {
+            let lockTick = setInterval(() => {
+                if (count < 3) {
+                    try {
+                        let openId = this.getOpenId();
+                        console.log(
+                            `shopId: ${shopId} openId:${openId} type: ${visitType}`
+                        );
+                        if (openId) {
+                            wepy
+                                .request({
+                                    url:
+                                        this.globalData.apiBaseUrl +
+                                        '/api/v2/saveParentSeller',
+                                    method: 'GET',
+                                    data: {
+                                        visitType,
+                                        shopId
+                                    }
+                                })
+                                .then(e => {
+                                    clearInterval(lockTick);
+                                    console.log(e);
+                                    console.log('锁粉成功！');
+                                });
+                        }
+                    } catch (e) {
+                        console.log('锁粉失败！');
+                    }
+                } else {
+                    count++;
+                }
+            }, 200);
+        }
+    }
+    /**
+     * 获取openId
+     */
+    getOpenId() {
+        // return 'oBPQT0el-V6nhFElvDP3I8AQ8Zos';
+        // return 'oBPQT0SRGXGRn_sZIrxvspoPlc0k';
+        try {
+            return this.globalData.openId || wepy.getStorageSync('openid');
+        } catch (error) {
+            return 'openId为空!';
+        }
+    }
+    async checkUserByOpenId() {
+        try {
+            let res = await wepy.request({
+                url:
+                    this.globalData.apiBaseUrl +
+                    '/api/v2/userCenter/checkUserByOpenId',
+                data: {}
+            });
+            if (res.data.code === 20000) {
+                // let { data } = res.data;
+            } else {
+                await this.reLogin();
+            }
+        } catch (error) {
+            console.log('检测openId请求失败！');
+            console.log(error);
+        }
+    }
+    onError(error) {
+        console.log('异常抛出!');
+        console.log(error);
+    }
+}
+</script>

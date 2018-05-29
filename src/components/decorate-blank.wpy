@@ -1,0 +1,14 @@
+<template>
+  <view class="blank-container" style="height:{{item.widgetsContent.theHeight * 2}}rpx"/>
+</template>
+<script>
+import wepy from 'wepy';
+
+export default class decorateBlank extends wepy.component {}
+</script>
+
+<style lang="less">
+.blank-container {
+    width: 100%;
+}
+</style>

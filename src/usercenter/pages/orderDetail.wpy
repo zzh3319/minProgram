@@ -1,0 +1,1068 @@
+<template>
+  <view class="orderDetail-box">
+
+    <view wx:if="{{hasFloatButton}}" class="flost_btn">
+      <view class="btn-fixed blue" @tap="goodsDetailShare">
+        <i class="iconfont blue">&#xe6ad;</i>
+      </view>
+    </view>
+
+    <view class="top-info-box mt20">
+      <view class="secured tr">
+        <view class="item-icon">
+          <text class="item-icon-c iconfont">&#xe600;</text>
+        </view>
+        <text class="item-text">担保交易</text>
+      </view>
+      <wxc-flex class="wrap">
+        <view class="item main">
+          <text class="num">订单号：{{orderInfo.wfxOrderNo}}</text>
+        </view>
+        <view class="item main tr">
+          <text class="time">下单时间：{{orderInfo.stringCreatedTime}}</text>
+        </view>
+      </wxc-flex>
+    </view>
+    <view class="logistics-box" wx:if="{{orderInfo.canShowLogistics}}">
+      <view class="weui-cells weui-cells_after-title">
+        <!-- url="/usercenter/pages/orders?url={{baseUrl}}/order/myorder.sc" -->
+        <navigator url="/usercenter/pages/logisticTrack?orderNo={{orderInfo.wfxOrderNo}}" class="weui-cell weui-cell_access" hover-class="weui-cell_active">
+          <view class="weui-cell__hd">
+            <text class="right-icon iconfont">&#xe669;</text>
+          </view>
+          <view class="weui-cell__bd">查看物流</view>
+          <view class="weui-cell__ft weui-cell__ft_in-access"></view>
+        </navigator>
+      </view>
+    </view>
+    <view class="address-box mt20">
+      <wxc-flex class="wrap">
+        <view class="item main">
+          <view class="item-icon">
+            <text class="item-icon-c iconfont">&#xe666;</text>
+          </view>
+          <text class="item-text">{{orderInfo.receiverName}}</text>
+        </view>
+        <view class="item main tr">
+          <view class="item-icon">
+            <text class="item-icon-c iconfont">&#xe649;</text>
+          </view>
+          <text class="item-text phonenum">{{orderInfo.receiverMobileEncode}}</text>
+        </view>
+      </wxc-flex>
+      <view class="address-detail mt15">
+        <wxc-elip line="2" class="item main">{{orderInfo.receiverState}}{{orderInfo.receiverCity}}{{orderInfo.receiverDistrict}}{{orderInfo.receiverAddress}}</wxc-elip>
+      </view>
+    </view>
+
+    <view class="goods-box mt20">
+      <view class="title-box childTitle">
+        <wxc-flex class="wrap">
+          <view class="item main">
+            <text>商品信息</text>
+          </view>
+        </wxc-flex>
+      </view>
+      <repeat for="{{productLists}}" key="index" index="index" item="item">
+        <orderItemDetail :item="item" :shopid.sync="shopid" :orderid.sync="orderid" :orderstatus.sync="orderstatus" :commodityNos.sync="commodityNos"></orderItemDetail>
+      </repeat>
+    </view>
+
+    <view class="infos-box mt20">
+      <view class="title-box childTitle">
+        <wxc-flex class="wrap">
+          <view class="item main">
+            <text class="color666">支付方式</text>
+          </view>
+          <view class="item main tr">
+            <text>{{orderInfo.payTypeDesc}}</text>
+          </view>
+        </wxc-flex>
+      </view>
+      <view class="con-box">
+        <wxc-flex class="wrap">
+          <view class="item main">
+            <text>商品总金额</text>
+          </view>
+          <view class="item main tr">
+            <text class="red">￥{{orderInfo.totalFee}}</text>
+          </view>
+        </wxc-flex>
+        <wxc-flex class="wrap">
+          <view class="item main">
+            <text>活动优惠</text>
+          </view>
+          <view class="item main tr">
+            <text class="red">￥{{orderInfo.singleDiscountFee+orderInfo.groupDiscountFee}}</text>
+          </view>
+        </wxc-flex>
+        <wxc-flex class="wrap">
+          <view class="item main">
+            <text>券/口令优惠</text>
+          </view>
+          <view class="item main tr">
+            <text class="red">￥{{orderInfo.couponDiscountFee}}</text>
+          </view>
+        </wxc-flex>
+        <wxc-flex class="wrap">
+          <view class="item main">
+            <text>运费</text>
+          </view>
+          <view class="item main tr">
+            <text class="red">￥{{orderInfo.postFee}}</text>
+          </view>
+        </wxc-flex>
+      </view>
+      <view class="title-box childTitle noborderbt">
+        <wxc-flex class="wrap">
+          <view class="item main tr">
+            <view><text>实付款：</text><text>￥</text><text class="red">{{orderInfo.payment}}</text>
+            </view>
+          </view>
+        </wxc-flex>
+      </view>
+    </view>
+
+    <!-- 跳转 某h5页面 -->
+    <view class="contact-box mt20">
+      <view class="item-icon-box" @tap="huanXinContact">
+        <view class="item-icon">
+          <text class="item-icon-c iconfont">&#xe60a;</text>
+        </view>
+        <text class="item-text">联系客服</text>
+      </view>
+    </view>
+    <!-- <view class="booking-time {{orderInfo.isRed?'red':''}}" wx:if='{{orderInfo.latestDeliveryTimeStr}}'>
+                  预售商品最晚发货时间:{{orderInfo.latestDeliveryTimeStr}}
+                </view> -->
+
+    <view class="btn-box" wx:if="{{orderInfo.canPay || orderInfo.canBuyAgin || orderInfo.canCancel || orderInfo.canConfirm||orderInfo.latestDeliveryTimeStr}}">
+      <wxc-flex class="wrap">
+        <view class="item side time-info" wx:if="{{orderInfo.canPay}}">
+          <view class="tit">付款剩余时间</view>
+          <view class="time">{{minutes}}分{{seconds}}秒</view>
+        </view>
+        <view class="item side time-info {{orderInfo.isRed?'red':''}}" wx:if='{{orderInfo.latestDeliveryTimeStr&&!orderInfo.canPay}}'>
+          <view class="tit">预售商品最晚发货时间</view>
+          <view class="time">{{orderInfo.latestDeliveryTimeStr}}</view>
+        </view>
+        <view class="item main tr">
+          <view class="btn tc redBtn fr" @tap="goPay" wx:if="{{orderInfo.canPay}}">去付款</view>
+          <view class="btn tc redBtn fr" @tap="goPayAgain" wx:if="{{orderInfo.canBuyAgin}}">重新购买</view>
+          <view class="btn tc greyBtn fr" @tap="cancleConfirm" wx:if="{{orderInfo.canCancel}}">取消订单</view>
+          <view class="btn tc redBtn fr" @tap="confirmReceipt" wx:if="{{orderInfo.canConfirm}}">确认收货</view>
+        </view>
+      </wxc-flex>
+    </view>
+  </view>
+</template>
+<style lang="less">
+@import '../../static/less/base/fn';
+.orderDetail-box {
+
+  .flost_btn {
+    z-index: 2;
+    position: fixed;
+    right: 50rpx;
+    top: 450rpx;
+    .btn-fixed {
+      display: block;
+      margin-bottom: 20rpx;
+      padding: 0;
+      width: 88rpx;
+      height: 88rpx;
+      line-height: 88rpx;
+      text-align: center;
+      -webkit-border-radius: 50%;
+      -moz-border-radius: 50%;
+      border-radius: 50%;
+      -webkit-box-shadow: 1rpx 1rpx 10rpx rgba(130, 130, 130, 0.5);
+      -moz-box-shadow: 1rpx 1rpx 10rpx rgba(130, 130, 130, 0.5);
+      box-shadow: 1rpx 1rpx 10rpx rgba(130, 130, 130, 0.5);
+      background-color: #fff;
+      color: #4da0d9;
+      &:last-child {
+        margin-bottom: 0;
+      }
+      &:before,
+      &:after {
+        display: none;
+      }
+      &.blue {
+        color: #4da0d9;
+      }
+      >.iconfont {
+        font-size: 44rpx;
+        line-height: 88rpx;
+      }
+    }
+  }
+
+  padding-bottom: 100rpx;
+  .top-info-box {
+    padding: 20rpx 16rpx;
+    background: #ffffff;
+    .secured {
+      color: #999999;
+      height: 48rpx;
+      line-height: 48rpx;
+      font-size: 26rpx;
+      .item-icon-c {
+        color: #00a0e9;
+      }
+    }
+    .num {
+      color: #333333;
+      font-size: 24rpx;
+      white-space: nowrap;
+    }
+    .time {
+      font-size: 22rpx;
+      color: #999999;
+      white-space: nowrap;
+    }
+  }
+
+  .address-box {
+    padding: 20rpx 90rpx 20rpx 20rpx;
+    background: #ffffff;
+    font-size: 26rpx;
+    color: #333333;
+    border: 6rpx solid;
+    -webkit-border-image: url(https://i2.ygimg.cn/cmp/mp/border-line.jpg?v=1);
+    border-image-slice: 8 6;
+    border-image-repeat: round;
+    .item-icon {
+      .item-icon-c {
+        color: #f2818a;
+        font-size: 40rpx;
+      }
+    }
+    .phonenum {
+      color: #252525;
+    }
+  }
+
+  .goods-box {
+    .order-item {
+      &:last-child {
+        .lists-box {
+          border-bottom: none;
+        }
+      }
+    }
+  }
+
+  .infos-box {
+    background: #ffffff;
+    .con-box {
+      padding: 16rpx;
+      border-bottom: 1rpx solid #e9e9e9;
+      font-size: 26rpx;
+      color: #666666;
+      .wrap {
+        height: 50rpx;
+        line-height: 50rpx;
+      }
+    }
+  }
+
+  .contact-box {
+    padding: 30rpx 0;
+    text-align: center;
+    background: #ffffff;
+    .item-icon-box {
+      .item-icon-c {
+        font-size: 48rpx;
+        color: #111111;
+      }
+    }
+  }
+
+  .logistics-box {
+    background: #ffffff;
+    .right-icon {
+      margin-right: 36rpx;
+      color: #9c9c9c;
+      font-size: 42rpx;
+    }
+    .weui-cells {
+      font-size: 28rpx;
+      color: #333333;
+      margin-top: 0;
+    }
+    .weui-cells_after-title {
+      margin-top: 0;
+    }
+  }
+
+  .btn-box {
+    width: 100%;
+    height: 100rpx;
+    border-top: 1rpx solid #e5e5ec;
+    background: #ffffff;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    .time-info {
+      padding: 10rpx 0 0 18rpx;
+      color: #333333;
+      font-size: 28rpx;
+      &.red {
+        color: #ff414b;
+      }
+      .tit {
+        color: #999999;
+      }
+    }
+
+    .btn {
+      height: 100rpx;
+      line-height: 100rpx;
+      padding: 0 50rpx;
+      font-size: 28rpx;
+      cursor: pointer;
+      &.greyBtn {
+        background: #eaeaea;
+        color: #333333;
+      }
+      &.redBtn {
+        min-width: 100rpx;
+        background: #ff434d;
+        color: #ffffff;
+        text-align: center;
+      }
+    }
+  }
+}
+
+//title
+.title-box {
+  height: 90rpx;
+  line-height: 90rpx;
+  padding: 0 20rpx;
+  background: #7c7c7c;
+  color: #fffefe;
+  font-size: 30rpx;
+  &.childTitle {
+    height: 84rpx;
+    line-height: 84rpx;
+    padding: 0 20rpx;
+    background: #ffffff;
+    color: #333333;
+    font-size: 28rpx;
+    border-bottom: 1rpx solid #e9e9e9;
+    &.noborderbt {
+      border-bottom: none;
+    }
+  }
+}
+
+//item
+.item-text {
+  display: inline-block;
+  margin-left: 12rpx;
+}
+
+.item-icon {
+  display: inline-block;
+  position: relative;
+  width: 48rpx;
+  height: 48rpx;
+  font-size: 32rpx;
+}
+
+//item-end
+.side {
+  flex-grow: 0;
+}
+
+.main {
+  flex-grow: 1;
+}
+
+.red {
+  color: #ff414b;
+}
+
+// .booking-time {
+//   padding: 30rpx 20rpx;
+//   position: fixed;
+//   bottom: 0;
+//   left: 0;
+//   width: 100%;
+//   box-sizing: border-box;
+//   z-index: 99;
+//   background-color: #f4f4f4;
+//   .red {
+//     color: #ff434d;
+//   }
+// }
+</style>
+<script>
+var timer; //只需一个倒计时
+import wepy from 'wepy'; //引入组件
+import orderItemDetail from '@/components/orderItemDetail';
+export default class orderDetail extends wepy.page {
+  config = {
+    navigationBarTitleText: '订单详情',
+    usingComponents: {
+      'wxc-flex': '../../packages/@minui/wxc-flex/dist/index',
+      'wxc-elip': '../../packages/@minui/wxc-elip/dist/index'
+    }
+  };
+  components = {
+    orderItemDetail
+  };
+  computed = {};
+  data = {
+    baseUrl: '',
+    curOrderId: '',
+    huanXinUrl: '',
+    isSeller: 0,
+    isShow: true,
+    minutes: '--',
+    seconds: '--',
+    timeDistance: 1800000, //30分钟为1800秒，实际计算间隔值
+    userInfo: {},
+    orderInfo: {
+      id: '', //订单id
+      wfxOrderNo: '--', //订单号
+      createdTime: '--', //下单时间
+      stringCreatedTime: '--', //下单时间格式化
+      receiverName: '加载中...', //接收人
+      receiverMobileEncode: '--', //手机号
+      receiverState: '--', //省
+      receiverCity: '--', //市
+      receiverDistrict: '--', //区
+      receiverAddress: '--', //详细地址
+      payType: '加载中...', //支付方式
+      payTypeDesc: '加载中...', //支付方式
+      totalFee: 0, //商品总金额
+      singleDiscountFee: 0, //单品活动优惠
+      groupDiscountFee: 0, //组合活动优惠金额
+      couponDiscountFee: 0, //优惠券优惠金额，即券口令优惠
+      firstOrderFee: 0, //首单优惠金额
+      payment: 0, //实付金额
+      postFee: 0, //运费
+      canPay: false, //是否可以支付
+      canCancel: false, //是否可以取消订单
+      canConfirm: false, //是否可以确认收货
+      canBuyAgin: false, //是否可重新购买
+      canShowLogistics: false, //是否可查看物流信息
+      status: '--' //订单状态
+    },
+    orderid: '',
+    shopid: '',
+    orderstatus: '',
+    commodityNos: [],
+    productLists: [],
+    hasFloatButton: false,
+    goodsCardData: null
+  };
+  methods = {
+    cancleConfirm(e) {
+      var _this = this;
+      wepy.showModal({ title: '取消订单', content: '是否取消？' }).then(res => {
+        if (res.confirm) {
+          _this.cancleOrder();
+        } else {
+          wepy.showToast({
+            icon: 'none',
+            title: '取消失败',
+            duration: 4000
+          });
+        }
+      }).catch(res => {
+        wepy.showToast({
+          icon: 'none',
+          title: '取消失败',
+          duration: 4000
+        });
+      })
+      // wepy.showModal({
+      //     title: '取消订单',
+      //     content: '是否取消？',
+      //     success: function(res) {
+      //         if (res.confirm) {
+      //             _this.cancleOrder();
+      //         } else {
+      //             wepy.showToast({
+      //                 icon: 'none',
+      //                 title: '取消失败',
+      //                 duration: 4000
+      //             });
+      //         }
+      //     },
+      //     fail: function(res) {
+      //         wepy.showToast({
+      //             icon: 'none',
+      //             title: '取消失败',
+      //             duration: 4000
+      //         });
+      //     }
+      // });
+    },
+    goPay() {
+      var _this = this;
+      let openIdVal = wepy.getStorageSync('openid');
+      wepy.showLoading();
+      var params = {
+        orderNo: _this.orderInfo.id,
+        openId: openIdVal
+      };
+      wepy
+        .request({
+          url: `${
+          this.$parent.globalData.apiBaseUrlMock
+          }/api/v2/order/orderTopay`,
+          data: params
+        })
+        .then(res => {
+          let response = res.data;
+          if (response.code === 20000) {
+            //请求成功
+            if (
+              response.data === undefined ||
+              response.data === '' ||
+              response.data === null
+            ) {
+              //无数据返回状态
+              //若无数据
+              wepy.showToast({
+                title: '产品卖光啦',
+                duration: 4000
+              });
+              wepy.hideLoading();
+            } else {
+              //代码执行
+              let wfxOrderNoz = response.data.wfxOrderNo;
+              _this.requestPay(wfxOrderNoz);
+            }
+            //无数据end
+          } else {
+            //若请求失败，则显示信息
+            wepy.showToast({
+              icon: 'none',
+              title: '支付失败',
+              duration: 4000
+            });
+            setTimeout(() => {
+              wepy.redirectTo({
+                url: '/usercenter/pages/payfail'
+              });
+            }, 500);
+          }
+        });
+      //end
+    },
+    confirmReceipt(e) {
+      var _this = this;
+      wepy.showModal({ title: '确认收货', content: '是否确认收货？' }).then(res => {
+        if (res.confirm) {
+          _this.confirmReceiptSub();
+        }
+      }).catch(res => {
+        wepy.showToast({
+          icon: 'none',
+          title: '网络错误',
+          duration: 4000
+        });
+      })
+      // wepy.showModal({
+      //     title: '确认收货',
+      //     content: '是否确认收货？',
+      //     success: function(res) {
+      //         //_this.surePaySub();
+      //         if (res.confirm) {
+      //             _this.confirmReceiptSub();
+      //         }
+      //     },
+      //     fail: function(res) {
+      //         wepy.showToast({
+      //             icon: 'none',
+      //             title: '网络错误',
+      //             duration: 4000
+      //         });
+      //     }
+      // });
+    },
+    goPayAgain() {
+      //是否可以重新购买,然后进入提交订单页面
+      var _this = this;
+      let openIdVal = wepy.getStorageSync('openid');
+      wepy.showLoading();
+      var params = {
+        order_no: _this.orderInfo.id,
+        open_id: openIdVal
+      };
+      wepy
+        .request({
+          method: 'POST',
+          url: `${
+          this.$parent.globalData.apiBaseUrlMock
+          }/api/v2/order/cmpBuyAgin`,
+          data: params
+        })
+        .then(res => {
+          let response = res.data;
+          if (response.code === 20000) {
+            //请求成功
+            if (
+              response.data === undefined ||
+              response.data === '' ||
+              response.data === null
+            ) {
+              //无数据返回状态
+              //若无数据
+              wepy.showToast({
+                icon: 'none',
+                title: response.errorMsg + ' ',
+                duration: 4000
+              });
+              wepy.hideLoading();
+            } else {
+              //代码执行
+              wepy.showToast({
+                icon: 'none',
+                title: '正在跳转...',
+                duration: 4000
+              });
+              setTimeout(() => {
+                wepy.redirectTo({
+                  url: '/usercenter/pages/confirmPay'
+                });
+              }, 500);
+            }
+            //无数据end
+          } else {
+            //若请求失败，则显示信息
+            wepy.showToast({
+              icon: 'none',
+              title: response.errorMsg + ' ',
+              duration: 4000
+            });
+          }
+        });
+      //end
+    },
+    huanXinContact() {
+      let _this = this;
+      let prodName = _this.productLists[0].prodName;
+      let payment = _this.orderInfo.payment;
+      let orderId = _this.orderInfo.id;
+      let imageUrl = _this.productLists[0].picSmall.split('?')[0];
+      let orderNo = _this.orderInfo.wfxOrderNo;
+      let url =
+        '/usercenter/pages/contact?prodName=' +
+        prodName +
+        '&payment=' +
+        payment +
+        '&orderId=' +
+        orderId +
+        '&imageUrl=' +
+        imageUrl +
+        '&orderNo=' +
+        orderNo;
+      wepy.redirectTo({
+        url: url
+      });
+    },
+    goodsDetailShare() {
+      let goodsCardData = this.goodsCardData;
+      if (!goodsCardData) {
+        return false;
+      }
+      goodsCardData.orderNo = this.orderInfo.wfxOrderNo;
+      let encodeData = JSON.stringify(goodsCardData);
+      // let encodeData = JSON.stringify({ "commodityName": "STACCATO/思加图春季黑色胎牛漆皮/兰色胎牛漆皮女皮鞋9LC19AQ4", "wfxPrice": "0.01", "imgUrl": "http://127.0.0.1:8022/Group%202.png", "sharePage": "https://devcmp.belle.net.cn/mpshop/item/99944177.sc", "qrCodePath": "https://testcmp.belle.net.cn/pics/wfx/STACCATO/WX_ACODE/F7988AF9AA7D4E71AE2247F78B86E76F.png" })
+      wepy.navigateTo({
+        url: '/usercenter/pages/goodsCardPage?data=' + encodeData
+      });
+    }
+  };
+  events = {};
+  cancleOrder(e) {
+    var _this = this;
+    let openIdVal = wepy.getStorageSync('openid');
+    wepy.setStorageSync('cancleFlag', 'true'); //设置是否点击取消按钮
+    wepy.showLoading();
+    var params = {
+      order_no: _this.orderInfo.id,
+      open_id: openIdVal
+    };
+    wepy
+      .request({
+        method: 'POST',
+        url: `${
+        this.$parent.globalData.apiBaseUrlMock
+        }/api/v2/order/cancelOrder`,
+        data: params
+      })
+      .then(res => {
+        let response = res.data;
+        if (response.code === 20000) {
+          //请求成功
+          if (response.data) {
+            wepy.showToast({
+              icon: 'success',
+              title: '取消成功',
+              duration: 4000
+            });
+            setTimeout(() => {
+              _this.initData(_this.orderInfo.id); //ff
+            }, 500);
+            wepy.hideLoading();
+          } else {
+            //代码执行
+            wepy.showToast({
+              title: '取消失败',
+              duration: 4000
+            });
+            wepy.hideLoading();
+          }
+          //无数据end
+        } else {
+          //若请求失败，则显示信息
+          wepy.showToast({
+            icon: 'none',
+            title: response.errorMsg + ' ',
+            duration: 4000
+          });
+        }
+      });
+    //end
+  }
+  payOkHandler(getOrder) {
+    //更新订单状态
+    let _that = this;
+    let openId = wepy.getStorageSync('openid');
+    let orderNo = _that.orderInfo.id; //订单号
+    wepy
+      .request({
+        url:
+        _that.$parent.globalData.apiBaseUrl + `/api/v2/order/payok?merchantNo={$merchantNo}&openId=${openId}`,
+        method: 'POST',
+        data: {
+          order_no: getOrder,
+           receiveRedPacketPagePath: 'mphome/pages/getCouponResult'
+        }
+      })
+      .then(getRes => {
+        wepy.hideLoading();
+        if (getRes.data.code === 20000) {
+          wepy.showToast({
+            icon: 'success',
+            title: '支付成功',
+            duration: 4000
+          });
+        //    let redPacket = getRes.data.redPacket;
+           let redPacket = getRes.data.data.redPacket;
+          let encodeData = '';
+          if (redPacket) {
+              encodeData = JSON.stringify(redPacket);
+          }
+          setTimeout(() => {
+            wepy.redirectTo({
+              //ff参
+              url:
+              '/usercenter/pages/paysuccess?orderNo=' +
+              orderNo + '&data=' + encodeData
+            });
+          }, 500);
+        } else {
+          wepy.showToast({
+            image: './../../static/img/notice.png',
+            icon: 'none', //ff 图标要改
+            title: '支付失败',
+            duration: 4000
+          });
+          setTimeout(() => {
+            wepy.redirectTo({
+              //ff参
+              url: '/usercenter/pages/payfail'
+            });
+          }, 500);
+        }
+      });
+  }
+  requestPay(wfxOrderNoz) {
+    var _that = this;
+           let openId = wepy.getStorageSync('openid');
+    wepy
+      .request({
+        url:
+        this.$parent.globalData.apiBaseUrl + `/api/v2/pay/sendData?merchantNo={$merchantNo}&openId=${openId}`,
+        method: 'POST',
+        data: {
+          biz_no: wfxOrderNoz,
+          open_id: wepy.getStorageSync('openid')
+        }
+      })
+      .then(res => {
+        let response = res.data;
+        if (res.data.code !== 20000) {
+          wepy.showToast({
+            image: './../../static/img/notice.png',
+            icon: 'none',
+            title: response.errorMsg,
+            duration: 4000
+          });
+          wepy.hideLoading();
+          return;
+        }
+        wepy.hideLoading();
+        var paysignInfo = JSON.parse(res.data.data.actionForm);
+        if (!paysignInfo) {
+          //0元单
+          return;
+        }
+        wepy.requestPayment({
+          appId: paysignInfo.appId,
+          timeStamp: paysignInfo.timeStamp + '',
+          nonceStr: paysignInfo.nonceStr,
+          package: paysignInfo.package,
+          signType: 'MD5',
+          paySign: paysignInfo.sign
+        }).then(getData => {
+          wepy.showLoading();
+          _that.payOkHandler(wfxOrderNoz);
+        }).catch(res => {
+          wepy.showToast({
+            image: './../../static/img/notice.png',
+            icon: 'none',
+            title: '支付失败',
+            duration: 4000
+          });
+          //取消操作后，刷新当前页面数据
+          setTimeout(() => {
+            _that.initData(_that.orderInfo.id);
+          }, 500);
+        })
+      });
+  }
+  onReady() { }
+  onLoad(opt) {
+    let orderId = opt.orderNo;
+    this.curOrderId = orderId;
+    this.initData(orderId);
+    this.$apply();
+  }
+  onShow(opt) {
+    //按需加载，从某个标志页返回时，才加载
+    let cancleFlag = wepy.getStorageSync('cancleFlag');
+    let refundLink = wepy.getStorageSync('refundLink');
+    let refundFlag = wepy.getStorageSync('refundFlag');
+    if (cancleFlag || refundLink || refundFlag) {
+      this.initData(this.curOrderId);
+      //取消标志
+      if (cancleFlag) {
+        wepy.removeStorageSync('cancleFlag'); //删除 取消订单按钮标志
+      }
+      if (refundLink) {
+        wepy.removeStorageSync('refundLink');
+      }
+      if (refundFlag) {
+        wepy.removeStorageSync('refundFlag');
+      }
+    }
+  }
+  initData(orderId) {
+    wepy.showLoading();
+    var _this = this;
+    var params = {
+      orderNo: orderId,
+      openId: wepy.getStorageSync('openid'),
+      receiveRedPacketPagePath: 'mphome/pages/getCouponResult'
+    };
+    wepy
+      .request({
+        url: `${
+        this.$parent.globalData.apiBaseUrlMock
+        }/api/v2/order/getOrderInfo`,
+        data: params
+      })
+      .then(res => {
+        let response = res.data;
+        if (response.code === 20000) {
+          //请求成功
+          if (
+            response.data === undefined ||
+            response.data === '' ||
+            response.data === null
+          ) {
+            //无数据返回状态
+            //若无数据
+            wepy.showToast({
+              title: '网络错误',
+              duration: 4000
+            });
+            wepy.hideLoading();
+          } else {
+            let redPacket = response.data.redPacket;
+            if (redPacket) {
+              _this.hasFloatButton = true;
+              _this.goodsCardData = redPacket;
+            } else {
+              _this.hasFloatButton = false;
+              _this.goodsCardData = null;
+            }
+            var order = response.data.order;
+            _this.orderInfo.id = order.id;
+            _this.orderid = order.id;
+            _this.shopid = order.shopId;
+            _this.commodityNos = response.data.commodityNos;
+            _this.timeDistance = response.data.orderLeftTime;
+
+            _this.orderInfo.wfxOrderNo = order.wfxOrderNo;
+            _this.orderInfo.createdTime = order.createdTime;
+            _this.orderInfo.stringCreatedTime =
+              order.stringCreatedTime;
+            _this.orderInfo.receiverName = order.receiverName;
+            _this.orderInfo.receiverMobileEncode =
+              order.receiverMobileEncode;
+
+            _this.orderInfo.receiverState = order.receiverState;
+            _this.orderInfo.receiverCity = order.receiverCity;
+            _this.orderInfo.receiverDistrict =
+              order.receiverDistrict;
+            _this.orderInfo.receiverAddress = order.receiverAddress;
+
+            _this.orderInfo.payType = order.payType;
+            _this.orderInfo.payTypeDesc = order.payTypeDesc;
+            _this.orderInfo.totalFee = order.totalFee;
+            _this.orderInfo.singleDiscountFee =
+              order.singleDiscountFee;
+
+            _this.orderInfo.groupDiscountFee =
+              order.groupDiscountFee;
+            _this.orderInfo.couponDiscountFee =
+              order.couponDiscountFee;
+            _this.orderInfo.firstOrderFee = order.firstOrderFee;
+            _this.orderInfo.payment = order.payment;
+
+            _this.orderInfo.canPay = order.canPay;
+            _this.orderInfo.canCancel = order.canCancel;
+            _this.orderInfo.canConfirm = order.canConfirm;
+            _this.orderInfo.canBuyAgin = order.canBuyAgin;
+            _this.orderInfo.postFee = order.postFee;
+            _this.orderInfo.canShowLogistics =
+              order.canShowLogistics;
+
+            _this.orderInfo.status = order.status;
+            _this.orderInfo.isRed = order.isRed;
+            _this.orderInfo.latestDeliveryTimeStr =
+              order.latestDeliveryTimeStr;
+            _this.orderstatus = order.status;
+
+            //order信息
+            _this.productLists = order.orderDetails;
+            _this.$apply();
+            wepy.hideLoading();
+            if (_this.orderstatus === 'WAIT_PAY') {
+              clearInterval(timer);
+              _this.countDown();
+            }
+          }
+          //无数据end
+        } else {
+          //若请求失败，则显示信息
+          wepy.showToast({
+            title: response.errorMsg + ' ',
+            duration: 4000
+          });
+          wepy.hideLoading();
+        }
+      });
+  }
+  confirmReceiptSub() {
+    var _this = this;
+    let openIdVal = wepy.getStorageSync('openid');
+    wepy.showLoading();
+    var params = {
+      order_no: _this.orderInfo.id,
+      open_id: openIdVal
+    };
+    wepy
+      .request({
+        method: 'POST',
+        url: `${
+        this.$parent.globalData.apiBaseUrlMock
+        }/api/v2/order/sureOrder`,
+        data: params
+      })
+      .then(res => {
+        let response = res.data;
+        if (response.code === 20000) {
+          //请求成功
+          if (response.data.success) {
+            wepy.showToast({
+              icon: 'success',
+              title: '确认收货成功',
+              duration: 4000
+            });
+            setTimeout(() => {
+              _this.initData(_this.orderInfo.id); //重新加载数据
+            }, 500);
+            wepy.hideLoading();
+          } else {
+            wepy.showToast({
+              title: '确认失败',
+              duration: 4000
+            });
+            wepy.hideLoading();
+          }
+          //无数据end
+        } else {
+          //若请求失败，则显示信息
+          wepy.showToast({
+            icon: 'none',
+            title: response.errorMsg + ' ',
+            duration: 4000
+          });
+        }
+      });
+    //end
+  }
+  countDown() {
+    let _this = this;
+    let intMinute, intSecond;
+    let timeDistance;
+    timeDistance = _this.timeDistance;
+    if (timeDistance > 0) {
+      timer = setInterval(function() {
+        timeDistance -= 1;
+        intMinute = Math.floor(timeDistance / 60); //毫秒转换为分钟
+        intSecond = Math.floor(timeDistance - intMinute * 60); //毫秒转换为秒,比如59秒
+
+        if (timeDistance > 0) {
+          //写入页面
+          _this.timeDistance = timeDistance;
+          _this.minutes = _this.onlyBeTwo(intMinute); //分
+          _this.seconds = _this.onlyBeTwo(intSecond); //秒
+          _this.$apply();
+        } else {
+          clearInterval(timer);
+          _this.orderInfo.canPay = false;
+          _this.orderInfo.canCancel = false;
+          _this.$apply();
+        }
+      }, 1000);
+      //end
+    } else {
+      clearInterval(timer);
+      _this.orderInfo.canPay = false;
+      _this.orderInfo.canCancel = false;
+      _this.$apply();
+    }
+  }
+  onlyBeTwo(value) {
+    //双位转换
+    if (value < 10) {
+      return '0' + value;
+    } else {
+      return value;
+    }
+  }
+}
+</script>

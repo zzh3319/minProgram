@@ -1,0 +1,287 @@
+<style lang="less">
+page {
+    max-width: 100%;
+    background-color: white;
+    .wrap {
+        padding: 10rpx 15rpx;
+        width: 100%;
+        box-sizing: border-box;
+        .head {
+            padding-bottom: 20rpx;
+            margin: 20rpx;
+            text-align: left;
+            box-sizing: border-box;
+            border-bottom: 1rpx dashed #ccc;
+            .title {
+                color: black;
+                font-size: 32rpx;
+                font-weight: bold;
+            }
+            .times {
+                margin-top: 8rpx;
+                color: #666;
+                font-size: 23rpx;
+            }
+        }
+        .wxParse-img {
+            width: 100% !important;
+        }
+        .btn {
+            z-index: 2;
+            position: fixed;
+            right: 50rpx;
+            top: 450rpx;
+            .btn-fixed {
+                display: block;
+                margin-bottom: 20rpx;
+                padding: 0;
+                width: 88rpx;
+                height: 88rpx;
+                line-height: 88rpx;
+                text-align: center;
+                -webkit-border-radius: 50%;
+                -moz-border-radius: 50%;
+                border-radius: 50%;
+                -webkit-box-shadow: 1rpx 1rpx 10rpx rgba(130, 130, 130, 0.5);
+                -moz-box-shadow: 1rpx 1rpx 10rpx rgba(130, 130, 130, 0.5);
+                box-shadow: 1rpx 1rpx 10rpx rgba(130, 130, 130, 0.5);
+                background-color: #fff;
+                &:last-child {
+                    margin-bottom: 0;
+                }
+                &:before,
+                &:after {
+                    display: none;
+                }
+                &.blue {
+                    color: #4da0d9;
+                }
+                > .iconfont {
+                    font-size: 44rpx;
+                    line-height: 88rpx;
+                }
+            }
+        }
+    }
+    .nodata_wrap {
+        width: 230rpx;
+        margin: 0 auto;
+        margin-top: 295rpx;
+        text-align: center;
+    }
+    .link-block {
+        position: relative;
+        .mask {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+    }
+
+    .img {
+        max-width: 100%;
+    }
+}
+</style>
+<template>
+  <view hidden="{{false}}" class="wrap">
+    <view class="head">
+      <view class="title">{{title}}</view>
+      <view class="times">{{show_time}}</view>
+    </view>
+    <block wx:for="{{contentText}}"  wx:for-index="idy" wx:key="index"  wx:for-item="pItem">
+      <navigator class="link-block" wx:if="{{pItem.type === 'a'}}" url="{{pItem.url}}">
+        <view class="mask"></view>
+        <rich-text nodes="{{pItem.content}}"></rich-text>
+      </navigator>
+      <rich-text wx:else nodes="{{pItem.content}}"></rich-text>
+    </block>
+    <view class="btn">
+      <button class="btn-fixed" type="default" open-type="share"><i class="iconfont Gray">&#xe6ac;</i></button>
+      <view class="btn-fixed blue" @tap="articelShare"><i class="iconfont Gray">&#xe6ad;</i></view>
+    </view>
+  </view>
+  <!-- 没数据 -->
+  <view hidden="{{true}}" class="nodata_wrap">
+    <Empty :info="emptyInfo"></Empty>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+import GTools from '@/mixins/g-tools';
+import FixedBox from '@/components/fixedBox';
+import Empty from '@/components/empty';
+export default class findDetail extends wepy.page {
+    mixins = [GTools];
+    config = {
+        navigationBarTitleText: '发现详情'
+    };
+    data = {
+        emptyInfo: {
+            desc: '暂没有相关文章',
+            imgUrl: 'https://i2.ygimg.cn/cmp/mp/shopping_no.png'
+        },
+        contentText: [],
+        title: '',
+        show_time: '',
+        fixedConfig: {
+            forword: false,
+            share: false
+        },
+        pic_cover: '', //转发
+        pic_card: '', //卡片
+        articleId: '',
+        shopId: '',
+        shareType: ''
+    };
+    components = {
+        FixedBox,
+        Empty
+    };
+    methods = {
+        wxParseTagATap(event) {
+            //a标签点击事件
+            let url = event.currentTarget.dataset.src;
+            let indexReg = /^(\/pages\/index)/; //首页
+            let findReg = /^(\/pages\/find)/; //发现
+            let findDetailReg = /^(\/mphome\/pages\/findDetail)/; //发现详情
+            if (findReg.test(url) || indexReg.test(url)) {
+                // tab页面
+                wepy.switchTab({
+                    url
+                });
+            } else if (findDetailReg.test(url)) {
+                wepy.redirectTo({
+                    url
+                });
+            } else {
+                wepy.navigateTo({
+                    url
+                });
+            }
+        },
+        articelShare() {
+            // let data = JSON.parse(decodeURIComponent(options.data));
+            //let data=JSON.parse(`{"discoverName":"翻遍一整年明星红毯，就为告诉你年会穿什么鞋","imgUrl":"https://testcmp.belle.net.cn/pics/wfx/ARTICLE_COVER_PIC/555CA3A8E0B84FDAA6A15CDF9E5064C1.png","sharePage":"https://devcmp.belle.net.cn/discover/view/e33b8afad11d4888bd641da96ae111ca.sc?shopId=0abfefe9e7fb4bd09e6723514bac3bc1","qrCodePath":"https://testcmp.belle.net.cn/pics/wfx/STACCATO/WX_ACODE/DE0BA17F5F0442D9B9B8A488A35EE8F9.png"}`)
+            let postData = {
+                articleId: this.articleId,
+                discoverName: this.title,
+                imgUrl: this.pic_card
+            };
+            let encodeData = JSON.stringify(postData);
+            wepy.navigateTo({
+                url: '/mphome/pages/articleShare?data=' + encodeData
+            });
+        }
+    };
+    async requestData(articleId) {
+        let url = `${this.$parent.globalData.apiBaseUrl}/api/v2/discover`;
+        let param = {
+            articleId: articleId
+        };
+        let response = await this.customFunction.fetchData(
+            url,
+            param,
+            {},
+            {
+                isShowLoad: false
+            }
+        );
+        let { data, code, errorMsg } = response;
+        if (code !== 20000) {
+            this.customFunction.toast(errorMsg || '数据错误！');
+            return;
+        }
+        this.renderData(data);
+    }
+    renderData(data) {
+        let content = data.content;
+        let title = data.title;
+        let showTime = data.show_time;
+        let picCover = data.pic_cover;
+        this.pic_card = picCover.split('?')[0]; //"http://i2.ygimg.cn/pics/staccato/2015/100138541/100138541_01_s.jpg?4" bug ?4;
+        this.pic_cover = picCover;
+        this.show_time = showTime;
+        this.title = title;
+        content = content.replace(/div/g, 'p');
+        let pArr = content.match(/<p[^>]*>(?:(?!<\/p>)[\s\S])*<\/p>/gi) || [];
+        //  console.log(content);
+        pArr = pArr.map((item, i) => {
+            let _node = item.match(/<a href="([^"]*)">/);
+            let _url = null;
+            if (_node) {
+                _url = _node[1].match(
+                    /https:\/\/[^/]*\/mpshop\/item\/(\d{8,11}).sc/
+                );
+                _url = _url
+                    ? '/pages/goodsDetail?commodityNo=' + _url[1]
+                    : _node[1];
+                console.log(_node && _node[1]);
+            }
+            let type = _node ? 'a' : 'p';
+            return {
+                type,
+                content: item.replace(/<img\s/g, '<img class="img" '),
+                url: _url
+            };
+        });
+        console.log(pArr);
+        this.contentText = pArr;
+        this.$apply();
+    }
+    async onLoad(options) {
+        this.shareType = options.type || '';
+        this.shopId = options.shopId || '';
+        this.articleId = options.articleId || '';
+        let curUrl;
+        if (options.type || options.scene) {
+            this.shareType = null;
+            if (options.scene) {
+                let ops = options.scene.split('-');
+                this.shopId = ops[0];
+                this.articleId = ops[1];
+            } else {
+                curUrl = this.customFunction.getCurrentPageUrlWithArgs();
+                this.$parent.globalData.fromUrl.url = curUrl;
+            }
+            // 锁粉
+            this.$parent.lockFans(this.shopId, 5); //5 发现详情页访问
+        }
+        wepy.showLoading({
+            title: '加载中',
+            mask: true
+        });
+        await this.requestData(this.articleId);
+        this.$apply();
+        wepy.hideLoading();
+    }
+
+    onShareAppMessage() {
+        let title = this.title;
+        let picCover = this.pic_cover;
+        let articleId = this.articleId;
+        let shopId = wepy.getStorageSync('shopId');
+        let path = `/mphome/pages/findDetail?type=share&shopId=${shopId}&articleId=${articleId}`;
+        return {
+            title: title,
+            imageUrl: picCover,
+            path: path,
+            success: function(res) {
+                wepy.showToast({
+                    title: '转发成功',
+                    icon: 'success',
+                    duration: 2000
+                });
+            },
+            fail: function(res) {
+                wepy.showToast({
+                    icon: 'none',
+                    title: '转发失败',
+                    duration: 2000
+                });
+            }
+        };
+    }
+}
+</script>

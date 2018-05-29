@@ -1,0 +1,379 @@
+<style>
+page {
+    background: #f4f4f4;
+}
+
+.container {
+    width: 100%;
+    position: relative;
+    padding: 0 0 0;
+    color: #777;
+}
+
+.view,
+.payPrice,
+.payWay {
+    display: block;
+    width: 100%;
+}
+
+.orderstatus {
+    padding: 20px 20px;
+    /*width:100%;*/
+    text-align: center;
+    background: #fff;
+    margin-bottom: 20px;
+}
+
+.orderstatus text {
+    display: block;
+    padding: 10px 0 0;
+    color: #4fbb2a;
+}
+
+.payCon {
+    width: 100%;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+.payBtn {
+    margin-top: 50px;
+    width: 40%;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.goToOrder {
+    float: left;
+    background: #ff434d;
+    border: 1px solid #ff434d;
+    color: #fff;
+}
+
+.goOnBuy {
+    float: right;
+    background: #f4f4f4;
+    border: 1px solid #777;
+    color: #777;
+}
+
+.payPrice text {
+    color: #ff434d;
+}
+
+.payPrice,
+.payWay {
+    font-size: 13px;
+}
+
+.repayment {
+    text-align: left;
+    font-size: 15px;
+    padding-left: 20px;
+    padding-right: 20px;
+    color: #666;
+}
+
+.orderstatusWrap {
+    /* width: 100%;*/
+    background: #fff;
+}
+
+.containerWrap .container,
+.payOk .goToPayWrap,
+.payOk .goToPayWrap,
+.payNo .goToPayWrap,
+.payNo .goToPayWrap {
+    display: none;
+}
+
+.payOk .goToPayWrap,
+.payOk .goToPayWrap,
+.payNo .goToPayWrap,
+.payNo .goToPayWrap {
+    display: none;
+}
+
+.goToPay .payNoWrap,
+.goToPay .payOkWrap {
+    display: none;
+}
+
+.goToPay .goToPayWrap {
+    display: block;
+}
+
+.payOk .payOkWrap,
+.payNo .payNoWrap {
+    display: block;
+}
+</style>
+<template>
+    <view>
+        <ShareCard wx:if="{{hasShareCard}}" />
+        <view class="container" hidden="{{payOkHide}}">
+            <view class="orderstatus orderstatusWrap payOkWrap">
+                <icon type="success" size="50"></icon>
+                <text>订单支付成功!</text>
+            </view>
+            <view class="payCon">
+                <view class='payPrice'>支付金额：
+                    <text>{{orderPrice}}</text>
+                </view>
+                <view class='payWay'>支付方式：在线支付(微信支付)</view>
+                <view bindtap="goToOrder" class="payBtn goToOrder">查看订单</view>
+                <view bindtap="goOnBuy" class="payBtn goOnBuy">继续购买</view>
+            </view>
+        </view>
+        <view class="container" hidden="{{payNoHide}}">
+            <view class="orderstatus repayment">您的订单未支付成功，系统将会为您保留1个小时，1个小时后系统将会自动取消订单，请尽快完成支付。</view>
+            <view class="payCon">
+                <view class='payPrice'>支付金额：
+                    <text>{{orderPrice}}</text>
+                </view>
+                <view class='payWay'>支付方式：在线支付(微信支付)</view>
+                <view bindtap="goPay" class="payBtn goToOrder goToPay">去支付</view>
+                <view bindtap="goOnBuy" class="payBtn goOnBuy">继续购买</view>
+            </view>
+        </view>
+        <view class="container" hidden="{{goToPayHide}}">
+            <view class="orderstatus repayment orderSuccess">下单成功，系统将会为您保留1个小时，1个小时后系统将会自动取消订单，请尽快完成支付。</view>
+            <view class="payCon">
+                <view class='payPrice'>支付金额：
+                    <text>{{orderPrice}}</text>
+                </view>
+                <view class='payWay'>支付方式：在线支付(微信支付)</view>
+                <view bindtap="goToOrder" class="payBtn goToOrder">查看订单</view>
+                <view bindtap="goOnBuy" class="payBtn goOnBuy">继续购买</view>
+            </view>
+        </view>
+    </view>
+</template>
+<script>
+import wepy from 'wepy';
+import ShareCard from '@/components/shareCard';
+export default class gopay extends wepy.page {
+    config = {
+        navigationBarTitleText: '提交支付',
+        usingComponents: {
+            'wxc-mask': '../../../packages/@minui/wxc-mask/dist/index'
+        }
+    };
+    components = {
+        ShareCard
+    };
+    data = {
+        orderPrice: '',
+        goToPayHide: false,
+        payOkHide: true, //true是隐藏
+        payNoHide: true, //true是隐藏
+        getOrderId: '',
+        payment: '',
+        order_no: '',
+        orderNo: '',
+        openId: '',
+        orderId: '',
+        hasShareCard: false,
+        imgPath: '{$defaultImg}'
+    };
+    onShareAppMessage(option){//在shareCard.wpy中有发红包的button
+        if (option.from === 'button') {
+            // 来自页面内转发按钮
+            console.log(option.target)
+        }
+        return {
+            title: '送您一个拼手气红包',
+            path: '/mphome/pages/getCouponResult?redPacketSendId='+this.orderNo+'',
+            imageUrl: 'https://i2.ygimg.cn/cmp/mp/red-envelope.png'
+        }
+    };
+    methods = {};
+    onLoad(options) {
+        // this.$broadcast('shareCard:show', { name: 555, age: 666 });
+        wepy.setNavigationBarTitle({
+            title: '提交支付'
+        });
+        var _that = this;
+        var orderNum = options.orderNo;
+        this.payment = options.payment;
+        this.getOrderId = options.orderId;
+        this.openId = options.openId;
+        this.orderNo = orderNum;
+        this.orderPrice = (+options.payment).toFixed(2);
+        this.$apply();
+        if (wepy.getStorageSync('openid') === '') {
+            _that.payLoginCheck(orderNum);
+        } else {
+            _that.requestPay(orderNum);
+        }
+        return false;
+    }
+    goToOrder() {
+        wepy.redirectTo({
+            url: `/usercenter/pages/orderDetail?orderNo=${this.getOrderId}`
+        });
+    }
+    goOnBuy() {
+        wepy.switchTab({
+            url: '/pages/index'
+        });
+        this.$apply();
+    }
+    goPay() {
+        var getOrderNo = this.orderNo;
+        this.requestPay(getOrderNo);
+    }
+
+    async payLoginCheck(getOrder) {
+        // 验证是否授权
+        let returnUrl = `/usercenter/pages/authorize?payneedlogin=yes&orderNo=${
+            this.getOrderId
+            }`;
+        wepy.redirectTo({
+            url: returnUrl
+        });
+        // await this.$parent.wxxlogin("", {
+        //   success: res => {
+        //     this.requestPay(getOrder);
+        //   },
+        //   payneedlogin: "yes"
+        // });
+    }
+    noNeedPayHandler() {
+        //0元单
+        let _that = this;
+        wepy
+            .request({
+                url:
+                _that.$parent.globalData.apiBaseUrl + '/api/v2/no_need_pay',
+                method: 'GET',
+                data: {
+                    openId: _that.openId,
+                    orderId: _that.getOrderId
+                }
+            })
+            .then(getRes => {
+                wepy.hideLoading();
+                if (getRes.data.code === 20000) {
+                    wepy.setNavigationBarTitle({
+                        title: '支付成功'
+                    });
+                    _that.orderPrice = _that.payment;
+                    _that.goToPayHide = true;
+                    _that.payNoHide = true;
+                    _that.payOkHide = false;
+                    // _that.getOrderId = responseData.data.order_id;
+                    _that.$apply();
+                } else {
+                    wepy.redirectTo({
+                        url: '/usercenter/pages/payfail'
+                    });
+                }
+            });
+    }
+    payOkHandler(getOrder) {
+        //更新订单状态
+        let _that = this;
+        let openId = wepy.getStorageSync('openid');
+        wepy
+            .request({
+                url: _that.$parent.globalData.apiBaseUrl + `/api/v2/order/payok?merchantNo={$merchantNo}&openId=${openId}`,
+                method: 'POST',
+                data: {
+                    order_no: getOrder,
+                    receiveRedPacketPagePath: 'mphome/pages/getCouponResult'
+                }
+            })
+            .then(getRes => {
+                console.log(getRes);
+                wepy.hideLoading();
+                if (getRes.data.code === 20000) {
+                    wepy.setNavigationBarTitle({
+                        title: '支付成功'
+                    });
+                    let responseData = getRes.data;
+                    _that.orderPrice = responseData.data.payment;
+                    _that.goToPayHide = true;
+                    _that.payNoHide = true;
+                    _that.payOkHide = false;
+                    _that.getOrderId = responseData.data.order_id;
+                    // responseData.data.redPacket={
+                    //   "shareTitle": "恭喜你获得10个大红包",
+                    //   "shareImgUrl": "https://i2.ygimg.cn/cmp/mp/Group2.png",
+                    //   "shareContent": "领取现金红包，下单可直接抵扣！",
+                    //   "wxCodeUlr": "https://testcmp.belle.net.cn/pics/wfx/STACCATO/WX_ACODE/F7988AF9AA7D4E71AE2247F78B86E76F.png",
+                    // }
+                    let redPacket = responseData.data.redPacket;
+                    if (redPacket) {
+                        _that.hasShareCard = true;
+                        _that.$broadcast('shareCard:show', redPacket, 'mask');
+                    }
+                    _that.$apply();
+                } else {
+                    wepy.redirectTo({
+                        url: '/usercenter/pages/payfail'
+                    });
+                }
+            });
+    }
+    requestPay(getOrder) {
+        var _that = this;
+        let openId = wepy.getStorageSync('openid');
+        wepy
+            .request({
+                url: this.$parent.globalData.apiBaseUrl + `/api/v2/pay/sendData?merchantNo={$merchantNo}&openId=${openId}`,
+                method: 'POST',
+                data: {
+                    biz_no: getOrder,
+                    open_id: wepy.getStorageSync('openid')
+                }
+            })
+            .then(res => {
+                if (res.data.code !== 20000) {
+                    console.log(res.data.code);
+                    return;
+                }
+                wepy.hideLoading();
+                var paysignInfo = JSON.parse(res.data.data.actionForm);
+                if (!paysignInfo) {
+                    //0元单
+                    _that.noNeedPayHandler();
+                    return;
+                }
+                wepy
+                    .requestPayment({
+                        //支付中心
+                        appId: paysignInfo.appId,
+                        timeStamp: paysignInfo.timeStamp + '',
+                        nonceStr: paysignInfo.nonceStr,
+                        package: paysignInfo.package,
+                        signType: 'MD5',
+                        paySign: paysignInfo.sign
+                    })
+                    .then(getData => {
+                        wepy.showLoading();
+                        _that.payOkHandler(getOrder);
+                    })
+                    .catch(res => {
+                        console.log(res);
+                        wepy.setNavigationBarTitle({
+                            title: '支付失败'
+                        });
+                        // _that.goToPayHide = true;
+                        // _that.payOkHide = true;
+                        // _that.payNoHide = false;
+                        console.log('支付失败');
+                        // _that.$parent.globalData.paySuccessBack = _that.$parent.globalData.h5BaseUrl + '/order/myorder.sc'; //直接到订单页面
+                        _that.$apply();
+                        wepy.redirectTo({
+                            url: '/usercenter/pages/buyerOrderList'
+                        });
+                    });
+            });
+    }
+}
+</script>

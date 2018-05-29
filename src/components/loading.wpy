@@ -1,0 +1,41 @@
+<template lang="wxml">
+  <wxc-loading
+      is-show="{{isShow}}"
+      image="{{image}}"
+      slip="{{slip}}"
+    ></wxc-loading>
+</template>
+<script>
+import wepy from 'wepy';
+export default class loading extends wepy.component {
+    props = {
+        isShow: {
+            type: Boolean,
+            default: false,
+            twoWay: true
+        },
+        image: {
+            type: String,
+            default:
+                'https://s10.mogucdn.com/mlcdn/c45406/170607_5241335cb37ka3ab7781ddh504ggh_200x200.png'
+        },
+        slip: {
+            type: String,
+            default:
+                'http://s10.mogucdn.com/p1/160715/upload_ifrgmmzwmyydknldhezdambqmeyde_200x200.png'
+        }
+    };
+    data = {};
+    methods = {
+        show() {
+            this.isShow = true;
+        },
+        hide() {
+            this.isShow = false;
+        }
+    };
+}
+</script>
+<style lang="less">
+
+</style>

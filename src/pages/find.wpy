@@ -1,0 +1,175 @@
+<template>
+    <view class="find-container">
+        <repeat for="{{render}}" key="index" index="index" item="item">
+            <!-- decorateGoodsTitle因repeat的子组件中传值错误,放在此处,升级后修改 -->
+            <decorateGoodsListTitle :item.sync="item" wx:if="{{item.widgetsContent.titleFlag==1}}" />
+            <decorateGoodsListSwiper :item.sync="item" wx:if="{{item.type=='goods4'}}" />
+            <decorateListArticleTab :item.sync="item" wx:if="{{item.type=='acticleChannle'}}" :itemIndex.sync="index" />
+            <!-- 基础组件,需要整个items -->
+            <decorateBlank :item.sync="item" wx:if="{{item.type=='space'}}" />
+            <decorateSearch :item.sync="item" wx:if="{{item.type=='search'}}" />
+            <decorateSwiper :item.sync="item" wx:if="{{item.type=='scroll'}}" />
+            <decorateCoupons :item.sync="item" wx:elif="{{item.type=='coupon'}}" />
+            <decorateTcNine :item.sync="item" wx:elif="{{item.type=='tc9'}}" />
+            <!-- 只需要循环widgetsContent内数组的组件 -->
+            <decorateList :item.sync="item" wx:else/>
+            <view wx:if="{{item.widgetsContent.marginBottom==1}}" class='margin-b'></view>
+        </repeat>
+        <decorateGoods1 wx:if="{{lastModuleDataObj}}" :hasMoreData.sync="hasMoreData" :lastModuleDataObj.sync="lastModuleDataObj" :lastModuleDataList.sync="lastModuleDataList" />
+        <returnTop :showReturnBotton.sync="showReturnBotton" />
+    </view>
+</template>  
+<script>
+import wepy from 'wepy';
+import decorateGoods1 from '@/components/decorate-goods1';
+import decorateList from '@/components/decorate-list';
+import decorateSwiper from '@/components/decorate-swiper';
+import decorateSearch from '@/components/decorate-search';
+import decorateCoupons from '@/components/decorate-coupons';
+import decorateBlank from '@/components/decorate-blank';
+import decorateTcNine from '@/components/decorate-tc-nine';
+import decorateGoodsListSwiper from '@/components/decorate-list-goods-swiper';
+import decorateGoodsListTitle from '@/components/decorate-list-goods-title';
+import decorateListArticleTab from '@/components/decorate-list-article-tab';
+import returnTop from '@/components/return-top';
+import GTools from '@/mixins/g-tools';
+import linkHandle from '@/mixins/link-map';
+export default class find extends wepy.page {
+    mixins = [GTools];
+    config = {
+        navigationBarTitleText: '发现',
+        enablePullDownRefresh: true,
+        backgroundTextStyle: 'dark',
+        usingComponents: {
+            'wxc-flex': '../../../packages/@minui/wxc-flex/dist/index',
+            'wxc-elip': '../../../packages/@minui/wxc-elip/dist/index',
+            'wxc-tab': '../../../packages/@minui/wxc-tab/dist/index',
+            'wxc-tab-panel': '../../../packages/@minui/wxc-tab/dist/panel',
+            'wxc-price': '../../../packages/@minui/wxc-price/dist/index'
+        }
+    };
+    components = {
+        decorateList,
+        decorateSwiper,
+        decorateSearch,
+        decorateBlank,
+        decorateCoupons,
+        decorateTcNine,
+        decorateGoodsListTitle,
+        decorateListArticleTab,
+        decorateGoodsListSwiper,
+        returnTop,
+        decorateGoods1
+    };
+    data = {
+        render: [],
+        showReturnBotton: false,
+        //zzh
+        lastModuleDataList: null,
+        lastModuleDataObj: null,
+        pageNum: 1,
+        moduleContentContorlNum: 20, //模块内容list数量控制
+        onePageContentNum: 10, //分页一次加载个数
+        allPageContentNum: 0, //总页数
+        hasMoreData: true
+    };
+    onReachBottom() {
+        this.customFunction.onReachBottomHandler(this);
+    }
+    async onLoad(options) {
+      console.log('opt find', options);
+      let shopId = options.shopId || '';
+        if (options.type) {
+            let curUrl;
+            // 锁粉
+            this.$parent.lockFans(shopId, 3); //3 发现首页访问
+             curUrl = this.customFunction.getCurrentPageUrlWithArgs();
+            this.$parent.globalData.fromUrl.url = curUrl;
+        }
+        this.init();
+    }
+    async init({ loadingStatus = true } = {}) {
+        const url = `${
+            this.$parent.globalData.apiBaseUrl
+        }/api/v2/component/pagehome`;
+        const params = {
+            type: 'DISCOVER'
+        };
+        const { data, code } = await this.customFunction.fetchData(
+            url,
+            params,
+            {},
+            {
+                isShowLoad: loadingStatus
+            }
+        );
+        if (code !== 20000) {
+            this.customFunction.showModal();
+            console.error('获取数据错误:code', code);
+            console.error('获取数据错误:data', data);
+            return;
+        }
+        data.forEach(item => {
+            item.widgetsContent = JSON.parse(item.widgetsContent);
+        });
+        // zzh
+        this.customFunction.pagingHandler(data, this);
+        // zzh
+        this.render = data;
+        this.$apply();
+    }
+    onPageScroll({ scrollTop }) {
+        if (scrollTop > 400 && !this.showReturnBotton) {
+            this.showReturnBotton = true;
+            this.$apply();
+        }
+        if (scrollTop < 400 && this.showReturnBotton) {
+            this.showReturnBotton = false;
+            this.$apply();
+        }
+    }
+    onShareAppMessage(options) {
+        // URL 增加 shopId
+        let shopId = wepy.getStorageSync('shopId');
+        let path = `/pages/find?type=share&shopId=${shopId}`;
+        return {
+            title: '{$shareTitle}',
+            path: path,
+            // imageUrl: "{$shareImg}",
+            success: function(res) {
+                // 转发成功
+                wepy.showToast({
+                    title: '转发成功',
+                    icon: 'success',
+                    duration: 2000
+                });
+            },
+            fail: function(res) {
+                wepy.showToast({
+                    icon: 'none',
+                    title: '转发失败',
+                    duration: 2000
+                });
+            }
+        };
+    }
+    onPullDownRefresh(e) {
+        this.init({
+            loadingStatus: false
+        });
+        wepy.stopPullDownRefresh();
+    }
+    events = linkHandle;
+}
+</script>
+<style lang="less">
+page {
+    background: white;
+}
+.find-container {
+    // height: 100vh;
+    .margin-b {
+        margin-bottom: 20rpx;
+    }
+}
+</style>

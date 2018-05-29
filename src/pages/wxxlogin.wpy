@@ -1,0 +1,39 @@
+<template>
+
+</template>
+<script>
+import wepy from 'wepy';
+export default class wxxlogin extends wepy.page {
+    config = {};
+    data = {
+        redirectUrl: ''
+    };
+    methods = {};
+    onLoad(options) {
+        //wepy.showNavigationBarLoading();
+        wepy.showLoading();
+        console.log('微信登录页面onload');
+        // var _that = this;
+        let returnUrl = options.return_url;
+        //_that.returnUrl=options.returnUrl;
+        wepy.setStorageSync('sessionId', options.sessionId);
+        //console.log(returnUrl);
+        console.log(returnUrl);
+        if (typeof returnUrl !== 'undefined' && returnUrl) {
+            //APP.globalData.returnUrl=returnUrl
+            let _url = returnUrl.match(/(https:\/\/|https%3A%2F%2F)?([\s\S]*)/);
+            wepy.setStorageSync(
+                'returnUrl',
+                typeof _url[1] === 'undefined'
+                    ? 'https://' + returnUrl
+                    : returnUrl
+            ); //登录成功需要跳转页面
+            //console.log(APP.globalData.baseUrl);
+            this.$parent.wxxlogin();
+        }
+    }
+    clearStorage() {
+        wepy.clearStorage();
+    }
+}
+</script>

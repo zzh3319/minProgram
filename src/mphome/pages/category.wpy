@@ -1,0 +1,197 @@
+<style lang="less">
+page {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.box {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    padding-top: 20rpx;
+}
+.nav-left {
+    box-sizing: border-box;
+    width: 220rpx;
+    height: 100%;
+    background: #fff;
+    margin-right: 20rpx;
+    // min-height: 1186rpx;
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+    float: left;
+}
+.nav-left-box {
+    width: 220rpx;
+    height: 100rpx;
+    box-sizing: border-box;
+    border-bottom: 1rpx solid #eeeeee;
+    padding-left: 40rpx;
+    overflow: hidden;
+}
+.nav-left-items {
+    width: 180rpx;
+    height: 52rpx;
+    box-sizing: border-box;
+    margin-top: 24rpx;
+    font-size: 30rpx;
+    line-height: 52rpx;
+    color: #231815;
+    font-family: PingFangSC-Regular;
+}
+.nav-left-items.active {
+    border-right: 12rpx solid #00c843;
+}
+.nav-right {
+    width: 510rpx;
+    flex: 1;
+    height: 100%;
+    background: #fff;
+    float: left;
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+}
+.nav-right-items {
+    width: 50%;
+    height: 282rpx;
+    box-sizing: border-box;
+    text-align: center;
+    float: left;
+}
+.images {
+    display: block;
+    width: 205rpx;
+    height: 205rpx;
+    margin: 20rpx 25rpx 8rpx;
+
+    image {
+        max-width: 100%;
+        max-height: 100%;
+    }
+}
+.txt {
+    font-size: 26rpx;
+    color: #231815;
+    font-family: PingFangSC-Regular;
+    line-height: 28rpx;
+}
+</style>
+
+<template>
+
+<view class="box">
+  <!-- 左侧分类导航 -->
+  <view class="nav-left">
+    <view wx:for="{{listLeft}}" wx:key="{{index}}">
+      <view class="nav-left-box" @tap="switchRightTab({{item.id}},{{index}})">
+        <view class="nav-left-items {{curNav == index ? 'active' : ''}}" >{{item.name}}</view>
+      </view>
+    </view>
+  </view>
+  <!-- 右侧分类列表 -->
+  <view class="nav-right">  
+      <navigator wx:for="{{listRight}}" wx:key="{{index}}" url="/mphome/pages/goodsList?cat_no={{item.catNo}}&cat_id={{item.id}}" class="nav-right-items" hover-class="none">
+        <view class="images">
+          <image src="{{item.picUrl?item.picUrl:'https://i2.ygimg.cn/cmp/mp/preinstalled.jpg'}}" mode="widthFix"></image>
+        </view>
+        <text class="txt">{{item.name}}</text>
+      </navigator>
+  </view>
+</view>
+
+</template>
+<script>
+import wepy from 'wepy';
+export default class Category extends wepy.page {
+    config = {
+        navigationBarTitleText: '分类'
+    };
+    data = {
+        curNav: 0, //左侧分类点击获取的index
+        id: '', //点击左侧分类要传值的id
+        listLeft: [], //一级分类列表
+        listRight: [], //二级分类列表
+        imageUrl: 'https://testcmp.belle.net.cn/pics/wfx/' //二级分类的图片访问域名
+    };
+    components = {};
+    methods = {
+        switchRightTab(id, index) {
+            if (this.curNav === index) {
+                return false;
+            } else {
+                this.id = id;
+                this.curNav = index;
+                this.update();
+            }
+        }
+    };
+
+    //点击左侧分类请求二级分类的数据
+    update() {
+        wepy.showLoading({
+            title: '加载中',
+            mask: true
+        });
+        wepy
+            .request({
+                url:
+                    this.$parent.globalData.apiBaseUrl +
+                    '/api/v2/catogry/getCatLevelTwoList',
+                data: {
+                    id: this.id
+                }
+            })
+            .then(data => {
+                wepy.hideLoading();
+                this.listRight = [];
+                console.log(data);
+                let store = data.data;
+                if (store.code === 20000) {
+                    this.listRight = store.data;
+                } else {
+                    wepy.showToast({
+                        itle: store.errorMsg || '数据错误',
+                        icon: 'none',
+                        duration: 2000
+                    });
+                }
+                this.$apply();
+            });
+    }
+
+    onLoad() {
+        wepy.showLoading({
+            title: '加载中',
+            mask: true
+        });
+        wepy
+            .request({
+                url:
+                    this.$parent.globalData.apiBaseUrl +
+                    '/api/v2/catogry/getCatLevelOneList',
+                data: {}
+            })
+            .then(data => {
+                console.log('进来了');
+                wepy.hideLoading();
+                let store = data.data;
+                console.log(data);
+                if (store.code === 20000) {
+                    this.listLeft = store.data || [];
+                    this.listRight = store.data[0].childCategory || [];
+                } else {
+                    wepy.showToast({
+                        itle: store.errorMsg || '数据错误',
+                        icon: 'none',
+                        duration: 2000
+                    });
+                }
+                this.$apply();
+            });
+    }
+}
+</script>

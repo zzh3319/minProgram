@@ -1,0 +1,143 @@
+<template>
+  <view class="decorate-list-article-tab">
+    <wxc-tab bind:tabchange="tabChangge" line-color="{{lineColor}}" animate="{{animate}}" default-index="{{0}}" active-text-color="{{textColor}}" active-line-color="{{textColor}}" component-id="{{item.id}}">
+      <wxc-tab-panel class="wxc-tab-panel" wx:for="{{item.widgetsContent.list}}" wx:for-item="tabItem" label="{{tabItem.text}}" wx:key="{{index}}" tab-index="{{index}}" component-id="{{item.id}}">
+        <view class="decorate-tab-panel" wx:if="{{tabItem.data}}">
+          <repeat for="{{tabItem.data}}" key="index" index="index" item="panelItem">
+            <view class="decorate-list-article-tab-col" @tap="link({{panelItem.id}})">
+              <image class="decorate-item-image" src="{{panelItem.picCover}}" mode="widthFix" />
+              <view class="decorate-item-text">
+                <wxc-elip>
+                  {{panelItem.title}}
+                </wxc-elip>
+              </view>
+            </view>
+          </repeat>
+        </view>
+        <view class="decorate-tab-panel decorate-empty" wx:else>
+          数据为空
+        </view>
+      </wxc-tab-panel>
+    </wxc-tab>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+import GTools from '@/mixins/g-tools';
+export default class decorateListTab extends wepy.component {
+    mixins = [GTools];
+    props = {
+        item: {
+            type: Object,
+            default: {}
+        },
+        itemIndex: {
+            type: Number,
+            default: 0
+        }
+    };
+    data = {
+        animate: true,
+        textColor: '#ff4a4a',
+        lineColor: 'transparent',
+        tabs: [
+            {
+                text: '选项一',
+                content: '内容一'
+            },
+            {
+                text: '选项二',
+                content: '内容二'
+            },
+            {
+                text: '选项三',
+                content: '内容三'
+            }
+        ]
+    };
+    async fetchData(key) {
+        // const url = `${
+        //   this.$parent.$parent.globalData.apiBaseUrl
+        // }/api/v2/component/articleList`;
+        // const params = {
+        //   channelId: key
+        // };
+        // const { data, code } = await this.customFunction.fetchData(
+        //   url,
+        //   params,
+        //   {},
+        //   {
+        //     isShowLoad: false
+        //   }
+        // );
+        // if (code !== 20000) {
+        //   console.error("文章列表三获取数据错误");
+        // }
+        // return data;
+    }
+    methods = {
+        link(linkUrl) {
+            this.$emit('link-Handle', 2, linkUrl + '.sc');
+        },
+        // async tabChangge(e) {
+        //   const { key } = e.detail;
+        //   const tabData = this.item.widgetsContent.list[key];
+        //   const id = (tabData && tabData.id) || 0;
+        //   let result = this.tabData[id];
+        //   // if (this.tabJson[id]) return;
+        //   if (!result) {
+        //     result = await this.fetchData(id);
+        //     this.tabData[id] = result;
+        //   }
+        //   this.tabJson = result;
+        //   this.$apply();
+        // }
+        async tabChangge(e) {
+            // const { key } = e.detail;
+            // const tabData = this.item.widgetsContent.list[key];
+            // const id = (tabData && tabData.id) || 0;
+            // const itemIndex = this.itemIndex;
+            // if (tabData.data) return;
+            // const result = await this.fetchData(id);
+            // this.$emit("updateRender", itemIndex, key, result);
+            // this.$apply();
+        }
+    };
+    computed = {};
+}
+</script>
+
+<style lang="less">
+.decorate-list-article-tab {
+    background: #f7f7f7;
+}
+.decorate-tab-panel {
+    background: #fff;
+    min-height: 150rpx;
+    margin-top: -2rpx;
+    &.decorate-empty {
+        line-height: 150rpx;
+        color: #ddd;
+        text-align: center;
+    }
+}
+.decorate-list-article-tab-col {
+    display: flex;
+    padding: 8rpx;
+    width: 100%;
+    background: #fff;
+    box-sizing: border-box;
+    .decorate-item-image {
+        width: 230rpx;
+    }
+    .decorate-item-text {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        width: 500rpx;
+        padding: 16rpx 20rpx;
+        box-sizing: border-box;
+        background: #fff;
+    }
+}
+</style>

@@ -1,0 +1,245 @@
+<style lang="less">
+.tabChange {
+    display: flex;
+    background-color: #fff;
+
+    .submenu {
+        flex: 1;
+        margin: 0 80rpx;
+        color: #999;
+        text-align: center;
+        display: block;
+        padding: 20rpx 0;
+
+        .money {
+            margin-bottom: 1rpx;
+            display: block;
+            font-size: 28rpx;
+        }
+
+        .moneydesc {
+            font-size: 26rpx;
+            margin-left: 15rpx;
+        }
+    }
+    .submenuActive {
+        border-bottom: 2rpx solid #717171;
+        color: #000;
+
+        .money {
+            font-weight: 700;
+        }
+    }
+}
+
+.profitDetail {
+    background-color: #fff;
+    margin-top: 10rpx;
+
+    .profitTit {
+        display: flex;
+        padding: 0 50rpx;
+
+        text {
+            flex: 1;
+            display: block;
+            padding: 20rpx 0;
+        }
+    }
+
+    .profitList {
+        .item {
+            display: flex;
+            padding: 10rpx 30rpx 10rpx 50rpx;
+            border-top: 3rpx solid #f4f4f4;
+
+            text {
+                margin: 10rpx 0;
+                font-size: 28rpx;
+                color: #000;
+
+                &.orderTime {
+                    font-size: 24rpx;
+                    color: #777;
+                }
+            }
+
+            .profit {
+                font-size: 28rpx;
+                margin-top: 30rpx;
+
+                text {
+                    display: inline;
+                    color: #009966;
+                }
+
+                i.rightarrow {
+                    font-size: 24rpx;
+                    margin-left: 20rpx;
+                    margin-top: 20rpx;
+                }
+            }
+
+            view {
+                flex: 1;
+
+                text {
+                    display: block;
+                }
+            }
+        }
+    }
+
+    .orderNum {
+        text-align: left;
+    }
+
+    .profit {
+        text-align: right;
+    }
+}
+
+.empty {
+    padding: 200rpx 0;
+}
+</style>
+
+<template>
+  <view class="container">
+    <view class="tabChange">
+      <view class="submenu {{ index == curIndex ? 'submenuActive' : ''}}" wx:for="{{profitData}}" wx:key="index" @tap="changeTab({{index}},{{item.status}})">
+        <text class="money">￥<text>{{item.money}}</text></text>
+        <text class="moneydesc">{{item.name}}</text>
+      </view>
+    </view>
+    <view class="profitDetail">
+      <view class="profitTit">
+        <text class="orderNum">订单号</text>
+        <text class="profit">{{curIndex == 0?'预估提成':'已到账'}}</text>
+      </view>
+      <!--提成明细列表  -->
+      <view class="profitList" wx:if="profitList.length != 0">
+        <navigator class="item" url="/usercenter/pages/profitDetail?orderNo={{item.orderNo}}" hover-class="other-navigator-hover" wx:for="{{profitList}}" wx:key="{{index}}">
+          <view>
+            <text class="orderNum">{{item.orderNo}}</text>
+            <text class="orderTime">{{item.timeStr}}</text>
+          </view>
+          <view class="profit">
+            <text>+  ¥<text>{{item.amountStr}}</text></text>
+            <i class="iconfont rightarrow">&#xe60e;</i>
+          </view>
+        </navigator>
+      </view>
+    </view> 
+    <!-- 无列表 -->
+    <view wx:if="{{profitList.length == 0}}" class="empty">
+      <empty :info="emptyInfo"></empty>
+    </view>
+    <view class="weui-loadmore" wx:if="{{isHideLoadMore}}">
+      <view class="weui-loading" wx:if="{{loadtxt == '正在加载'}}"></view>
+      <view class="weui-loadmore__tips">{{loadtxt}}</view>
+    </view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+import empty from '@/components/empty';
+export default class profit extends wepy.page {
+    shareType = {};
+    shareUrl = {};
+    config = {
+        navigationBarTitleText: '提成明细',
+        onReachBottomDistance: 10
+    };
+    components = {
+        empty
+    };
+    mixins = [];
+    data = {
+        profitData: [
+            { money: '', name: '预估提成', status: 0 },
+            { money: '', name: '已到账', status: 1 }
+        ],
+        curIndex: 0,
+        pageNo: 1,
+        PageCount: '',
+        profitList: [], //提成列表
+        limit: 20, //页码条数
+        isHideLoadMore: false,
+        loadtxt: '正在加载',
+        emptyInfo: {
+            desc: '暂没有相关数据',
+            imgUrl: 'https://i2.ygimg.cn/cmp/mp/shopping_no.png'
+        }
+    };
+    computed = {};
+    methods = {};
+    events = {};
+
+    onLoad() {
+        this.initPage();
+    }
+    //加载更多
+    methods = {
+        changeTab: function(index, status) {
+            if (this.curIndex !== index) {
+                //清空数组列表数据/清除翻页
+                this.profitList = [];
+                this.pageNo = 1;
+                this.PageCount = '';
+                this.curIndex = status;
+                this.initPage();
+            }
+        },
+        onReachBottom: function() {
+            let that = this;
+            that.isHideLoadMore = true;
+            if (that.pageNo < that.pageCount) {
+                that.pageNo++;
+                that.initPage();
+            } else {
+                that.loadtxt = '没有更多数据';
+            }
+        }
+    };
+    initPage() {
+        var that = this;
+        wepy.showLoading();
+        wepy
+            .request({
+                url:
+                    that.$parent.globalData.apiBaseUrl +
+                    '/api/v2/finace/commissionDetail',
+                method: 'GET',
+                data: {
+                    // 请求数据 test
+                    openId: wepy.getStorageSync('openid'),
+                    pageNo: this.pageNo, //当前第几页
+                    limit: this.limit, //每页条数
+                    status: this.profitData[this.curIndex].status
+                }
+            })
+            .then(res => {
+                wepy.hideLoading();
+                if (res.data.code === 20000) {
+                    console.log(res);
+                    this.profitData[0].money = res.data.data.summary.notSettled;
+                    this.profitData[1].money = res.data.data.summary.hasSettled;
+                    this.pageNo = res.data.data.pageNo;
+                    this.pageCount = res.data.data.pageCount;
+                    this.profitList = this.profitList.concat(
+                        res.data.data.items
+                    );
+                    that.$apply();
+                } else {
+                    wepy.showToast({
+                        title: res.errorMsg + '',
+                        icon: 'none',
+                        duration: 2000
+                    });
+                }
+            });
+    }
+}
+</script>

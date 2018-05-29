@@ -1,0 +1,34 @@
+<template>
+  <view class="msg">内容:{{code}}</view>
+   <button @tap="getCode()">获取</button>
+</template>
+
+<script>
+import wepy from 'wepy';
+export default class scanCode extends wepy.page {
+    config = {};
+    components = {};
+    mixins = [];
+    data = {
+        code: ''
+    };
+    computed = {};
+    methods = {
+        getCode() {
+            wepy.scanCode().then(res => {
+                this.code = JSON.stringify(res);
+                this.$apply();
+                console.log(res);
+            });
+        }
+    };
+    events = {};
+    onLoad(options) {}
+}
+</script>
+<style lang="less">
+.msg {
+    width: 100%;
+    word-break: break-all;
+}
+</style>

@@ -1,0 +1,72 @@
+<template>
+  <view class="decorate-tc-nine"
+   >
+    <wxc-flex main="between" cross="baseline">
+      <!-- 数据结构问题,使用循环不便 -->
+      <view  @tap="link({{item.widgetsContent.list[0].linkType}},{{item.widgetsContent.list[0].linkValue}})" style="width: {{item.widgetsContent.col_1}}%;height:{{imageInfo[item.widgetsContent.list[0].imgUrl]}}rpx;" wx:if="{{item.widgetsContent.col_1}}">
+        <image bindload="imageLoad" data-cols="{{item.widgetsContent.col_1}}"  data-name="{{item.widgetsContent.list[0].imgUrl}}" src="{{item.widgetsContent.list[0].imgUrl}}" lazy-load='{{true}}'  mode="scaleToFill" class="swiper-image" />
+      </view>
+      <view  @tap="link({{item.widgetsContent.list[1].linkType}},{{item.widgetsContent.list[1].linkValue}})" style="width: {{item.widgetsContent.col_2}}%;height:{{imageInfo[item.widgetsContent.list[0].imgUrl]}}rpx;" wx:if="{{item.widgetsContent.col_2}}">
+        <image  src="{{item.widgetsContent.list[1].imgUrl}}" lazy-load='{{true}}' mode="scaleToFill" class="swiper-image" />
+      </view>
+      <view  @tap="link({{item.widgetsContent.list[2].linkType}},{{item.widgetsContent.list[2].linkValue}})" style="width: {{item.widgetsContent.col_3}}%;height:{{imageInfo[item.widgetsContent.list[0].imgUrl]}}rpx;" wx:if="{{item.widgetsContent.col_3}}">
+        <image  src="{{item.widgetsContent.list[2].imgUrl}}" lazy-load='{{true}}' mode="scaleToFill" class="swiper-image" />
+      </view>
+      <view  @tap="link({{item.widgetsContent.list[3].linkType}},{{item.widgetsContent.list[3].linkValue}})" style="width: {{item.widgetsContent.col_4}}%;height:{{imageInfo[item.widgetsContent.list[0].imgUrl]}}rpx;" wx:if="{{item.widgetsContent.col_4}}">
+        <image  src="{{item.widgetsContent.list[3].imgUrl}}" lazy-load='{{true}}' mode="scaleToFill" class="swiper-image" />
+      </view>
+      <view  @tap="link({{item.widgetsContent.list[4].linkType}},{{item.widgetsContent.list[4].linkValue}})" style="width: {{item.widgetsContent.col_5}}%;height:{{imageInfo[item.widgetsContent.list[0].imgUrl]}}rpx;" wx:if="{{item.widgetsContent.col_5}}">
+        <image  src="{{item.widgetsContent.list[4].imgUrl}}" lazy-load='{{true}}' mode="scaleToFill" class="swiper-image" />
+      </view>
+    </wxc-flex>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+
+export default class decorateTcNine extends wepy.component {
+    props = {
+        item: {
+            type: Object,
+            default: {}
+        }
+    };
+    data = {
+        imageInfo: {}
+    };
+    methods = {
+        imageLoad(e) {
+             let $width = e.detail.width; //获取图片真实宽度
+             let $height = e.detail.height;
+             let $cols = parseInt(e.currentTarget.dataset.cols) / 100;
+
+            const percent = $cols * 750 / $width;
+            const height = $height * percent;
+
+            //获取第一个图片的高度和url地址,在组件获取的时候根据url判断图片高度,防止组件共享高度
+            const name = e.currentTarget.dataset.name;
+            this.imageInfo[name] = height;
+        },
+        link(linkType, linkUrl) {
+            this.$emit('link-Handle', linkType, linkUrl);
+        }
+    };
+}
+</script>
+
+<style lang="less">
+.decorate-tc-nine {
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    .tc-nine-box {
+        height: 100%;
+    }
+    .swiper-image {
+    }
+}
+</style>

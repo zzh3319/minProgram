@@ -1,0 +1,258 @@
+<style type="less">
+page {
+    background-color: white;
+}
+@textColor: #333333;
+.flexLayout() {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+.mycustomer {
+    box-sizing: border-box;
+    width: 100%;
+    background-color: white;
+    position: relative;
+    .hover {
+        z-index: 2;
+        padding: 20rpx 30rpx;
+        position: fixed;
+        width: 100%;
+        top: 77rpx;
+        left: 0;
+        background-color: #f4f4f4;
+        color: #777777;
+        box-sizing: border-box;
+    }
+    .head {
+        z-index: 2;
+        background-color: white;
+        top: 0;
+        position: fixed;
+        padding: 12rpx 30rpx;
+        border-bottom: 1rpx solid #dadada;
+        width: 100%;
+        .flexLayout();
+        align-items: center;
+        .desc {
+            color: @textColor;
+            .num {
+                color: #fe2626;
+            }
+        }
+        .icon {
+            font-size: 40rpx;
+            color: #0a7ee0;
+        }
+    }
+
+    .mycustomer_list {
+        margin-top: 90rpx;
+        width: 100%;
+        .no_moreData {
+            text-align: center;
+            width: 100%;
+            color: #ccc;
+            font-size: 35rpx;
+            padding: 5rpx 0;
+        }
+        .item {
+            border-bottom: 1rpx solid #dadada;
+            padding: 20rpx 30rpx;
+            .flexLayout();
+            align-items: center;
+            .left {
+                display: flex;
+                align-items: center;
+                .img {
+                    width: 85rpx;
+                    height: 85rpx;
+                    border-radius: 50%;
+                }
+                .name {
+                    margin-left: 25rpx;
+                    color: #333333;
+                    font-size: 28rpx;
+                }
+            }
+        }
+        .time {
+            color: #999999;
+            font-size: 26rpx;
+        }
+    }
+
+    .nodata_wrap {
+        width: 230rpx;
+        margin: 0 auto;
+        margin-top: 295rpx;
+        text-align: center;
+        .icon {
+            width: 174rpx;
+            height: 174rpx;
+        }
+        .text {
+            width: 100%;
+            text-align: center;
+            font-size: 25rpx;
+            color: #666;
+        }
+    }
+}
+</style>
+<template>   
+  <view class="mycustomer">
+      <view hidden="{{hiddenshowTips}}" class="hover">
+          <text>他人通过你分享的商品链接或二维码访问或注册后，则锁定成为你的顾客。顾客一笔交易都会为你带来提成。</text>
+      </view>
+      <view @tap="showTipsHandler" class="head">
+        <view class="desc">
+          <text>我的顾客</text>
+          (<text class="num">{{totalCount}}</text>)  
+        </view>   
+        <text class="iconfont icon">&#xe604;</text>
+      </view>
+      <scroll-view wx:if="{{!isEmpty}}" class="mycustomer_list" scroll-y  style="height:100%;">
+            <repeat for="{{listData}}" key="index" index="index" item="item">
+                  <view class="item">  
+                      <view class="left">
+                         <image class="img" src="{{item.headShowImg}}"></image>
+                         <text class="name.">{{item.platformUsername}}</text>
+                      </view>
+                      <view class="time">
+                        <text>{{item.stringRegisterDate}}</text>
+                      </view>
+                  </view>
+            </repeat>
+            <view wx:if="{{NoMoreData}}" class="weui-loadmore">没有更多数据</view>
+            <view class="weui-loadmore" wx:if="{{hasMoreData}}">
+              <view class="weui-loading"></view>
+              <view class="weui-loadmore__tips">正在加载</view>
+            </view>
+      </scroll-view>
+
+      <view wx:if="{{isEmpty}}" class="nodata_wrap">
+          <Empty :info="emptyInfo"></Empty>
+      </view>
+  </view>
+</template>
+<script>
+import GTools from '@/mixins/g-tools';
+import wepy from 'wepy';
+import Empty from '@/components/empty';
+export default class customerList extends wepy.page {
+    mixins = [GTools];
+    config = {
+        navigationBarTitleText: '我的顾客'
+    };
+    components = {
+        Empty
+    };
+    data = {
+        emptyInfo: {
+            desc: '暂没有相关数据',
+            imgUrl: 'https://i2.ygimg.cn/cmp/mp/shopping_no.png'
+        },
+        hiddenshowTips: true,
+        listData: [],
+        pageNum: 1, //初始化
+        hasMoreData: false,
+        NoMoreData: false,
+        maxPageNum: 0, //临界值 已经最大了
+        totalCount: 0,
+        pageCount: 0, //总的页数
+        isEmpty: false //没有数据
+    };
+    methods = {
+        showTipsHandler() {
+            let state = this.hiddenshowTips;
+            this.hiddenshowTips = !state;
+            this.$apply();
+        },
+        onReachBottom(event) {
+            //只有list数量超出时页面才会触发onReachBottom
+            if (this.maxPageNum) {
+                //当maxPageNum有值的时间便不再发起请求；
+                this.NoMoreData = true; //比如只有一页  但是第一页的数量超过页面 触发了onReachBottom
+                return;
+            }
+            let pageNum = this.pageNum;
+            this.pageNum = pageNum + 1;
+            this.loadMoreData(pageNum + 1);
+            console.log(pageNum + 1);
+        }
+    };
+
+    async loadMoreData(num) {
+        // let url = `${this.$parent.globalData.apiBaseUrlMock}/customerList1`;
+        let url = `${
+            this.$parent.globalData.apiBaseUrl
+        }/api/v2/userCenter/fansList`;
+        let param = {
+            limit: 20,
+            pageNo: num
+        };
+        let response = await wepy.request({ url: url, data: param });
+        let { data, code, errorMsg } = response.data;
+        if (code !== 20000) {
+            this.customFunction.toast(errorMsg || '数据错误！');
+            return;
+        }
+
+        let resultList = data.items;
+        let pageCount = this.pageCount;
+        this.listData = this.listData.concat(resultList);
+        if (pageCount === num) {
+            this.hasMoreData = false;
+            this.NoMoreData = true;
+            this.maxPageNum = num;
+        }
+        this.$apply();
+    }
+
+    async firstLoadData(num) {
+        //let url = `${this.$parent.globalData.apiBaseUrlMock}/customerList1`;
+        let url = `${
+            this.$parent.globalData.apiBaseUrl
+        }/api/v2/userCenter/fansList`;
+        let param = {
+            limit: 20,
+            pageNo: num
+        };
+        let response = await this.customFunction.fetchData(url, param);
+        let { data, code, errorMsg } = response;
+        if (code !== 20000) {
+            this.customFunction.toast(errorMsg || '数据错误！');
+            return;
+        }
+        console.log(data);
+        let resultList = data.items; //
+        let pageCount = data.pageCount; //总的页数
+        let totalCount = data.totalCount; //总的人数
+
+        this.pageCount = pageCount;
+        this.totalCount = totalCount;
+        this.listData = resultList.concat(this.listData);
+
+        if (pageCount === 1) {
+            //第一次加载0-20  无更多数据
+            this.hasMoreData = false;
+            this.NoMoreData = false; //是否显示？
+            this.maxPageNum = num;
+        } else if (pageCount === 0) {
+            //
+            this.isEmpty = true;
+        } else {
+            //pageCount>1
+            this.hasMoreData = true;
+            this.NoMoreData = false;
+        }
+        this.$apply();
+    }
+    onLoad(options) {
+        let pageNum = this.pageNum || 1;
+        this.firstLoadData(pageNum);
+    }
+}
+</script>
